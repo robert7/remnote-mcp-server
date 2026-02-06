@@ -15,22 +15,31 @@ npm link  # Makes remnote-mcp-server globally available
 
 ### With Claude Code
 
-Add to `~/.claude/claude_desktop_config.json`:
+1. **Create global MCP configuration** at `~/.claude/.mcp.json`:
 
 ```json
 {
-  "mcpServers": {
-    "remnote": {
-      "command": "remnote-mcp-server",
-      "env": {
-        "REMNOTE_WS_PORT": "3002"
-      }
+  "remnote": {
+    "type": "stdio",
+    "command": "remnote-mcp-server",
+    "env": {
+      "REMNOTE_WS_PORT": "3002"
     }
   }
 }
 ```
 
-Then restart Claude Code.
+2. **Enable in settings** by adding to `~/.claude/settings.json`:
+
+```json
+"enabledMcpjsonServers": [
+  "remnote"
+]
+```
+
+3. **Restart Claude Code** to load the server.
+
+See [CLAUDE_CODE_CONFIG.md](./CLAUDE_CODE_CONFIG.md) for detailed configuration and troubleshooting.
 
 ### Manual Testing
 
@@ -40,6 +49,22 @@ npm start
 
 # Or development mode with auto-reload
 npm run dev
+```
+
+### Testing Server is Running
+
+After Claude Code starts:
+
+```bash
+# Check process is running
+ps aux | grep remnote-mcp-server
+
+# Check WebSocket port is listening
+lsof -i :3002
+
+# Test status tool in Claude Code
+# In Claude Code chat, type:
+# "Use remnote_status to check connection"
 ```
 
 ## Available Tools

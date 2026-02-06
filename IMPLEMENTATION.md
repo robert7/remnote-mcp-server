@@ -147,21 +147,37 @@ This makes `remnote-mcp-server` available globally.
 
 ### 4. Configure Claude Code
 
-Add to Claude Code's MCP configuration (see `CLAUDE_CODE_CONFIG.md`):
+Create `~/.claude/.mcp.json`:
 
 ```json
 {
-  "mcpServers": {
-    "remnote": {
-      "command": "remnote-mcp-server"
+  "remnote": {
+    "type": "stdio",
+    "command": "remnote-mcp-server",
+    "env": {
+      "REMNOTE_WS_PORT": "3002"
     }
   }
 }
 ```
 
+Enable in `~/.claude/settings.json`:
+
+```json
+"enabledMcpjsonServers": [
+  "remnote"
+]
+```
+
+See `CLAUDE_CODE_CONFIG.md` for detailed instructions.
+
 ### 5. Install RemNote Plugin
 
 Ensure the RemNote MCP Bridge plugin is installed and configured to connect to `ws://127.0.0.1:3002`.
+
+### 6. Restart Claude Code
+
+The server will start automatically when Claude Code launches.
 
 ## Development
 
@@ -225,14 +241,62 @@ All logs go to **stderr** (stdout reserved for MCP stdio protocol):
 
 ## Testing
 
+### Verifying Server is Running
+
+After Claude Code starts, check if the MCP server is running:
+
+```bash
+# Check process is running
+ps aux | grep remnote-mcp-server | grep -v grep
+
+# Check WebSocket port is listening
+lsof -i :3002
+
+# Expected output shows node process on port 3002:
+# node    <PID> <user>   14u  IPv6 ... TCP *:exlm-agent (LISTEN)
+```
+
+If the server is running, you should see the `remnote-mcp-server` process.
+
+### Checking Connection Status
+
+1. **In Claude Code:**
+   ```
+   Use remnote_status to check the RemNote connection
+   ```
+
+   Expected response when connected:
+   ```json
+   {
+     "connected": true,
+     "actionsProcessed": <number>,
+     "pluginVersion": "1.1.0",
+     "timestamp": "..."
+   }
+   ```
+
+2. **In RemNote Plugin Sidebar:**
+   - Status indicator should show "Connected" (green)
+   - Connection timestamp displayed
+   - Server URL: ws://127.0.0.1:3002
+
+3. **Server Logs:**
+   ```bash
+   # View MCP server logs
+   tail -f ~/.claude/debug/mcp-*.log
+
+   # Should show:
+   # [WebSocket Server] Listening on port 3002
+   # [MCP Server] Server started on stdio
+   # [WebSocket Server] Client connected
+   # [RemNote Bridge] RemNote plugin connected
+   ```
+
 ### Manual Testing Steps
 
 1. **Start RemNote** with MCP Bridge plugin enabled
-2. **Verify plugin shows "Disconnected"** (no server running)
-3. **Start MCP server:**
-   ```bash
-   npm run dev
-   ```
+2. **Verify plugin shows "Disconnected"** (if server not running)
+3. **Start Claude Code** (server starts automatically if configured)
 4. **Verify plugin shows "Connected"**
 5. **Test via Claude Code:**
    - "Create a note titled 'MCP Test'"
@@ -245,6 +309,33 @@ All logs go to **stderr** (stdout reserved for MCP stdio protocol):
 6. **Verify in RemNote:**
    - Notes appear in knowledge base
    - Action history shows in plugin sidebar
+
+### Standalone Testing (Without Claude Code)
+
+To test the server independently:
+
+```bash
+# Stop Claude Code first to free port 3002
+
+cd ~/Projects/_private/remnote-mcp-server
+npm run dev
+
+# Expected output:
+# [WebSocket Server] Listening on port 3002
+# [MCP Server] Server started on stdio
+```
+
+The server will wait for:
+1. RemNote plugin to connect via WebSocket
+2. MCP client to connect via stdio
+
+When RemNote connects, you'll see:
+```
+[WebSocket Server] Client connected
+[RemNote Bridge] RemNote plugin connected
+```
+
+Press Ctrl+C to stop the server.
 
 ### Error Testing
 
