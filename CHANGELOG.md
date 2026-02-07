@@ -7,6 +7,8 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-02-07
+
 ### Added
 
 - README.md now includes explanation of stdio transport architecture and its implications (lifecycle management, message
@@ -27,6 +29,8 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 ### Fixed
 
 - Version mismatch between package.json (0.1.0) and MCP server declaration (was 1.0.0)
+- Corrected critical configuration error in all documentation files that would prevent users from successfully setting
+  up the server
 
 ### Changed
 
@@ -40,11 +44,6 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 ### Removed
 
 - Deleted CLAUDE_CODE_CONFIG.md (content consolidated into README.md and AGENTS.md to eliminate redundancy)
-
-### Fixed
-
-- Corrected critical configuration error in all documentation files that would prevent users from successfully setting
-  up the server
 
 ## [0.1.0] - 2026-02-06
 
