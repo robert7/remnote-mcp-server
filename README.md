@@ -10,8 +10,6 @@ Bridge plugin](https://github.com/robert7/remnote-mcp-bridge).
 
 See Claude Code in action with RemNote: **[View Demo →](docs/demo.md)**
 
-![Demo Preview](docs/remnote-mcp-server-demo.jpg)
-
 ## What is This?
 
 The RemNote MCP Server enables AI assistants like Claude Code to interact directly with your RemNote knowledge base
