@@ -7,6 +7,20 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.1.3] - 2026-02-07
+
+### Added
+
+- Demo documentation with screenshot showing Claude Code searching RemNote via MCP Bridge & Server
+  - New `docs/demo.md` with visual demonstration
+  - Demo section in README.md with preview image
+  - Screenshot file: `docs/remnote-mcp-server-demo.jpg`
+- npm package badge in README.md linking to npm registry page
+- npm installation instructions as recommended installation method in README.md
+  - Global installation via `npm install -g remnote-mcp-server`
+  - Uninstall instructions for both npm and source installations
+- Enhanced troubleshooting section covering both npm and source installation methods
+
 ## [0.1.2] - 2026-02-07
 
 ### Added
