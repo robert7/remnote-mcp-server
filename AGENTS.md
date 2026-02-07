@@ -67,23 +67,48 @@ npm start
 
 ## Testing and Verification
 
-**No automated test suite.** Manual testing workflow:
+**Automated test suite with 95+ tests.**
+
+### Running Tests
 
 ```bash
-# 1. Start the server
-npm start  # or npm run dev for hot reload
+# Run all tests
+npm test
 
-# 2. Verify process is running
-ps aux | grep remnote-mcp-server
+# Watch mode (re-run on changes)
+npm run test:watch
 
-# 3. Verify WebSocket port is listening
-lsof -i :3002
+# Coverage report
+npm run test:coverage
 
-# 4. Test in Claude Code
-# In chat: "Use remnote_status to check connection"
+# Interactive UI
+npm run test:ui
 ```
 
-**Prerequisites:**
+### Code Quality Checks
+
+```bash
+# Run all quality checks (type check, lint, format, test, coverage)
+./code-quality.sh
+
+# Individual checks
+npm run typecheck    # TypeScript type checking
+npm run lint         # ESLint
+npm run lint:fix     # Auto-fix lint issues
+npm run format       # Auto-format code
+npm run format:check # Check formatting
+```
+
+### Coverage Requirements
+
+- Lines: 80%
+- Functions: 80%
+- Branches: 75%
+- Statements: 80%
+
+View detailed coverage: `open coverage/index.html`
+
+### Manual Testing Prerequisites
 
 - RemNote app running with MCP Bridge plugin installed and connected
 - Server configured in `~/.claude.json` under project's `mcpServers` key

@@ -1,5 +1,7 @@
 # RemNote MCP Server
 
+[![CI](https://github.com/robert7/remnote-mcp-server/actions/workflows/ci.yml/badge.svg)](https://github.com/robert7/remnote-mcp-server/actions/workflows/ci.yml)
+
 MCP server that bridges Claude Code (and other MCP clients) to [RemNote](https://remnote.com/) via the [RemNote MCP
 Bridge plugin](https://github.com/robert7/remnote-mcp-bridge).
 
@@ -392,14 +394,41 @@ The `enabledMcpjsonServers` setting in `~/.claude/settings.json` is also depreca
 
 ## Development
 
-### Scripts
+### Setup
 
 ```bash
-npm run dev        # Development with hot reload (tsx watch)
-npm run build      # Production build (TypeScript compilation)
-npm start          # Start built server
-npm run typecheck  # Type checking only
+npm install
+npm run build
+npm link  # Make command globally available
 ```
+
+### Development Workflow
+
+```bash
+npm run dev          # Watch mode with hot reload
+npm run typecheck    # Type checking only
+npm run build        # Production build
+```
+
+### Testing
+
+```bash
+npm test             # Run all tests
+npm run test:watch   # Watch mode
+npm run test:coverage # With coverage report
+```
+
+### Code Quality
+
+```bash
+./code-quality.sh    # Run all checks
+npm run lint         # ESLint only
+npm run format       # Format code
+```
+
+### Before Committing
+
+Run `./code-quality.sh` to ensure all checks pass.
 
 ### Manual Testing
 

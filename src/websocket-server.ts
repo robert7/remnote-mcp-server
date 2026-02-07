@@ -6,11 +6,14 @@ export class WebSocketServer {
   private wss: WSServer | null = null;
   private client: WebSocket | null = null;
   private port: number;
-  private pendingRequests = new Map<string, {
-    resolve: (value: unknown) => void;
-    reject: (error: Error) => void;
-    timeout: NodeJS.Timeout;
-  }>();
+  private pendingRequests = new Map<
+    string,
+    {
+      resolve: (value: unknown) => void;
+      reject: (error: Error) => void;
+      timeout: NodeJS.Timeout;
+    }
+  >();
   private connectCallbacks: Array<() => void> = [];
   private disconnectCallbacks: Array<() => void> = [];
 
@@ -39,7 +42,7 @@ export class WebSocketServer {
 
         this.client = ws;
         console.error('[WebSocket Server] Client connected');
-        this.connectCallbacks.forEach(cb => cb());
+        this.connectCallbacks.forEach((cb) => cb());
 
         ws.on('message', (data) => {
           try {
@@ -54,13 +57,13 @@ export class WebSocketServer {
           this.client = null;
 
           // Reject all pending requests
-          for (const [id, pending] of this.pendingRequests.entries()) {
+          for (const [_id, pending] of this.pendingRequests.entries()) {
             clearTimeout(pending.timeout);
             pending.reject(new Error('Connection lost'));
           }
           this.pendingRequests.clear();
 
-          this.disconnectCallbacks.forEach(cb => cb());
+          this.disconnectCallbacks.forEach((cb) => cb());
         });
 
         ws.on('error', (error) => {
@@ -90,7 +93,9 @@ export class WebSocketServer {
 
   async sendRequest(action: string, payload: Record<string, unknown>): Promise<unknown> {
     if (!this.client || this.client.readyState !== WebSocket.OPEN) {
-      throw new Error('RemNote plugin not connected. Please ensure the plugin is installed and running.');
+      throw new Error(
+        'RemNote plugin not connected. Please ensure the plugin is installed and running.'
+      );
     }
 
     const id = randomUUID();
@@ -158,7 +163,10 @@ export class WebSocketServer {
             pending.resolve(response.result);
           }
         } else {
-          console.error('[WebSocket Server] Received response for unknown request ID:', response.id);
+          console.error(
+            '[WebSocket Server] Received response for unknown request ID:',
+            response.id
+          );
         }
       }
     } catch (error) {

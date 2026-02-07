@@ -16,10 +16,10 @@ export const CREATE_NOTE_TOOL = {
       title: { type: 'string', description: 'The title of the note' },
       content: { type: 'string', description: 'Content as child bullets (newline-separated)' },
       parentId: { type: 'string', description: 'Parent Rem ID' },
-      tags: { type: 'array', items: { type: 'string' }, description: 'Tags to apply' }
+      tags: { type: 'array', items: { type: 'string' }, description: 'Tags to apply' },
     },
-    required: ['title']
-  }
+    required: ['title'],
+  },
 };
 
 export const SEARCH_TOOL = {
@@ -30,10 +30,10 @@ export const SEARCH_TOOL = {
     properties: {
       query: { type: 'string', description: 'Search query text' },
       limit: { type: 'number', description: 'Maximum results (1-100, default: 20)' },
-      includeContent: { type: 'boolean', description: 'Include child content (default: false)' }
+      includeContent: { type: 'boolean', description: 'Include child content (default: false)' },
     },
-    required: ['query']
-  }
+    required: ['query'],
+  },
 };
 
 export const READ_NOTE_TOOL = {
@@ -43,10 +43,10 @@ export const READ_NOTE_TOOL = {
     type: 'object' as const,
     properties: {
       remId: { type: 'string', description: 'The Rem ID to read' },
-      depth: { type: 'number', description: 'Depth of children to include (0-10, default: 3)' }
+      depth: { type: 'number', description: 'Depth of children to include (0-10, default: 3)' },
     },
-    required: ['remId']
-  }
+    required: ['remId'],
+  },
 };
 
 export const UPDATE_NOTE_TOOL = {
@@ -59,23 +59,23 @@ export const UPDATE_NOTE_TOOL = {
       title: { type: 'string', description: 'New title' },
       appendContent: { type: 'string', description: 'Content to append as children' },
       addTags: { type: 'array', items: { type: 'string' }, description: 'Tags to add' },
-      removeTags: { type: 'array', items: { type: 'string' }, description: 'Tags to remove' }
+      removeTags: { type: 'array', items: { type: 'string' }, description: 'Tags to remove' },
     },
-    required: ['remId']
-  }
+    required: ['remId'],
+  },
 };
 
 export const APPEND_JOURNAL_TOOL = {
   name: 'remnote_append_journal',
-  description: 'Append content to today\'s daily document in RemNote',
+  description: "Append content to today's daily document in RemNote",
   inputSchema: {
     type: 'object' as const,
     properties: {
-      content: { type: 'string', description: 'Content to append to today\'s daily document' },
-      timestamp: { type: 'boolean', description: 'Include timestamp (default: true)' }
+      content: { type: 'string', description: "Content to append to today's daily document" },
+      timestamp: { type: 'boolean', description: 'Include timestamp (default: true)' },
     },
-    required: ['content']
-  }
+    required: ['content'],
+  },
 };
 
 export const STATUS_TOOL = {
@@ -83,8 +83,8 @@ export const STATUS_TOOL = {
   description: 'Check the connection status and statistics of the RemNote MCP bridge',
   inputSchema: {
     type: 'object' as const,
-    properties: {}
-  }
+    properties: {},
+  },
 };
 
 export function registerAllTools(server: Server, wsServer: WebSocketServer) {
@@ -96,7 +96,7 @@ export function registerAllTools(server: Server, wsServer: WebSocketServer) {
           const args = CreateNoteSchema.parse(request.params.arguments);
           const result = await wsServer.sendRequest('create_note', args);
           return {
-            content: [{ type: 'text', text: JSON.stringify(result, null, 2) }]
+            content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
           };
         }
 
@@ -104,7 +104,7 @@ export function registerAllTools(server: Server, wsServer: WebSocketServer) {
           const args = SearchSchema.parse(request.params.arguments);
           const result = await wsServer.sendRequest('search', args);
           return {
-            content: [{ type: 'text', text: JSON.stringify(result, null, 2) }]
+            content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
           };
         }
 
@@ -112,7 +112,7 @@ export function registerAllTools(server: Server, wsServer: WebSocketServer) {
           const args = ReadNoteSchema.parse(request.params.arguments);
           const result = await wsServer.sendRequest('read_note', args);
           return {
-            content: [{ type: 'text', text: JSON.stringify(result, null, 2) }]
+            content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
           };
         }
 
@@ -120,7 +120,7 @@ export function registerAllTools(server: Server, wsServer: WebSocketServer) {
           const args = UpdateNoteSchema.parse(request.params.arguments);
           const result = await wsServer.sendRequest('update_note', args);
           return {
-            content: [{ type: 'text', text: JSON.stringify(result, null, 2) }]
+            content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
           };
         }
 
@@ -128,7 +128,7 @@ export function registerAllTools(server: Server, wsServer: WebSocketServer) {
           const args = AppendJournalSchema.parse(request.params.arguments);
           const result = await wsServer.sendRequest('append_journal', args);
           return {
-            content: [{ type: 'text', text: JSON.stringify(result, null, 2) }]
+            content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
           };
         }
 
@@ -136,18 +136,30 @@ export function registerAllTools(server: Server, wsServer: WebSocketServer) {
           const connected = wsServer.isConnected();
           if (!connected) {
             return {
-              content: [{
-                type: 'text',
-                text: JSON.stringify({ connected: false, message: 'RemNote plugin not connected' }, null, 2)
-              }]
+              content: [
+                {
+                  type: 'text',
+                  text: JSON.stringify(
+                    { connected: false, message: 'RemNote plugin not connected' },
+                    null,
+                    2
+                  ),
+                },
+              ],
             };
           }
           const result = await wsServer.sendRequest('status', {});
           return {
-            content: [{
-              type: 'text',
-              text: JSON.stringify({ connected: true, ...(typeof result === 'object' ? result : {}) }, null, 2)
-            }]
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify(
+                  { connected: true, ...(typeof result === 'object' ? result : {}) },
+                  null,
+                  2
+                ),
+              },
+            ],
           };
         }
 
@@ -156,11 +168,13 @@ export function registerAllTools(server: Server, wsServer: WebSocketServer) {
       }
     } catch (error) {
       return {
-        content: [{
-          type: 'text',
-          text: `Error: ${error instanceof Error ? error.message : String(error)}`
-        }],
-        isError: true
+        content: [
+          {
+            type: 'text',
+            text: `Error: ${error instanceof Error ? error.message : String(error)}`,
+          },
+        ],
+        isError: true,
       };
     }
   });
@@ -173,7 +187,7 @@ export function registerAllTools(server: Server, wsServer: WebSocketServer) {
       READ_NOTE_TOOL,
       UPDATE_NOTE_TOOL,
       APPEND_JOURNAL_TOOL,
-      STATUS_TOOL
-    ]
+      STATUS_TOOL,
+    ],
   }));
 }

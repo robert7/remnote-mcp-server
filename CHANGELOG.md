@@ -7,6 +7,21 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- Comprehensive testing infrastructure with Vitest (95 tests)
+  - Unit tests for WebSocketServer, tools, schemas
+  - Coverage thresholds enforced (80% lines/functions/statements, 75% branches)
+- Code quality tools
+  - ESLint with TypeScript-specific rules
+  - Prettier for consistent code formatting
+  - `./code-quality.sh` script for unified quality checks
+- CI/CD integration
+  - GitHub Actions workflow running all quality checks on push/PR
+  - CI status badge in README
+- npm scripts for testing, linting, and formatting
+- Test helpers and mock implementations for isolated testing
+
 ## [0.1.1] - 2026-02-07
 
 ### Added
