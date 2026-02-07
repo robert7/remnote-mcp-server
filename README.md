@@ -32,6 +32,42 @@ The server acts as a bridge:
 - **Journal Entries** - Append timestamped entries to daily documents
 - **Connection Status** - Check server and plugin connection health
 
+## Important Limitations
+
+**This MCP server enforces a strict 1:1:1 relationship:** one AI agent ↔ one MCP server instance ↔ one RemNote plugin
+connection.
+
+### Multi-Agent Constraints
+
+You **cannot** use multiple AI agents (e.g., two Claude Code sessions) with the same RemNote knowledge base
+simultaneously. Three architectural constraints prevent this:
+
+1. **stdio transport is point-to-point** - Each MCP server process communicates with exactly one AI agent via
+   stdin/stdout. The transport protocol doesn't support multiple clients.
+2. **WebSocket enforces single-client** - The server explicitly rejects multiple RemNote plugin connections. Only one
+   plugin instance can connect to port 3002 at a time (connection code: 1008).
+3. **Port binding conflict** - Multiple server instances attempting to use the default port 3002 will fail with
+   `EADDRINUSE`.
+
+### Practical Implications
+
+- **One agent at a time** - Close one Claude Code session before starting another if both need RemNote access
+- **No concurrent access** - Cannot have multiple AI assistants modifying your RemNote knowledge base simultaneously
+- **Separate workspaces don't help** - Even with different ports, only one plugin instance can connect to RemNote at a
+  time
+
+### Alternative Approach
+
+If you need multiple AI agents with separate note-taking systems, use separate RemNote accounts/workspaces and configure
+each with its own MCP server instance on different ports.
+
+### Future Plans
+
+**HTTP transport migration planned** - The single-agent limitation is a temporary architectural constraint. A future
+version will migrate from stdio transport to HTTP transport (SSE), which would allow multiple AI agents to connect
+to the same MCP server instance simultaneously. This would remove constraint #1 above while maintaining the existing
+WebSocket bridge to RemNote.
+
 ## Prerequisites
 
 - **Node.js** >= 18.0.0

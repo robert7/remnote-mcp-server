@@ -9,6 +9,11 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Documentation of multi-agent limitations in README.md
+  - Explains 1:1:1 architecture constraint (one AI agent ↔ one server ↔ one RemNote connection)
+  - Details three architectural constraints: stdio point-to-point transport, single-client WebSocket, port binding
+  - Provides practical implications and alternative approaches for users needing multiple agents
+  - Notes planned migration to HTTP transport (SSE) which would enable multi-agent support
 - Comprehensive testing infrastructure with Vitest (95 tests)
   - Unit tests for WebSocketServer, tools, schemas
   - Coverage thresholds enforced (80% lines/functions/statements, 75% branches)

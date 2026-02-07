@@ -217,7 +217,8 @@ See **.agents/dev-requirements.md** for detailed guidelines on:
 
 ## CRITICAL: ExecPlans
 
-When writing complex features or significant refactors, use an ExecPlan (as described in .agents/PLANS.md) from design to implementation.
+When writing complex features or significant refactors, use an ExecPlan (as described in .agents/PLANS.md) from design
+to implementation.
 
 ## CRITICAL: Git Commit Policy
 
