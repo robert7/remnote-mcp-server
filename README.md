@@ -1,6 +1,7 @@
 # RemNote MCP Server
 
 [![CI](https://github.com/robert7/remnote-mcp-server/actions/workflows/ci.yml/badge.svg)](https://github.com/robert7/remnote-mcp-server/actions/workflows/ci.yml)
+[![npm version](https://img.shields.io/npm/v/remnote-mcp-server.svg)](https://www.npmjs.com/package/remnote-mcp-server)
 
 MCP server that bridges Claude Code (and other MCP clients) to [RemNote](https://remnote.com/) via the [RemNote MCP
 Bridge plugin](https://github.com/robert7/remnote-mcp-bridge).
@@ -84,7 +85,25 @@ WebSocket bridge to RemNote.
 
 ### 1. Install the MCP Server
 
-**From source (recommended for development):**
+**From npm (recommended for most users):**
+
+```bash
+# Install globally
+npm install -g remnote-mcp-server
+
+# Verify installation
+which remnote-mcp-server
+# Should output: /path/to/node/bin/remnote-mcp-server
+```
+
+**Uninstalling:**
+
+```bash
+# Remove global installation
+npm uninstall -g remnote-mcp-server
+```
+
+**From source (for development):**
 
 ```bash
 git clone https://github.com/robert7/remnote-mcp-server.git
@@ -107,7 +126,7 @@ executable, allowing Claude Code to launch `remnote-mcp-server` from anywhere wi
 uses a different Node.js version or environment (e.g., different shell PATH), it won't find the command. Ensure your
 shell configuration (`.bashrc`, `.zshrc`) properly exposes your Node.js environment.
 
-**Unlinking the global command:**
+**Unlinking the source installation:**
 
 When you no longer want the global `remnote-mcp-server` command to point to your local repository:
 
@@ -120,7 +139,7 @@ which remnote-mcp-server
 # Should output nothing if successfully unlinked
 ```
 
-After unlinking, you can install the published package globally with `npm install -g remnote-mcp-server` if needed.
+After unlinking, you can install the published npm package globally with `npm install -g remnote-mcp-server` if needed.
 
 **About stdio transport**
 
@@ -362,13 +381,20 @@ Configure in the plugin control panel:
 
 ### Server Not Starting
 
-1. **Check if globally linked:**
+1. **Check if installed globally:**
    ```bash
    which remnote-mcp-server
    ```
-Should return a path to the executable.
+   Should return a path to the executable.
 
-2. **Re-link if needed:**
+2. **Reinstall if needed:**
+
+   **For npm installation:**
+   ```bash
+   npm install -g remnote-mcp-server
+   ```
+
+   **For source installation:**
    ```bash
    cd ~/Projects/_private/remnote-mcp-server
    npm link
