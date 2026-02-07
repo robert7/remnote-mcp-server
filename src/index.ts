@@ -1,8 +1,12 @@
 #!/usr/bin/env node
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { createRequire } from 'module';
 import { WebSocketServer } from './websocket-server.js';
 import { registerAllTools } from './tools/index.js';
+
+const require = createRequire(import.meta.url);
+const packageJson = require('../package.json');
 
 const WS_PORT = parseInt(process.env.REMNOTE_WS_PORT || '3002', 10);
 
@@ -11,7 +15,7 @@ async function main() {
   const mcpServer = new Server(
     {
       name: 'remnote-mcp-server',
-      version: '0.1.0',
+      version: packageJson.version,
     },
     {
       capabilities: {

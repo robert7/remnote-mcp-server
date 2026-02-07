@@ -7,6 +7,8 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-02-07
+
 ### Added
 
 - Documentation of multi-agent limitations in README.md
@@ -26,6 +28,10 @@ Versioning](https://semver.org/spec/v2.0.0.html).
   - CI status badge in README
 - npm scripts for testing, linting, and formatting
 - Test helpers and mock implementations for isolated testing
+
+### Changed
+
+- MCP server version is now dynamically read from package.json instead of being hardcoded in src/index.ts
 
 ## [0.1.1] - 2026-02-07
 
