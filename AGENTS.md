@@ -174,6 +174,10 @@ return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
 
 ## Development Workflow
 
+**CRITICAL**: Before writing any code or documentation, read `.agents/dev-workflow.md` first.
+
+This file contains essential workflow guidelines that must be followed for all development tasks.
+
 ### Git Commit Policy
 
 **DO NOT create git commits unless:**
