@@ -19,21 +19,19 @@ Maintainer guide for publishing new versions of `remnote-mcp-server` to npm.
    - `major` - Breaking changes (e.g., 1.0.0 → 2.0.0)
    - `minor` - New features, backwards compatible (e.g., 0.1.0 → 0.2.0)
    - `patch` - Bug fixes, backwards compatible (e.g., 0.1.0 → 0.1.1)
-
 2. **Document changes in CHANGELOG.md**
    - Move items from `[Unreleased]` to new version section
    - Add release date: `## [0.1.0] - 2026-02-07`
    - Ensure changes are categorized (Added, Changed, Fixed, etc.)
-
 3. **Verify package contents**
-   
+
    ```bash
    npm pack --dry-run
    ```
+
    - Check included files list
    - Verify `dist/` is built (runs automatically via `prepublishOnly`)
    - Ensure no sensitive files are included
-
 4. **Run type checks**
    ```bash
    npm run typecheck
@@ -51,16 +49,16 @@ Maintainer guide for publishing new versions of `remnote-mcp-server` to npm.
    ```bash
    npm publish --dry-run
    ```
+
    - Review output for any warnings
    - Verify package size is reasonable
-
 2. **Publish**
 
    ```bash
    npm publish
    ```
-   - For pre-release versions: `npm publish --tag beta`
 
+   - For pre-release versions: `npm publish --tag beta`
 3. **Verify publication**
    ```bash
    npm view remnote-mcp-server
@@ -82,7 +80,6 @@ Maintainer guide for publishing new versions of `remnote-mcp-server` to npm.
    - Navigate to repository releases page
    - Create release from tag
    - Copy CHANGELOG.md section for release notes
-
 3. **Update CHANGELOG.md**
    - Add new `[Unreleased]` section at top
    - Commit and push

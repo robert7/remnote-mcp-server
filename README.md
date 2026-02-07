@@ -1,6 +1,8 @@
 # RemNote MCP Server
 
-![Status](https://img.shields.io/badge/status-beta-yellow) ![License](https://img.shields.io/badge/license-MIT-blue) ![CI](https://github.com/robert7/remnote-mcp-server/actions/workflows/ci.yml/badge.svg) [![codecov](https://codecov.io/gh/robert7/remnote-mcp-server/branch/main/graph/badge.svg)](https://codecov.io/gh/robert7/remnote-mcp-server)
+![Status](https://img.shields.io/badge/status-beta-yellow) ![License](https://img.shields.io/badge/license-MIT-blue)
+![CI](https://github.com/robert7/remnote-mcp-server/actions/workflows/ci.yml/badge.svg)
+[![codecov](https://codecov.io/gh/robert7/remnote-mcp-server/branch/main/graph/badge.svg)](https://codecov.io/gh/robert7/remnote-mcp-server)
 
 MCP server that bridges Claude Code (and other MCP clients) to [RemNote](https://remnote.com/) via the [RemNote MCP
 Bridge plugin](https://github.com/robert7/remnote-mcp-bridge).
@@ -382,16 +384,16 @@ Configure in the plugin control panel:
    ```bash
    which remnote-mcp-server
    ```
-   Should return a path to the executable.
+Should return a path to the executable.
 
 2. **Reinstall if needed:**
 
-   **For npm installation:**
+**For npm installation:**
    ```bash
    npm install -g remnote-mcp-server
    ```
 
-   **For source installation:**
+**For source installation:**
    ```bash
    cd ~/Projects/_private/remnote-mcp-server
    npm link
@@ -536,7 +538,7 @@ Press Ctrl+C to stop.
 
 ### Development Documentation
 
-- **[IMPLEMENTATION.md](./IMPLEMENTATION.md)** - Technical implementation details
+- **[docs/architecture.md](./docs/architecture.md)** - Architecture and design rationale
 - **[AGENTS.md](./AGENTS.md)** - AI agent and developer guidance
 - **[CHANGELOG.md](./CHANGELOG.md)** - Version history
 

@@ -268,7 +268,11 @@ src/
 
 dist/                           # Compiled output (gitignored)
 .agents/                        # Development guidelines
+docs/                           # Architecture documentation
 ```
+
+For architectural design rationale (performance considerations, security model, error handling strategy), see
+[docs/architecture.md](./docs/architecture.md).
 
 ## Dependencies
 
