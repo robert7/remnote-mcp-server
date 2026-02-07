@@ -13,8 +13,8 @@ notes, and maintain your daily journal—all through conversational commands.
 
 **Architecture:**
 
-```
-Claude Code (MCP Client) ↔ MCP Server (stdio) ↔ WebSocket Server :3002 ↔ RemNote Plugin ↔ RemNote
+```text
+AI agent (e.g. Claude Code, MCP Client) ↔ MCP Server (stdio) ↔ WebSocket Server :3002 ↔ RemNote Plugin ↔ RemNote
 ```
 
 The server acts as a bridge:
