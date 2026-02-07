@@ -1,10 +1,13 @@
 # RemNote MCP Server
 
-MCP server that bridges Claude Code (and other MCP clients) to [RemNote](https://remnote.com/) via the [RemNote MCP Bridge plugin](https://github.com/robert7/remnote-mcp-bridge).
+MCP server that bridges Claude Code (and other MCP clients) to [RemNote](https://remnote.com/) via the [RemNote MCP
+Bridge plugin](https://github.com/robert7/remnote-mcp-bridge).
 
 ## What is This?
 
-The RemNote MCP Server enables AI assistants like Claude Code to interact directly with your RemNote knowledge base through the Model Context Protocol (MCP). This allows you to create notes, search your knowledge base, update existing notes, and maintain your daily journal—all through conversational commands.
+The RemNote MCP Server enables AI assistants like Claude Code to interact directly with your RemNote knowledge base
+through the Model Context Protocol (MCP). This allows you to create notes, search your knowledge base, update existing
+notes, and maintain your daily journal—all through conversational commands.
 
 **Architecture:**
 
@@ -13,6 +16,7 @@ Claude Code (MCP Client) ↔ MCP Server (stdio) ↔ WebSocket Server :3002 ↔ R
 ```
 
 The server acts as a bridge:
+
 - Communicates with Claude Code via stdio transport (MCP protocol)
 - Runs a WebSocket server (port 3002) that the RemNote browser plugin connects to
 - Translates MCP tool calls into RemNote API actions
@@ -91,7 +95,8 @@ MCP servers are configured in `~/.claude.json` under the `mcpServers` key within
 
 **Configuration Notes:**
 
-- **Global availability:** Use your home directory path (`/Users/username`) to make RemNote tools available in all projects
+- **Global availability:** Use your home directory path (`/Users/username`) to make RemNote tools available in all
+  projects
 - **Project-specific:** Use a specific project path to limit availability to that project
 - **Multiple projects:** Add `mcpServers` configuration under each project path as needed
 
@@ -130,7 +135,8 @@ MCP servers are configured in `~/.claude.json` under the `mcpServers` key within
 
 ### 4. Restart Claude Code
 
-Restart Claude Code completely to load the MCP server configuration. The server will start automatically when Claude Code launches.
+Restart Claude Code completely to load the MCP server configuration. The server will start automatically when Claude
+Code launches.
 
 ## Verification
 
@@ -278,7 +284,7 @@ Configure in the plugin control panel:
    ```bash
    which remnote-mcp-server
    ```
-   Should return a path to the executable.
+Should return a path to the executable.
 
 2. **Re-link if needed:**
    ```bash
@@ -310,7 +316,6 @@ Alternatively, configure a different port in both `~/.claude.json` and the RemNo
 1. **Verify plugin settings in RemNote:**
    - WebSocket URL: `ws://127.0.0.1:3002`
    - Auto-reconnect: Enabled
-
 2. **Check plugin console (RemNote Developer Tools):**
    ```
    Cmd+Option+I (macOS)
@@ -318,7 +323,6 @@ Alternatively, configure a different port in both `~/.claude.json` and the RemNo
    ```
 
 3. **Restart RemNote** after changing settings
-
 4. **Check server logs** for connection messages
 
 ### Tools Not Appearing in Claude Code
@@ -329,9 +333,7 @@ Alternatively, configure a different port in both `~/.claude.json` and the RemNo
    ```
 
 2. **Ensure configuration is under correct project path** (use home directory for global)
-
 3. **Restart Claude Code completely** (not just reload)
-
 4. **Check MCP logs:**
    ```bash
    tail -f ~/.claude/debug/mcp-*.log

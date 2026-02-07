@@ -4,13 +4,13 @@ This file provides guidance to AI agents when working with code in this reposito
 
 ## Project Overview
 
-This is an MCP (Model Context Protocol) server that bridges Claude Code to RemNote via a WebSocket connection. The
-server acts as middleware between Claude's stdio MCP transport and a RemNote browser plugin.
+This is an MCP (Model Context Protocol) server that bridges AI agents to RemNote via a WebSocket connection. The server
+acts as middleware between the agent's stdio MCP transport and a RemNote browser plugin.
 
 **Architecture:**
 
 ```text
-Claude Code (stdio) ↔ MCP Server ↔ WebSocket Server :3002 ↔ RemNote Plugin ↔ RemNote
+AI agent (stdio) ↔ MCP Server ↔ WebSocket Server :3002 ↔ RemNote Plugin ↔ RemNote
 ```
 
 ## Core Architecture
@@ -19,7 +19,7 @@ Claude Code (stdio) ↔ MCP Server ↔ WebSocket Server :3002 ↔ RemNote Plugin
 
 1. **MCP Server Layer** (`src/index.ts`)
    - Uses `@modelcontextprotocol/sdk` for MCP protocol implementation
-   - Communicates with Claude Code via stdio transport (stdin/stdout)
+   - Communicates with AI agent (e.g., Claude Code) via stdio transport (stdin/stdout)
    - **CRITICAL**: stdout is RESERVED for MCP protocol messages only
    - All logging MUST go to stderr
    - Spawns WebSocket server on configurable port (default 3002)
@@ -35,7 +35,7 @@ Claude Code (stdio) ↔ MCP Server ↔ WebSocket Server :3002 ↔ RemNote Plugin
      - Responses: `{ id: string, result?: unknown, error?: string }`
      - Heartbeats: `{ type: 'ping' | 'pong' }`
 3. **Tool Registration Layer** (`src/tools/index.ts`)
-   - Defines 6 MCP tools exposed to Claude Code
+   - Defines 6 MCP tools exposed to AI agents
    - Validates inputs via Zod schemas (`src/schemas/remnote-schemas.ts`)
    - Single unified handler dispatches by tool name
    - Returns results as formatted JSON text
@@ -98,7 +98,8 @@ lsof -i :3002
 ```bash
 npm install
 npm run build
-# Makes remnote-mcp-server globally available
+
+# CRITICAL: makes remnote-mcp-server command globally available
 npm link
 ```
 
@@ -129,7 +130,9 @@ MCP servers are configured in `~/.claude.json` under the `mcpServers` key. Confi
 }
 ```
 
-**Important:** The old separate `~/.claude/.mcp.json` file format is deprecated. Claude Code now uses a single `~/.claude.json` file with `mcpServers` configuration per project. The `enabledMcpjsonServers` setting in `~/.claude/settings.json` is also deprecated.
+**Important:** The old separate `~/.claude/.mcp.json` file format is deprecated. Claude Code now uses a single
+`~/.claude.json` file with `mcpServers` configuration per project. The `enabledMcpjsonServers` setting
+in `~/.claude/settings.json` is also deprecated.
 
 ## Key Technical Constraints
 
