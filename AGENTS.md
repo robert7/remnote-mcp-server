@@ -49,6 +49,62 @@ AI agent (stdio) ↔ MCP Server ↔ WebSocket Server :3002 ↔ RemNote Plugin �
 - `remnote_append_journal` - Append to today's daily document
 - `remnote_status` - Check connection status and statistics
 
+## MANDATORY: Code Change Requirements
+
+**ALL code changes MUST follow these requirements (non-negotiable):**
+
+1. **Tests** - Update/add tests for all code changes (no exceptions)
+2. **Documentation** - Update docstrings and docs where applicable
+3. **Code Quality** - Run linting and formatting checks
+4. **Test Execution** - Run test suite to verify changes
+5. **Full Code Quality Execution** - Run all code quality checks by executing `./code-quality.sh`
+6. **CHANGELOG.md** - Document all functional changes
+
+See **.agents/dev-requirements.md** for detailed guidelines on:
+
+- Planning requirements (what to include in every plan)
+- Execution requirements (tests, docs, code quality, verification)
+
+**If you skip any of these steps, the task is INCOMPLETE.**
+
+## CRITICAL: ExecPlans
+
+When writing complex features or significant refactors, use an ExecPlan (as described in .agents/PLANS.md) from design
+to implementation.
+
+## CRITICAL: Git Commit Policy
+
+**DO NOT create git commits unless explicitly requested by the user.**
+
+- You may use `git add`, `git rm`, `git mv`, and other git commands
+- You may stage changes and prepare them for commit
+- **DO NOT** run `git commit` - the user handles commits manually
+- When changes are ready, inform the user: "Changes are staged and ready for you to commit"
+
+**Exceptions - commits ARE allowed ONLY when:**
+
+1. User explicitly requests: "create a commit" or "commit these changes"
+2. Using `/create-commit` slash command
+3. Using `/create-release` slash command
+
+**IMPORTANT:** Even when exceptions apply:
+
+- Commit messages must NOT include co-authorship attribution
+- No "Co-Authored-By: <agent name>" or similar text
+- These are the user's commits, not the agent's
+
+See **.agents/dev-workflow.md** for complete Git Commit Policy details.
+
+### Documentation Guidelines
+
+**IMPORTANT**: Before updating any documentation, read `.agents/dev-documentation.md` first.
+
+This file contains critical principles for writing maintainable documentation, including:
+
+- Non-Redundancy Principle (avoid documenting what's obvious from code)
+- What belongs in code-level vs developer vs user documentation
+- Focus on WHY (design rationale) over WHAT/HOW (implementation details)
+
 ## Development Commands
 
 ```bash
@@ -196,62 +252,6 @@ const result = await websocketServer.sendRequest('search', params);
 // Returns formatted response
 return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
 ```
-
-## MANDATORY: Code Change Requirements
-
-**ALL code changes MUST follow these requirements (non-negotiable):**
-
-1. **Tests** - Update/add tests for all code changes (no exceptions)
-2. **Documentation** - Update docstrings and docs where applicable
-3. **Code Quality** - Run linting and formatting checks
-4. **Test Execution** - Run test suite to verify changes
-5. **Full Code Quality Execution** - Run all code quality checks by executing `./code-quality.sh`
-6. **CHANGELOG.md** - Document all functional changes
-
-See **.agents/dev-requirements.md** for detailed guidelines on:
-
-- Planning requirements (what to include in every plan)
-- Execution requirements (tests, docs, code quality, verification)
-
-**If you skip any of these steps, the task is INCOMPLETE.**
-
-## CRITICAL: ExecPlans
-
-When writing complex features or significant refactors, use an ExecPlan (as described in .agents/PLANS.md) from design
-to implementation.
-
-## CRITICAL: Git Commit Policy
-
-**DO NOT create git commits unless explicitly requested by the user.**
-
-- You may use `git add`, `git rm`, `git mv`, and other git commands
-- You may stage changes and prepare them for commit
-- **DO NOT** run `git commit` - the user handles commits manually
-- When changes are ready, inform the user: "Changes are staged and ready for you to commit"
-
-**Exceptions - commits ARE allowed ONLY when:**
-
-1. User explicitly requests: "create a commit" or "commit these changes"
-2. Using `/create-commit` slash command
-3. Using `/create-release` slash command
-
-**IMPORTANT:** Even when exceptions apply:
-
-- Commit messages must NOT include co-authorship attribution
-- No "Co-Authored-By: <agent name>" or similar text
-- These are the user's commits, not the agent's
-
-See **.agents/dev-workflow.md** for complete Git Commit Policy details.
-
-### Documentation Guidelines
-
-**IMPORTANT**: Before updating any documentation, read `.agents/dev-documentation.md` first.
-
-This file contains critical principles for writing maintainable documentation, including:
-
-- Non-Redundancy Principle (avoid documenting what's obvious from code)
-- What belongs in code-level vs developer vs user documentation
-- Focus on WHY (design rationale) over WHAT/HOW (implementation details)
 
 ## Project Structure
 

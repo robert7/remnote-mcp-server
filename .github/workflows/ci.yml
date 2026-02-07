@@ -1,4 +1,4 @@
-name: CI
+name: Code Quality & Tests
 
 on:
   push:
@@ -8,7 +8,6 @@ on:
 
 jobs:
   quality:
-    name: Code Quality & Tests
     runs-on: ubuntu-latest
 
     steps:
@@ -18,7 +17,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'npm'
 
       - name: Install dependencies
@@ -26,11 +25,3 @@ jobs:
 
       - name: Run code quality checks
         run: ./code-quality.sh
-
-      - name: Upload coverage reports
-        uses: codecov/codecov-action@v4
-        if: always()
-        with:
-          files: ./coverage/lcov.info
-          token: ${{ secrets.CODECOV_TOKEN }}
-        continue-on-error: true
