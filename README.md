@@ -48,12 +48,20 @@ cd remnote-mcp-server
 npm install
 npm run build
 
-# CRITICAL: makes remnote-mcp-server command globally available
+# Creates global symlink: makes remnote-mcp-server command available system-wide
 npm link
+
+# Verify it worked
+which remnote-mcp-server
+# Should output e.g.: /Users/<username>/.nvm/versions/node/<version>/bin/remnote-mcp-server
 ```
-Note: npm link creates symbolic links so you can develop and test a local package in another project instantly,
-by linking your package folder either globally (npm link in the package, then npm link <package-name> in the app)
-or directly (npm link ../path/to/package), without publishing or reinstalling.
+
+**What npm link does:** Creates a symbolic link from your global `node_modules` bin directory to this project's
+executable, allowing Claude Code to launch `remnote-mcp-server` from anywhere without publishing to npm.
+
+**Important:** Claude Code CLI must have access to the same Node.js environment where you ran `npm link`. If Claude Code
+uses a different Node.js version or environment (e.g., different shell PATH), it won't find the command. Ensure your
+shell configuration (`.bashrc`, `.zshrc`) properly exposes your Node.js environment.
 
 **About stdio transport**
 
@@ -73,13 +81,6 @@ exchanges JSON-RPC messages via standard input/output streams.
 This architecture provides tight integration with Claude Code while maintaining process isolation and security
 boundaries. For technical details, see the [MCP
 specification](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports).
-
-**Verify installation:**
-
-```bash
-which remnote-mcp-server
-# Should output: /Users/<username>/.nvm/versions/node/<version>/bin/remnote-mcp-server
-```
 
 ### 2. Install RemNote MCP Bridge Plugin
 

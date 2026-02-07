@@ -12,6 +12,9 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - README.md now includes explanation of stdio transport architecture and its implications (lifecycle management, message
   protocol, logging constraints)
 - AGENTS.md now references `.agents/dev-documentation.md` for documentation guidelines
+- README.md now includes inline verification step for `npm link` using `which` command with concise explanation of what
+  npm link creates
+- README.md now explains Node.js environment requirement for Claude Code CLI to execute the `remnote-mcp-server` command
 
 ### Changed
 
