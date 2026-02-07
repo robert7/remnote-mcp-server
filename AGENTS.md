@@ -172,76 +172,50 @@ const result = await websocketServer.sendRequest('search', params);
 return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
 ```
 
-## Development Workflow
+## MANDATORY: Code Change Requirements
 
-**CRITICAL**: Before writing any code or documentation, read `.agents/dev-workflow.md` first.
+**ALL code changes MUST follow these requirements (non-negotiable):**
 
-This file contains essential workflow guidelines that must be followed for all development tasks.
+1. **Tests** - Update/add tests for all code changes (no exceptions)
+2. **Documentation** - Update docstrings and docs where applicable
+3. **Code Quality** - Run linting and formatting checks
+4. **Test Execution** - Run test suite to verify changes
+5. **Full Code Quality Execution** - Run all code quality checks by executing `./code-quality.sh`
+6. **CHANGELOG.md** - Document all functional changes
 
-### Git Commit Policy
+See **.agents/dev-requirements.md** for detailed guidelines on:
 
-**DO NOT create git commits unless:**
+- Planning requirements (what to include in every plan)
+- Execution requirements (tests, docs, code quality, verification)
 
-1. User explicitly requests commit creation
-2. Using `/create-commit` command
-3. Using `/create-release` command
+**If you skip any of these steps, the task is INCOMPLETE.**
 
-**For all other changes:**
+## CRITICAL: ExecPlans
 
-- Use `git add`, `git mv`, `git rm` as needed
-- Stage files but DO NOT commit
-- Inform user when changes are ready for review
+When writing complex features or significant refactors, use an ExecPlan (as described in .agents/PLANS.md) from design to implementation.
 
-**Important commit message guidelines:**
+## CRITICAL: Git Commit Policy
 
-- Commit messages should NOT include co-authorship attribution
-- No "Co-Authored-By: <agent name>" or similar
+**DO NOT create git commits unless explicitly requested by the user.**
+
+- You may use `git add`, `git rm`, `git mv`, and other git commands
+- You may stage changes and prepare them for commit
+- **DO NOT** run `git commit` - the user handles commits manually
+- When changes are ready, inform the user: "Changes are staged and ready for you to commit"
+
+**Exceptions - commits ARE allowed ONLY when:**
+
+1. User explicitly requests: "create a commit" or "commit these changes"
+2. Using `/create-commit` slash command
+3. Using `/create-release` slash command
+
+**IMPORTANT:** Even when exceptions apply:
+
+- Commit messages must NOT include co-authorship attribution
+- No "Co-Authored-By: <agent name>" or similar text
 - These are the user's commits, not the agent's
-- If uncertain whether user wants commit creation, ask for clarification
 
-### Changelog Maintenance
-
-**MANDATORY: All functional changes MUST be documented in CHANGELOG.md.**
-
-Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
-
-**Categories:**
-
-- `Added` - New features
-- `Changed` - Changes to existing functionality
-- `Deprecated` - Features marked for removal
-- `Removed` - Removed features
-- `Fixed` - Bug fixes
-- `Security` - Security fixes
-
-**Example:**
-
-```markdown
-## [Unreleased]
-
-### Added
-- WebSocket reconnection handling for dropped connections
-
-### Fixed
-- Request timeout now properly cleans up pending promises
-```
-
-**Creating releases:** Use `/create-release` command
-
-### Code Changes Requirements
-
-**When planning code changes, MUST include:**
-
-1. Test updates (which tests to modify/add)
-2. Documentation updates (docstrings, README, etc.)
-3. Verification steps (type checks, manual testing)
-
-**When executing code changes, MUST:**
-
-1. Update tests (if test infrastructure exists)
-2. Update documentation (inline comments, docstrings, README)
-3. Run `npm run typecheck`
-4. Test manually with verification steps above
+See **.agents/dev-workflow.md** for complete Git Commit Policy details.
 
 ### Documentation Guidelines
 
@@ -255,7 +229,7 @@ This file contains critical principles for writing maintainable documentation, i
 
 ## Project Structure
 
-```
+```text
 src/
 ├── index.ts                    # Main entry point, MCP server setup
 ├── websocket-server.ts         # WebSocket bridge implementation
