@@ -188,6 +188,13 @@ return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
 - Stage files but DO NOT commit
 - Inform user when changes are ready for review
 
+**Important commit message guidelines:**
+
+- Commit messages should NOT include co-authorship attribution
+- No "Co-Authored-By: <agent name>" or similar
+- These are the user's commits, not the agent's
+- If uncertain whether user wants commit creation, ask for clarification
+
 ### Changelog Maintenance
 
 **MANDATORY: All functional changes MUST be documented in CHANGELOG.md.**

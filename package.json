@@ -11,11 +11,36 @@
     "build": "tsc",
     "dev": "tsx watch src/index.ts",
     "start": "node dist/index.js",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
   },
-  "keywords": ["mcp", "remnote", "model-context-protocol"],
-  "author": "Robert",
+  "keywords": [
+    "mcp",
+    "remnote",
+    "model-context-protocol",
+    "knowledge-base",
+    "note-taking",
+    "ai",
+    "assistant",
+    "websocket",
+    "bridge"
+  ],
+  "author": "nightingale7 <nightingale7@gmail.com>",
   "license": "MIT",
+  "files": [
+    "dist/",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/robert7/remnote-mcp-server.git"
+  },
+  "bugs": {
+    "url": "https://github.com/robert7/remnote-mcp-server/issues"
+  },
+  "homepage": "https://github.com/robert7/remnote-mcp-server#readme",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.26.0",
     "ws": "^8.19.0",

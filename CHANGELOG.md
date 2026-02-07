@@ -15,6 +15,16 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - README.md now includes inline verification step for `npm link` using `which` command with concise explanation of what
   npm link creates
 - README.md now explains Node.js environment requirement for Claude Code CLI to execute the `remnote-mcp-server` command
+- LICENSE file (MIT License)
+- Repository, homepage, and bugs fields in package.json for npm registry
+- Files field in package.json to explicitly control published files
+- prepublishOnly script to ensure build before publishing
+- Additional keywords for improved npm discoverability
+- Coauthorship policy documented in CLAUDE.md
+
+### Fixed
+
+- Version mismatch between package.json (0.1.0) and MCP server declaration (was 1.0.0)
 
 ### Changed
 
