@@ -1,7 +1,6 @@
 # RemNote MCP Server
 
-[![CI](https://github.com/robert7/remnote-mcp-server/actions/workflows/ci.yml/badge.svg)](https://github.com/robert7/remnote-mcp-server/actions/workflows/ci.yml)
-[![npm version](https://img.shields.io/npm/v/remnote-mcp-server.svg)](https://www.npmjs.com/package/remnote-mcp-server)
+![Status](https://img.shields.io/badge/status-beta-yellow) ![License](https://img.shields.io/badge/license-MIT-blue) ![CI](https://github.com/robert7/remnote-mcp-server/actions/workflows/ci.yml/badge.svg) [![codecov](https://codecov.io/gh/robert7/remnote-mcp-server/branch/main/graph/badge.svg)](https://codecov.io/gh/robert7/remnote-mcp-server)
 
 MCP server that bridges Claude Code (and other MCP clients) to [RemNote](https://remnote.com/) via the [RemNote MCP
 Bridge plugin](https://github.com/robert7/remnote-mcp-bridge).
