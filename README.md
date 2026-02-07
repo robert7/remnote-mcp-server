@@ -5,6 +5,12 @@
 MCP server that bridges Claude Code (and other MCP clients) to [RemNote](https://remnote.com/) via the [RemNote MCP
 Bridge plugin](https://github.com/robert7/remnote-mcp-bridge).
 
+## Demo
+
+See Claude Code in action with RemNote: **[View Demo →](docs/demo.md)**
+
+![Demo Preview](docs/remnote-mcp-server-demo.jpg)
+
 ## What is This?
 
 The RemNote MCP Server enables AI assistants like Claude Code to interact directly with your RemNote knowledge base
@@ -100,6 +106,21 @@ executable, allowing Claude Code to launch `remnote-mcp-server` from anywhere wi
 **Important:** Claude Code CLI must have access to the same Node.js environment where you ran `npm link`. If Claude Code
 uses a different Node.js version or environment (e.g., different shell PATH), it won't find the command. Ensure your
 shell configuration (`.bashrc`, `.zshrc`) properly exposes your Node.js environment.
+
+**Unlinking the global command:**
+
+When you no longer want the global `remnote-mcp-server` command to point to your local repository:
+
+```bash
+# Remove the global symlink
+npm unlink -g remnote-mcp-server
+
+# Verify it's removed
+which remnote-mcp-server
+# Should output nothing if successfully unlinked
+```
+
+After unlinking, you can install the published package globally with `npm install -g remnote-mcp-server` if needed.
 
 **About stdio transport**
 
