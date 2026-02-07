@@ -1,6 +1,6 @@
 {
   "name": "remnote-mcp-server",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "MCP server bridge for RemNote knowledge base",
   "type": "module",
   "main": "dist/index.js",

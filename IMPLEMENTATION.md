@@ -2,7 +2,8 @@
 
 ## Overview
 
-The RemNote MCP Server bridges Claude Code (via MCP protocol) to RemNote knowledge bases through the RemNote MCP Bridge plugin.
+The RemNote MCP Server bridges Claude Code (via MCP protocol) to RemNote knowledge bases through the RemNote MCP Bridge
+plugin.
 
 **Architecture Flow:**
 ```
@@ -44,6 +45,7 @@ Manages bidirectional communication with the RemNote plugin:
 - **Error handling:** Connection loss rejects all pending requests
 
 **Key Methods:**
+
 - `start()` - Start WebSocket server
 - `stop()` - Graceful shutdown
 - `sendRequest(action, payload)` - Send request to RemNote plugin with correlation
@@ -58,28 +60,24 @@ Six RemNote tools exposed to Claude Code:
 1. **`remnote_create_note`**
    - Create new note with title, optional content, parent, and tags
    - Maps to RemNote action: `create_note`
-
 2. **`remnote_search`**
    - Search knowledge base with query, limit, and includeContent options
    - Maps to RemNote action: `search`
-
 3. **`remnote_read_note`**
    - Read specific note by ID with configurable depth
    - Maps to RemNote action: `read_note`
-
 4. **`remnote_update_note`**
    - Update note title, append content, add/remove tags
    - Maps to RemNote action: `update_note`
-
 5. **`remnote_append_journal`**
    - Append content to today's daily document
    - Maps to RemNote action: `append_journal`
-
 6. **`remnote_status`**
    - Check connection status and statistics
    - Maps to RemNote action: `status`
 
 All tools:
+
 - Use Zod schemas for parameter validation
 - Return JSON-formatted results
 - Handle errors gracefully with `isError` flag
@@ -147,29 +145,28 @@ This makes `remnote-mcp-server` available globally.
 
 ### 4. Configure Claude Code
 
-Create `~/.claude/.mcp.json`:
+Add to `~/.claude.json`:
 
 ```json
 {
-  "remnote": {
-    "type": "stdio",
-    "command": "remnote-mcp-server",
-    "env": {
-      "REMNOTE_WS_PORT": "3002"
+  "projects": {
+    "/Users/username": {
+      "mcpServers": {
+        "remnote": {
+          "type": "stdio",
+          "command": "remnote-mcp-server",
+          "args": [],
+          "env": {
+            "REMNOTE_WS_PORT": "3002"
+          }
+        }
+      }
     }
   }
 }
 ```
 
-Enable in `~/.claude/settings.json`:
-
-```json
-"enabledMcpjsonServers": [
-  "remnote"
-]
-```
-
-See `CLAUDE_CODE_CONFIG.md` for detailed instructions.
+See README.md for detailed configuration instructions.
 
 ### 5. Install RemNote Plugin
 
@@ -198,7 +195,6 @@ npm run typecheck  # Type checking only
    ```
 
 2. Open RemNote with MCP Bridge plugin
-
 3. Verify connection in console:
    ```
    [WebSocket Server] Listening on port 3002
@@ -208,14 +204,14 @@ npm run typecheck  # Type checking only
    ```
 
 4. Make changes to `src/*` - server auto-reloads
-
 5. Test tools via Claude Code or MCP Inspector
 
 ## Error Handling
 
 ### WebSocket Layer
 
-- **No client connected:** Returns error "RemNote plugin not connected. Please ensure the plugin is installed and running."
+- **No client connected:** Returns error "RemNote plugin not connected. Please ensure the plugin is installed and
+  running."
 - **Request timeout (5s):** Rejects promise with timeout error
 - **Connection lost mid-request:** All pending requests fail with "Connection lost"
 - **Malformed messages:** Logged to stderr, request rejected
@@ -265,7 +261,7 @@ If the server is running, you should see the `remnote-mcp-server` process.
    Use remnote_status to check the RemNote connection
    ```
 
-   Expected response when connected:
+Expected response when connected:
    ```json
    {
      "connected": true,
@@ -279,7 +275,6 @@ If the server is running, you should see the `remnote-mcp-server` process.
    - Status indicator should show "Connected" (green)
    - Connection timestamp displayed
    - Server URL: ws://127.0.0.1:3002
-
 3. **Server Logs:**
    ```bash
    # View MCP server logs
@@ -305,7 +300,6 @@ If the server is running, you should see the `remnote-mcp-server` process.
    - "Update note {remId} with new content"
    - "Append 'Test entry' to today's journal"
    - "Check RemNote status"
-
 6. **Verify in RemNote:**
    - Notes appear in knowledge base
    - Action history shows in plugin sidebar
@@ -326,6 +320,7 @@ npm run dev
 ```
 
 The server will wait for:
+
 1. RemNote plugin to connect via WebSocket
 2. MCP client to connect via stdio
 
@@ -359,11 +354,13 @@ Press Ctrl+C to stop the server.
 ## Dependencies
 
 ### Production
+
 - `@modelcontextprotocol/sdk` ^1.26.0 - MCP protocol implementation
 - `ws` ^8.19.0 - WebSocket server
 - `zod` ^4.3.6 - Schema validation
 
 ### Development
+
 - `typescript` ^5.9.3 - TypeScript compiler
 - `tsx` ^4.21.0 - TypeScript execution with hot reload
 - `@types/node` ^25.2.1 - Node.js type definitions
@@ -386,6 +383,7 @@ Press Ctrl+C to stop the server.
 ## Future Enhancements
 
 Potential improvements:
+
 - [ ] TLS/SSL support for WebSocket
 - [ ] Authentication/authorization
 - [ ] Multiple client support with session management
@@ -428,9 +426,10 @@ Potential improvements:
 
 ## Version History
 
-### v1.0.0 (2026-02-06)
+### v0.1.0 (2026-02-06)
 
 Initial release:
+
 - WebSocket server for RemNote plugin bridge
 - MCP stdio transport for Claude Code
 - Six RemNote tools
