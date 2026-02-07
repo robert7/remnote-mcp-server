@@ -48,9 +48,31 @@ cd remnote-mcp-server
 npm install
 npm run build
 
-# Make globally available
+# CRITICAL: makes remnote-mcp-server command globally available
 npm link
 ```
+Note: npm link creates symbolic links so you can develop and test a local package in another project instantly,
+by linking your package folder either globally (npm link in the package, then npm link <package-name> in the app)
+or directly (npm link ../path/to/package), without publishing or reinstalling.
+
+**About stdio transport**
+
+This MCP server uses [stdio transport](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports#stdio),
+the preferred communication mechanism for MCP. In stdio transport, Claude Code launches the server as a subprocess and
+exchanges JSON-RPC messages via standard input/output streams.
+
+**Key characteristics:**
+
+- **Lifecycle management**: Claude Code automatically starts the server when it launches and stops it on exit. The
+  server is launched as a subprocess, not a standalone service.
+- **Message protocol**: Communication uses newline-delimited JSON-RPC messages on stdin (client → server) and stdout
+  (server → client). No HTTP/REST endpoints are exposed.
+- **Logging constraint**: stdout is reserved exclusively for MCP protocol messages. All logging must go to stderr, which
+  is why the codebase uses `console.error()` for logs.
+
+This architecture provides tight integration with Claude Code while maintaining process isolation and security
+boundaries. For technical details, see the [MCP
+specification](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports).
 
 **Verify installation:**
 

@@ -232,6 +232,16 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 3. Run `npm run typecheck`
 4. Test manually with verification steps above
 
+### Documentation Guidelines
+
+**IMPORTANT**: Before updating any documentation, read `.agents/dev-documentation.md` first.
+
+This file contains critical principles for writing maintainable documentation, including:
+
+- Non-Redundancy Principle (avoid documenting what's obvious from code)
+- What belongs in code-level vs developer vs user documentation
+- Focus on WHY (design rationale) over WHAT/HOW (implementation details)
+
 ## Project Structure
 
 ```

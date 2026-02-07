@@ -7,6 +7,12 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- README.md now includes explanation of stdio transport architecture and its implications (lifecycle management, message
+  protocol, logging constraints)
+- AGENTS.md now references `.agents/dev-documentation.md` for documentation guidelines
+
 ### Changed
 
 - **BREAKING**: Documentation now shows correct Claude Code configuration format using `~/.claude.json` with
