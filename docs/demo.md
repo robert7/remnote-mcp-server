@@ -1,6 +1,6 @@
 # Demo
 
-Claude Code searching in RemNote using the RemNote MCP Bridge & Server:
+Claude Code searching in RemNote using the [RemNote MCP Bridge](https://github.com/robert7/remnote-mcp-bridge) & Server (this repository):
 
 ![RemNote MCP Server Demo](remnote-mcp-server-demo.jpg)
 
