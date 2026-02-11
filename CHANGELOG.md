@@ -21,9 +21,9 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - Multi-agent support: Multiple AI agents can now connect to the same RemNote knowledge base simultaneously
 - HTTP MCP server with Streamable HTTP (SSE) transport for session management
 - New `REMNOTE_HTTP_PORT` environment variable (default: 3001)
-- DNS rebinding protection via SDK's `createMcpExpressApp()`
+- Express-based HTTP server with JSON parsing middleware
 - Session lifecycle management: multiple concurrent MCP sessions with independent state
-- Comprehensive HTTP server test suite (10+ tests covering session management, routing, and error cases)
+- Comprehensive HTTP server test suite (15 tests covering initialization, session management, SSE streams, and error cases)
 
 ### Dependencies
 

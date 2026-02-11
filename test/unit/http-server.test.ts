@@ -41,7 +41,10 @@ describe('HttpMcpServer', () => {
       // Verify server is listening by making a request
       const response = await fetch(`http://127.0.0.1:${port}/mcp`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json, text/event-stream',
+        },
         body: JSON.stringify({
           jsonrpc: '2.0',
           method: 'initialize',
@@ -65,7 +68,10 @@ describe('HttpMcpServer', () => {
       await expect(
         fetch(`http://127.0.0.1:${port}/mcp`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json, text/event-stream',
+          },
           body: JSON.stringify({}),
         })
       ).rejects.toThrow();
@@ -78,7 +84,10 @@ describe('HttpMcpServer', () => {
 
       const response = await fetch(`http://127.0.0.1:${port}/mcp`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json, text/event-stream',
+        },
         body: JSON.stringify({
           jsonrpc: '2.0',
           method: 'initialize',
@@ -120,17 +129,26 @@ describe('HttpMcpServer', () => {
       const responses = await Promise.all([
         fetch(`http://127.0.0.1:${port}/mcp`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json, text/event-stream',
+          },
           body: JSON.stringify(initRequest),
         }),
         fetch(`http://127.0.0.1:${port}/mcp`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json, text/event-stream',
+          },
           body: JSON.stringify(initRequest),
         }),
         fetch(`http://127.0.0.1:${port}/mcp`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json, text/event-stream',
+          },
           body: JSON.stringify(initRequest),
         }),
       ]);
@@ -155,7 +173,10 @@ describe('HttpMcpServer', () => {
       // Initialize session
       const initResponse = await fetch(`http://127.0.0.1:${port}/mcp`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json, text/event-stream',
+        },
         body: JSON.stringify({
           jsonrpc: '2.0',
           method: 'initialize',
@@ -175,6 +196,7 @@ describe('HttpMcpServer', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          Accept: 'application/json, text/event-stream',
           'mcp-session-id': sessionId,
         },
         body: JSON.stringify({
@@ -215,7 +237,10 @@ describe('HttpMcpServer', () => {
 
       const response = await fetch(`http://127.0.0.1:${port}/mcp`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json, text/event-stream',
+        },
         body: JSON.stringify({
           jsonrpc: '2.0',
           method: 'tools/list',
@@ -237,7 +262,10 @@ describe('HttpMcpServer', () => {
       // Initialize session
       const initResponse = await fetch(`http://127.0.0.1:${port}/mcp`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json, text/event-stream',
+        },
         body: JSON.stringify({
           jsonrpc: '2.0',
           method: 'initialize',
@@ -256,12 +284,14 @@ describe('HttpMcpServer', () => {
       // Terminate session
       const deleteResponse = await fetch(`http://127.0.0.1:${port}/mcp`, {
         method: 'DELETE',
-        headers: { 'mcp-session-id': sessionId },
+        headers: {
+          Accept: 'application/json, text/event-stream',
+          'mcp-session-id': sessionId,
+        },
       });
 
       expect(deleteResponse.status).toBe(200);
-      const data = await deleteResponse.json();
-      expect(data.success).toBe(true);
+      // SDK's handleRequest for DELETE returns empty body
       expect(httpServer.getActiveSessionCount()).toBe(0);
     });
 
@@ -270,7 +300,10 @@ describe('HttpMcpServer', () => {
 
       const response = await fetch(`http://127.0.0.1:${port}/mcp`, {
         method: 'DELETE',
-        headers: { 'mcp-session-id': 'non-existent-session' },
+        headers: {
+          Accept: 'application/json, text/event-stream',
+          'mcp-session-id': 'non-existent-session',
+        },
       });
 
       expect(response.status).toBe(404);
@@ -283,6 +316,9 @@ describe('HttpMcpServer', () => {
 
       const response = await fetch(`http://127.0.0.1:${port}/mcp`, {
         method: 'DELETE',
+        headers: {
+          Accept: 'application/json, text/event-stream',
+        },
       });
 
       expect(response.status).toBe(400);
@@ -298,7 +334,10 @@ describe('HttpMcpServer', () => {
       // Initialize session
       const initResponse = await fetch(`http://127.0.0.1:${port}/mcp`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json, text/event-stream',
+        },
         body: JSON.stringify({
           jsonrpc: '2.0',
           method: 'initialize',
@@ -316,12 +355,15 @@ describe('HttpMcpServer', () => {
       // Request SSE stream (don't await - it's a long-lived connection)
       const response = await fetch(`http://127.0.0.1:${port}/mcp`, {
         method: 'GET',
-        headers: { 'mcp-session-id': sessionId },
+        headers: {
+          Accept: 'application/json, text/event-stream',
+          'mcp-session-id': sessionId,
+        },
       });
 
       expect(response.status).toBe(200);
       expect(response.headers.get('content-type')).toBe('text/event-stream');
-      expect(response.headers.get('cache-control')).toBe('no-cache');
+      expect(response.headers.get('cache-control')).toContain('no-cache');
       expect(response.headers.get('connection')).toBe('keep-alive');
     });
 
@@ -330,7 +372,10 @@ describe('HttpMcpServer', () => {
 
       const response = await fetch(`http://127.0.0.1:${port}/mcp`, {
         method: 'GET',
-        headers: { 'mcp-session-id': 'invalid-session' },
+        headers: {
+          Accept: 'application/json, text/event-stream',
+          'mcp-session-id': 'invalid-session',
+        },
       });
 
       expect(response.status).toBe(404);
@@ -343,6 +388,9 @@ describe('HttpMcpServer', () => {
 
       const response = await fetch(`http://127.0.0.1:${port}/mcp`, {
         method: 'GET',
+        headers: {
+          Accept: 'application/json, text/event-stream',
+        },
       });
 
       expect(response.status).toBe(400);
@@ -360,7 +408,10 @@ describe('HttpMcpServer', () => {
       // Initialize first session
       await fetch(`http://127.0.0.1:${port}/mcp`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json, text/event-stream',
+        },
         body: JSON.stringify({
           jsonrpc: '2.0',
           method: 'initialize',
@@ -378,7 +429,10 @@ describe('HttpMcpServer', () => {
       // Initialize second session
       await fetch(`http://127.0.0.1:${port}/mcp`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json, text/event-stream',
+        },
         body: JSON.stringify({
           jsonrpc: '2.0',
           method: 'initialize',
@@ -400,7 +454,10 @@ describe('HttpMcpServer', () => {
       // Initialize 2 sessions
       await fetch(`http://127.0.0.1:${port}/mcp`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json, text/event-stream',
+        },
         body: JSON.stringify({
           jsonrpc: '2.0',
           method: 'initialize',
@@ -415,7 +472,10 @@ describe('HttpMcpServer', () => {
 
       await fetch(`http://127.0.0.1:${port}/mcp`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json, text/event-stream',
+        },
         body: JSON.stringify({
           jsonrpc: '2.0',
           method: 'initialize',

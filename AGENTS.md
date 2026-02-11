@@ -107,6 +107,21 @@ When writing complex features or significant refactors, use an ExecPlan (as desc
 
 See **.agents/dev-workflow.md** for complete Git Commit Policy details.
 
+## Development Environment
+
+**node-check.sh Script:**
+
+For development, use `node-check.sh` to activate nvm and ensure the correct Node.js environment:
+
+```bash
+# Activate environment and run commands
+source ./node-check.sh && npm install
+source ./node-check.sh && npm test
+source ./node-check.sh && npm run dev
+```
+
+This script ensures the correct Node.js version is available via nvm.
+
 ## Development Commands
 
 **IMPORTANT:** The server must be started independently as a long-running process. It does not auto-start with Claude Code.

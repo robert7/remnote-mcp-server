@@ -1,7 +1,6 @@
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
-import { createMcpExpressApp } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
-import express, { Express, Request, Response } from 'express';
+import express, { type Express, type Request, type Response } from 'express';
 import { randomUUID } from 'crypto';
 import { WebSocketServer } from './websocket-server.js';
 import { registerAllTools } from './tools/index.js';
@@ -24,25 +23,23 @@ export class HttpMcpServer {
     this.wsServer = wsServer;
     this.serverInfo = serverInfo;
 
-    // Use SDK's DNS rebinding protection and JSON parsing
-    this.app = createMcpExpressApp();
+    // Create Express app with JSON parsing
+    this.app = express();
+    this.app.use(express.json());
 
     // Route handlers
     this.setupRoutes();
   }
 
   private setupRoutes(): void {
-    const router = express.Router();
-
     // POST: Handle session initialization and requests
-    router.post('/', async (req: Request, res: Response) => {
+    this.app.post('/mcp', async (req: Request, res: Response) => {
       try {
         const sessionId = req.headers['mcp-session-id'] as string | undefined;
         const body = req.body;
 
         // Check if this is an initialize request
-        const isInitializeRequest =
-          body && body.method === 'initialize' && body.jsonrpc === '2.0';
+        const isInitializeRequest = body && body.method === 'initialize' && body.jsonrpc === '2.0';
 
         if (!sessionId && isInitializeRequest) {
           // New session initialization
@@ -75,61 +72,42 @@ export class HttpMcpServer {
     });
 
     // GET: SSE stream for session notifications
-    router.get('/', (req: Request, res: Response) => {
+    this.app.get('/mcp', async (req: Request, res: Response) => {
       const sessionId = req.headers['mcp-session-id'] as string | undefined;
 
       if (!sessionId) {
-        res.status(400).json({
-          error: 'Missing mcp-session-id header',
-        });
+        res.status(400).json({ error: 'Missing mcp-session-id header' });
         return;
       }
 
       const transport = this.transports.get(sessionId);
       if (!transport) {
-        res.status(404).json({
-          error: `Session not found: ${sessionId}`,
-        });
+        res.status(404).json({ error: `Session not found: ${sessionId}` });
         return;
       }
 
-      // Set SSE headers
-      res.setHeader('Content-Type', 'text/event-stream');
-      res.setHeader('Cache-Control', 'no-cache');
-      res.setHeader('Connection', 'keep-alive');
-
-      // Handle SSE stream
-      transport.handleSseStream(req, res);
+      // Let transport handle SSE stream setup
+      await transport.handleRequest(req, res);
     });
 
     // DELETE: Terminate session
-    router.delete('/', (req: Request, res: Response) => {
+    this.app.delete('/mcp', async (req: Request, res: Response) => {
       const sessionId = req.headers['mcp-session-id'] as string | undefined;
 
       if (!sessionId) {
-        res.status(400).json({
-          error: 'Missing mcp-session-id header',
-        });
+        res.status(400).json({ error: 'Missing mcp-session-id header' });
         return;
       }
 
       const transport = this.transports.get(sessionId);
       if (!transport) {
-        res.status(404).json({
-          error: `Session not found: ${sessionId}`,
-        });
+        res.status(404).json({ error: `Session not found: ${sessionId}` });
         return;
       }
 
-      // Remove transport
-      this.transports.delete(sessionId);
-      console.error(`[HTTP Server] Session terminated: ${sessionId}`);
-
-      res.status(200).json({ success: true });
+      // Let transport handle session termination
+      await transport.handleRequest(req, res);
     });
-
-    // Mount router at /mcp
-    this.app.use('/mcp', router);
   }
 
   private async initializeNewSession(req: Request, res: Response, body: unknown): Promise<void> {
@@ -141,6 +119,15 @@ export class HttpMcpServer {
         console.error(`[HTTP Server] New session initialized: ${sessionId}`);
       },
     });
+
+    // Set up onclose handler to clean up transport when closed
+    transport.onclose = () => {
+      const sessionId = transport.sessionId;
+      if (sessionId && this.transports.has(sessionId)) {
+        console.error(`[HTTP Server] Session closed: ${sessionId}`);
+        this.transports.delete(sessionId);
+      }
+    };
 
     // Create new MCP server instance for this session
     const server = new Server(this.serverInfo, {
@@ -201,13 +188,19 @@ export class HttpMcpServer {
   }
 
   async stop(): Promise<void> {
-    return new Promise((resolve) => {
-      // Close all active sessions
-      for (const [sessionId, _transport] of this.transports.entries()) {
+    // Close all active transports
+    for (const [sessionId, transport] of this.transports.entries()) {
+      try {
+        console.error(`[HTTP Server] Closing session: ${sessionId}`);
+        await transport.close();
         this.transports.delete(sessionId);
-        console.error(`[HTTP Server] Closed session: ${sessionId}`);
+      } catch (error) {
+        console.error(`[HTTP Server] Error closing session ${sessionId}:`, error);
       }
+    }
 
+    // Close HTTP server
+    return new Promise((resolve) => {
       if (this.server) {
         this.server.close(() => {
           console.error('[HTTP Server] Server stopped');

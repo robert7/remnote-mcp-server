@@ -4,7 +4,7 @@
 ![CI](https://github.com/robert7/remnote-mcp-server/actions/workflows/ci.yml/badge.svg)
 [![codecov](https://codecov.io/gh/robert7/remnote-mcp-server/branch/main/graph/badge.svg)](https://codecov.io/gh/robert7/remnote-mcp-server)
 
-MCP server that bridges Claude Code (and other MCP clients) to [RemNote](https://remnote.com/) via the [RemNote MCP
+MCP server that bridges AI agents (e.g. Claude Code) to [RemNote](https://remnote.com/) via the [RemNote MCP
 Bridge plugin](https://github.com/robert7/remnote-mcp-bridge).
 
 ## Demo
@@ -167,7 +167,14 @@ Expected output:
 
 Keep this terminal running. The server must be running for Claude Code to connect.
 
-### 4. Configure Claude Code CLI
+## Configuration of AI Agents
+
+### Claude Code CLI
+
+
+### Claude Code CLI (manual configuration)
+
+If you prefer to manually configure the MCP server in Claude Code CLI instead of using `claude mcp add`, you can directly edit your `~/.claude.json` file.
 
 MCP servers are configured in `~/.claude.json` under the `mcpServers` key within project-specific sections.
 
