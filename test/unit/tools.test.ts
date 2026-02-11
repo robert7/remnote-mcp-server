@@ -352,7 +352,7 @@ describe('Tool Handlers - status', () => {
       params: { name: 'remnote_status', arguments: {} },
     });
 
-    expect(mockWsServer.sendRequest).toHaveBeenCalledWith('status', {});
+    expect(mockWsServer.sendRequest).toHaveBeenCalledWith('get_status', {});
   });
 
   it('should return disconnected status when not connected', async () => {

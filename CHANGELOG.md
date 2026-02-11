@@ -7,6 +7,40 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- **BREAKING**: Transport refactored from stdio to Streamable HTTP (SSE)
+  - Users must start server independently with `npm start` or `npm run dev`
+  - Server runs as long-running process on port 3001 (HTTP) and 3002 (WebSocket)
+  - Claude Code configuration must use `streamable-http` transport type instead of `stdio`
+  - Multiple Claude Code sessions can now connect to a single server instance
+- TypeScript module resolution changed from "node" to "Node16" for SDK deep imports compatibility
+- README.md "Claude Code CLI" section now includes complete `claude mcp` command examples
+  - Shows `claude mcp add` command with expected output
+  - Shows `claude mcp list` for verifying connection health
+  - Shows `claude mcp remove` for unregistering the server
+  - Positioned before manual configuration section as recommended approach
+
+### Added
+
+- Multi-agent support: Multiple AI agents can now connect to the same RemNote knowledge base simultaneously
+- HTTP MCP server with Streamable HTTP (SSE) transport for session management
+- New `REMNOTE_HTTP_PORT` environment variable (default: 3001)
+- Express-based HTTP server with JSON parsing middleware
+- Session lifecycle management: multiple concurrent MCP sessions with independent state
+- Comprehensive HTTP server test suite (15 tests covering initialization, session management, SSE streams, and error
+  cases)
+- "Two-Component Architecture" section in README.md for consistency with RemNote MCP Bridge documentation
+
+### Dependencies
+
+- Added `express` ^5.2.0 for HTTP server
+- Added `@types/express` ^5.0.0 for TypeScript support
+
+### Fixed
+
+- Fixed `remnote_status` tool action name mismatch (server sent 'status', plugin expected 'get_status')
+
 ## [0.1.3] - 2026-02-07
 
 ### Added

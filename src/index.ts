@@ -1,33 +1,19 @@
 #!/usr/bin/env node
-import { Server } from '@modelcontextprotocol/sdk/server/index.js';
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { createRequire } from 'module';
 import { WebSocketServer } from './websocket-server.js';
-import { registerAllTools } from './tools/index.js';
+import { HttpMcpServer } from './http-server.js';
 
 const require = createRequire(import.meta.url);
 const packageJson = require('../package.json');
 
 const WS_PORT = parseInt(process.env.REMNOTE_WS_PORT || '3002', 10);
+const HTTP_PORT = parseInt(process.env.REMNOTE_HTTP_PORT || '3001', 10);
 
 async function main() {
-  // Initialize MCP server
-  const mcpServer = new Server(
-    {
-      name: 'remnote-mcp-server',
-      version: packageJson.version,
-    },
-    {
-      capabilities: {
-        tools: {},
-      },
-    }
-  );
-
   // Initialize WebSocket server for RemNote plugin
   const wsServer = new WebSocketServer(WS_PORT);
 
-  // Log connection status to stderr (stdio reserved for MCP)
+  // Log connection status
   wsServer.onClientConnect(() => {
     console.error('[RemNote Bridge] RemNote plugin connected');
   });
@@ -40,20 +26,19 @@ async function main() {
   await wsServer.start();
   console.error(`[WebSocket Server] Listening on port ${WS_PORT}`);
 
-  // Register all RemNote MCP tools
-  registerAllTools(mcpServer, wsServer);
+  // Initialize HTTP MCP server
+  const httpServer = new HttpMcpServer(HTTP_PORT, wsServer, {
+    name: 'remnote-mcp-server',
+    version: packageJson.version,
+  });
 
-  // Set up stdio transport for MCP
-  const transport = new StdioServerTransport();
-  await mcpServer.connect(transport);
-
-  console.error('[MCP Server] Server started on stdio');
+  await httpServer.start();
 
   // Graceful shutdown
   const shutdown = async () => {
     console.error('[MCP Server] Shutting down...');
+    await httpServer.stop();
     await wsServer.stop();
-    await mcpServer.close();
     process.exit(0);
   };
 

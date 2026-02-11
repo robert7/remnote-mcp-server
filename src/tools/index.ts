@@ -148,7 +148,7 @@ export function registerAllTools(server: Server, wsServer: WebSocketServer) {
               ],
             };
           }
-          const result = await wsServer.sendRequest('status', {});
+          const result = await wsServer.sendRequest('get_status', {});
           return {
             content: [
               {
