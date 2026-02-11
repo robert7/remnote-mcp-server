@@ -5,8 +5,15 @@ implementation details, code patterns, and development workflows, see AGENTS.md 
 
 ## Performance Considerations
 
-The WebSocket bridge architecture was designed with several performance constraints:
+The multi-layer architecture was designed with several performance constraints:
 
+**HTTP MCP Layer:**
+- **Multiple concurrent sessions:** Supports multiple AI agents connecting simultaneously via Streamable HTTP (SSE)
+- **Per-session MCP Server instances:** Each MCP session gets its own Server instance, sharing the WebSocket bridge
+- **Stateful sessions:** Session state maintained in-memory via Map-based transport tracking
+- **DNS rebinding protection:** Uses SDK's `createMcpExpressApp()` to prevent DNS rebinding attacks
+
+**WebSocket Bridge Layer:**
 - **Single client connection model:** Prevents resource contention and simplifies state management. Only one RemNote
   plugin connection is allowed at a time, with additional connection attempts rejected with WebSocket close code 1008.
 - **5-second request timeout:** Prevents indefinite hanging of pending promises. Each request sent to the RemNote plugin
@@ -22,8 +29,10 @@ The WebSocket bridge architecture was designed with several performance constrai
 
 The server operates under a localhost security boundary assumption:
 
-- **Localhost only:** The WebSocket server binds to 127.0.0.1 by default (via ws module default behavior), making it
-  inaccessible from the network. This assumes the local machine is a trusted security boundary.
+- **Localhost only:** Both HTTP and WebSocket servers bind to 127.0.0.1 by default, making them inaccessible from the
+  network. This assumes the local machine is a trusted security boundary.
+- **DNS rebinding protection:** HTTP server uses SDK's `createMcpExpressApp()` which includes DNS rebinding protection
+  to prevent malicious websites from accessing localhost services.
 - **No authentication:** Since both the MCP server and RemNote plugin run on the same machine under the same user
   account, no authentication is implemented between them. The single-client connection model provides basic access
   control.
@@ -72,7 +81,7 @@ Potential architectural improvements for consideration:
 - **TLS/SSL support:** Add encrypted WebSocket connections (wss://) if the security model changes to allow network
   access
 - **Authentication/authorization:** If multi-user scenarios or network access is required, implement token-based auth
-- **Multiple client support:** Session management for multiple concurrent RemNote plugin connections
+- **Session persistence:** Optional session resumability across server restarts (currently all sessions lost on restart)
 - **Rate limiting:** Protect against rapid-fire requests that could overwhelm RemNote
 - **Request/response logging:** Persistent logging to file for debugging and auditing (currently only stderr)
 - **Metrics and monitoring:** Expose server metrics (request counts, latencies, error rates) for observability

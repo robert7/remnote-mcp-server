@@ -5,23 +5,24 @@ This file provides guidance to AI agents when working with code in this reposito
 ## Project Overview
 
 This is an MCP (Model Context Protocol) server that bridges AI agents to RemNote via a WebSocket connection. The server
-acts as middleware between the agent's stdio MCP transport and a RemNote browser plugin.
+acts as middleware between the agent's HTTP MCP transport and a RemNote browser plugin.
 
 **Architecture:**
 
 ```text
-AI agent (stdio) ↔ MCP Server ↔ WebSocket Server :3002 ↔ RemNote Plugin ↔ RemNote
+AI agents (HTTP) ↔ MCP HTTP Server :3001 ↔ WebSocket Server :3002 ↔ RemNote Plugin ↔ RemNote
 ```
 
 ## Core Architecture
 
 ### Three-Layer Bridge System
 
-1. **MCP Server Layer** (`src/index.ts`)
+1. **MCP Server Layer** (`src/index.ts`, `src/http-server.ts`)
    - Uses `@modelcontextprotocol/sdk` for MCP protocol implementation
-   - Communicates with AI agent (e.g., Claude Code) via stdio transport (stdin/stdout)
-   - **CRITICAL**: stdout is RESERVED for MCP protocol messages only
-   - All logging MUST go to stderr
+   - Communicates with AI agents (e.g., Claude Code) via Streamable HTTP transport (SSE)
+   - HTTP server listens on configurable port (default 3001)
+   - Supports multiple concurrent MCP sessions from different AI agents
+   - Each session gets independent MCP Server instance with shared WebSocket bridge
    - Spawns WebSocket server on configurable port (default 3002)
    - Handles graceful shutdown on SIGINT/SIGTERM
 2. **WebSocket Bridge Layer** (`src/websocket-server.ts`)
@@ -108,6 +109,8 @@ See **.agents/dev-workflow.md** for complete Git Commit Policy details.
 
 ## Development Commands
 
+**IMPORTANT:** The server must be started independently as a long-running process. It does not auto-start with Claude Code.
+
 ```bash
 # Development with hot reload
 npm run dev
@@ -118,8 +121,14 @@ npm run typecheck
 # Production build (compiles to dist/)
 npm run build
 
-# Run compiled binary
+# Run compiled binary (production)
 npm start
+```
+
+Expected output when starting:
+```
+[WebSocket Server] Listening on port 3002
+[HTTP Server] Listening on port 3001
 ```
 
 ## Testing and Verification
@@ -175,6 +184,7 @@ View detailed coverage: `open coverage/index.html`
 **Environment Variables:**
 
 - `REMNOTE_WS_PORT` - WebSocket server port (default: 3002)
+- `REMNOTE_HTTP_PORT` - HTTP MCP server port (default: 3001)
 
 **Installation:**
 ```bash
@@ -183,6 +193,18 @@ npm run build
 
 # CRITICAL: makes remnote-mcp-server command globally available
 npm link
+```
+
+**Starting the Server:**
+
+The server must be started independently before using with Claude Code:
+
+```bash
+# Development mode (with hot reload)
+npm run dev
+
+# Production mode
+npm start
 ```
 
 **Claude Code Configuration:**
@@ -199,12 +221,8 @@ MCP servers are configured in `~/.claude.json` under the `mcpServers` key. Confi
     "/Users/username/path/to/project": {
       "mcpServers": {
         "remnote": {
-          "type": "stdio",
-          "command": "remnote-mcp-server",
-          "args": [],
-          "env": {
-            "REMNOTE_WS_PORT": "3002"
-          }
+          "type": "streamable-http",
+          "url": "http://127.0.0.1:3001/mcp"
         }
       }
     }
@@ -218,22 +236,19 @@ in `~/.claude/settings.json` is also deprecated.
 
 ## Key Technical Constraints
 
-1. **stdout reserved for MCP protocol** - All logging to stderr only
-2. **Single WebSocket client** - Only one RemNote plugin connection allowed
-3. **5-second request timeout** - Prevents indefinite pending promises
-4. **UUID-based request tracking** - Allows multiple in-flight requests
-5. **TypeScript strict mode** - All code must pass strict type checking
-6. **Zod runtime validation** - Input schemas validated at runtime
+1. **Single WebSocket client** - Only one RemNote plugin connection allowed
+2. **5-second request timeout** - Prevents indefinite pending promises
+3. **UUID-based request tracking** - Allows multiple in-flight requests
+4. **TypeScript strict mode** - All code must pass strict type checking
+5. **Zod runtime validation** - Input schemas validated at runtime
+6. **Independent server process** - Must be started separately from Claude Code
 
 ## Code Patterns
 
 **Logging:**
+All logging goes to stderr:
 ```typescript
-// CORRECT - logs to stderr
 console.error('[INFO] Message');
-
-// WRONG - breaks MCP protocol
-console.log('Message');
 ```
 
 **Zod Schemas:**
@@ -258,7 +273,8 @@ return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
 
 ```text
 src/
-├── index.ts                    # Main entry point, MCP server setup
+├── index.ts                    # Main entry point, server startup
+├── http-server.ts              # HTTP MCP server with session management
 ├── websocket-server.ts         # WebSocket bridge implementation
 ├── tools/
 │   └── index.ts               # Tool registration and handlers
@@ -268,6 +284,7 @@ src/
     └── remnote-schemas.ts     # Zod validation schemas
 
 dist/                           # Compiled output (gitignored)
+test/unit/                      # Test suite (105+ tests)
 .agents/                        # Development guidelines
 docs/                           # Architecture documentation
 ```
