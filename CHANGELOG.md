@@ -14,7 +14,7 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - **BREAKING**: Transport refactored from stdio to Streamable HTTP (SSE)
   - Users must start server independently with `npm start` or `npm run dev`
   - Server runs as long-running process on port 3001 (HTTP) and 3002 (WebSocket)
-  - Claude Code configuration must use `streamable-http` transport type instead of `stdio`
+  - Claude Code configuration must use `http` transport type instead of `stdio`
   - Multiple Claude Code sessions can now connect to a single server instance
 - TypeScript module resolution changed from "node" to "Node16" for SDK deep imports compatibility
 - README.md "Claude Code CLI" section now includes complete `claude mcp` command examples
