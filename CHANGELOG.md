@@ -15,6 +15,11 @@ Versioning](https://semver.org/spec/v2.0.0.html).
   - Claude Code configuration must use `streamable-http` transport type instead of `stdio`
   - Multiple Claude Code sessions can now connect to a single server instance
 - TypeScript module resolution changed from "node" to "Node16" for SDK deep imports compatibility
+- README.md "Claude Code CLI" section now includes complete `claude mcp` command examples
+  - Shows `claude mcp add` command with expected output
+  - Shows `claude mcp list` for verifying connection health
+  - Shows `claude mcp remove` for unregistering the server
+  - Positioned before manual configuration section as recommended approach
 
 ### Added
 
@@ -23,7 +28,8 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - New `REMNOTE_HTTP_PORT` environment variable (default: 3001)
 - Express-based HTTP server with JSON parsing middleware
 - Session lifecycle management: multiple concurrent MCP sessions with independent state
-- Comprehensive HTTP server test suite (15 tests covering initialization, session management, SSE streams, and error cases)
+- Comprehensive HTTP server test suite (15 tests covering initialization, session management, SSE streams, and error
+  cases)
 
 ### Dependencies
 

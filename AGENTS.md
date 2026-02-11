@@ -70,7 +70,8 @@ See **.agents/dev-requirements.md** for detailed guidelines on:
 
 ## MANDATORY: Documentation Change Requirements
 
-**Before making ANY documentation change, you MUST read .agents/dev-documentation.md** for documentation standards and guidelines.
+**Before making ANY documentation change, you MUST read .agents/dev-documentation.md** for documentation standards and
+guidelines.
 
 **ALL documentation changes MUST be documented in CHANGELOG.md** - this includes updates to:
 
@@ -82,7 +83,8 @@ See **.agents/dev-requirements.md** for detailed guidelines on:
 
 ## CRITICAL: ExecPlans
 
-When writing complex features or significant refactors, use an ExecPlan (as described in .agents/PLANS.md) from design to implementation.
+When writing complex features or significant refactors, use an ExecPlan (as described in .agents/PLANS.md) from design
+to implementation.
 
 ## CRITICAL: Git Commit Policy
 
@@ -124,7 +126,8 @@ This script ensures the correct Node.js version is available via nvm.
 
 ## Development Commands
 
-**IMPORTANT:** The server must be started independently as a long-running process. It does not auto-start with Claude Code.
+**IMPORTANT:** The server must be started independently as a long-running process. It does not auto-start with Claude
+Code.
 
 ```bash
 # Development with hot reload
@@ -260,8 +263,7 @@ in `~/.claude/settings.json` is also deprecated.
 
 ## Code Patterns
 
-**Logging:**
-All logging goes to stderr:
+**Logging:** All logging goes to stderr:
 ```typescript
 console.error('[INFO] Message');
 ```

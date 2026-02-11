@@ -4,8 +4,8 @@
 ![CI](https://github.com/robert7/remnote-mcp-server/actions/workflows/ci.yml/badge.svg)
 [![codecov](https://codecov.io/gh/robert7/remnote-mcp-server/branch/main/graph/badge.svg)](https://codecov.io/gh/robert7/remnote-mcp-server)
 
-MCP server that bridges AI agents (e.g. Claude Code) to [RemNote](https://remnote.com/) via the [RemNote MCP
-Bridge plugin](https://github.com/robert7/remnote-mcp-bridge).
+MCP server that bridges AI agents (e.g. Claude Code) to [RemNote](https://remnote.com/) via the [RemNote MCP Bridge
+plugin](https://github.com/robert7/remnote-mcp-bridge).
 
 ## Demo
 
@@ -41,7 +41,8 @@ The server acts as a bridge:
 
 ## Multi-Agent Support
 
-**Multiple AI agents can now connect simultaneously!** The server uses Streamable HTTP transport, allowing multiple Claude Code sessions (or other MCP clients) to access the same RemNote knowledge base concurrently.
+**Multiple AI agents can now connect simultaneously!** The server uses Streamable HTTP transport, allowing multiple
+Claude Code sessions (or other MCP clients) to access the same RemNote knowledge base concurrently.
 
 ### How It Works
 
@@ -126,17 +127,22 @@ After unlinking, you can install the published npm package globally with `npm in
 
 **About Streamable HTTP Transport**
 
-This MCP server uses [Streamable HTTP transport](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports#http-with-sse),
-a communication mechanism for MCP that supports multiple concurrent clients.
+This MCP server uses [Streamable HTTP
+transport](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports#http-with-sse), a communication
+mechanism for MCP that supports multiple concurrent clients.
 
 **Key characteristics:**
 
-- **Lifecycle management**: You must start the server independently (`npm start` or `npm run dev`). Claude Code connects to the running server via HTTP.
-- **Message protocol**: Communication uses JSON-RPC over HTTP POST for requests and Server-Sent Events (SSE) for notifications.
+- **Lifecycle management**: You must start the server independently (`npm start` or `npm run dev`). Claude Code connects
+  to the running server via HTTP.
+- **Message protocol**: Communication uses JSON-RPC over HTTP POST for requests and Server-Sent Events (SSE) for
+  notifications.
 - **Multi-client support**: Multiple AI agents can connect simultaneously, each with their own MCP session.
 - **Session management**: Server tracks sessions via `mcp-session-id` headers and UUID-based request correlation.
 
-This architecture enables multiple Claude Code windows to access RemNote concurrently while maintaining process isolation and security boundaries. For technical details, see the [MCP specification](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports).
+This architecture enables multiple Claude Code windows to access RemNote concurrently while maintaining process
+isolation and security boundaries. For technical details, see the [MCP
+specification](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports).
 
 ### 2. Install RemNote MCP Bridge Plugin
 
@@ -171,10 +177,77 @@ Keep this terminal running. The server must be running for Claude Code to connec
 
 ### Claude Code CLI
 
+Use the `claude mcp` CLI commands to add, test, and remove the MCP server.
+
+**Add the server:**
+
+```bash
+# goto your project directory
+cd /Users/username/Projects/sample-project
+claude mcp add remnote --transport http http://localhost:3001/mcp
+```
+
+Example output:
+
+```text
+Added HTTP MCP server remnote with URL: http://localhost:3001/mcp to local config
+File modified: /Users/username/.claude.json [project: /Users/username/Projects/sample-project]
+```
+
+**Verify connection:**
+
+```bash
+claude mcp list
+```
+
+Example output:
+
+```text
+remnote: http://localhost:3001/mcp (HTTP) - ✓ Connected
+```
+
+**Using the server:**
+
+Once configured, Claude Code automatically loads RemNote tools in your sessions. See the [Example Usage](#example-usage)
+section below for conversational commands.
+
+```bash
+# In any Claude Code session
+claude
+
+prompt:
+show remnote note titles related do AI assisted coding
+...
+remnote - remnote_search (MCP)(query: "AI assisted coding", limit: 20, includeContent: false)
+...
+Found 20 notes related to "AI assisted coding". The main results include:
+
+  Primary note:
+  - AI assisted coding (remId: qtVwh5XBQbJM2HfSp)
+
+  Related tools/platforms:
+  - Claude Code
+  - Gemini CLI
+  ...
+```
+
+**Remove the server:**
+
+```bash
+claude mcp remove remnote
+```
+
+Example output:
+
+```text
+✓ Removed MCP server "remnote"
+  Config: /Users/username/.claude.json
+```
 
 ### Claude Code CLI (manual configuration)
 
-If you prefer to manually configure the MCP server in Claude Code CLI instead of using `claude mcp add`, you can directly edit your `~/.claude.json` file.
+If you prefer to manually configure the MCP server in Claude Code CLI instead of using `claude mcp add`, you can
+directly edit your `~/.claude.json` file.
 
 MCP servers are configured in `~/.claude.json` under the `mcpServers` key within project-specific sections.
 
@@ -184,50 +257,15 @@ MCP servers are configured in `~/.claude.json` under the `mcpServers` key within
 {
   "projects": {
     "/Users/username": {
+      ...
       "mcpServers": {
         "remnote": {
-          "type": "streamable-http",
-          "url": "http://127.0.0.1:3001/mcp"
+          "type": "http",
+          "url": "http://localhost:3001/mcp"
         }
-      }
-    }
-  }
+   ...     
 }
 ```
-
-**Configuration Notes:**
-
-- **Global availability:** Use your home directory path (`/Users/username`) to make RemNote tools available in all
-  projects
-- **Project-specific:** Use a specific project path to limit availability to that project
-- **Multiple projects:** Add `mcpServers` configuration under each project path as needed
-
-**Example with multiple projects:**
-
-```json
-{
-  "projects": {
-    "/Users/username": {
-      "mcpServers": {
-        "remnote": {
-          "type": "streamable-http",
-          "url": "http://127.0.0.1:3001/mcp"
-        }
-      }
-    },
-    "/Users/username/Projects/my-project": {
-      "mcpServers": {
-        "remnote": {
-          "type": "streamable-http",
-          "url": "http://127.0.0.1:3001/mcp"
-        }
-      }
-    }
-  }
-}
-```
-
-### 5. Restart Claude Code
 
 Restart Claude Code completely to load the MCP server configuration. Claude Code will connect to the running server.
 
@@ -349,24 +387,10 @@ export REMNOTE_WS_PORT=3004
 npm start
 ```
 
-Then update your `~/.claude.json`:
+Then update your `~/.claude.json` and RemNote plugin settings to use the new ports.
 
-```json
-{
-  "projects": {
-    "/Users/username": {
-      "mcpServers": {
-        "remnote": {
-          "type": "streamable-http",
-          "url": "http://127.0.0.1:3003/mcp"
-        }
-      }
-    }
-  }
-}
-```
-
-**Note:** If you change the WebSocket port, you must also update the WebSocket URL in the RemNote MCP Bridge plugin settings.
+**Note:** If you change the WebSocket port, you must also update the WebSocket URL in the RemNote MCP Bridge plugin
+settings.
 
 ### RemNote Plugin Settings
 
@@ -384,12 +408,11 @@ Configure in the plugin control panel:
    lsof -i :3001
    lsof -i :3002
    ```
-   Both ports should show active listeners.
+Both ports should show active listeners.
 
 2. **Check server output:**
    - You should see: `[HTTP Server] Listening on port 3001`
    - And: `[WebSocket Server] Listening on port 3002`
-
 3. **If server fails to start:**
    - Check if ports are already in use (see "Port Already in Use" below)
    - Verify installation: `which remnote-mcp-server`
@@ -449,7 +472,7 @@ Alternatively, configure different ports using environment variables (see Config
 
 ✅ **Correct transport type:**
 ```json
-"type": "streamable-http"  // NEW - required
+"type": "http"  // NEW - required
 ```
 
 ❌ **Using command instead of URL:**
@@ -463,7 +486,7 @@ Alternatively, configure different ports using environment variables (see Config
 ✅ **Correct configuration:**
 ```json
 {
-  "type": "streamable-http",
+  "type": "http",
   "url": "http://127.0.0.1:3001/mcp"  // NEW
 }
 ```
