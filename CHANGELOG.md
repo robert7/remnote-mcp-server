@@ -7,6 +7,8 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-02-11
+
 ### Changed
 
 - **BREAKING**: Transport refactored from stdio to Streamable HTTP (SSE)
