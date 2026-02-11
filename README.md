@@ -82,6 +82,8 @@ The WebSocket bridge still enforces a **single RemNote plugin connection**. This
 
 **From npm (recommended for most users):**
 
+See [MCP Server npm Package](https://www.npmjs.com/package/remnote-mcp-server).
+
 ```bash
 # Install globally
 npm install -g remnote-mcp-server
