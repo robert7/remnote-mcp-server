@@ -30,11 +30,16 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - Session lifecycle management: multiple concurrent MCP sessions with independent state
 - Comprehensive HTTP server test suite (15 tests covering initialization, session management, SSE streams, and error
   cases)
+- "Two-Component Architecture" section in README.md for consistency with RemNote MCP Bridge documentation
 
 ### Dependencies
 
 - Added `express` ^5.2.0 for HTTP server
 - Added `@types/express` ^5.0.0 for TypeScript support
+
+### Fixed
+
+- Fixed `remnote_status` tool action name mismatch (server sent 'status', plugin expected 'get_status')
 
 ## [0.1.3] - 2026-02-07
 

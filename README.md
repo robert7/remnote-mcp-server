@@ -11,6 +11,17 @@ plugin](https://github.com/robert7/remnote-mcp-bridge).
 
 See Claude Code in action with RemNote: **[View Demo →](docs/demo.md)**
 
+## Two-Component Architecture
+
+This system consists of **two separate components** that work together:
+
+1. **[RemNote MCP Bridge](https://github.com/robert7/remnote-mcp-bridge)** - A RemNote plugin that runs in your browser
+   or RemNote desktop app and exposes RemNote API functionality via WebSocket
+2. **RemNote MCP Server** (this repository) - A standalone server that connects your AI assistant to the bridge using
+   MCP protocol
+
+**Both components are required** for AI integration with RemNote.
+
 ## What is This?
 
 The RemNote MCP Server enables AI assistants like Claude Code to interact directly with your RemNote knowledge base
@@ -205,6 +216,8 @@ Example output:
 ```text
 remnote: http://localhost:3001/mcp (HTTP) - ✓ Connected
 ```
+
+As alternative you can use `/mcp` command in any Claude Code session to check the connection health.
 
 **Using the server:**
 
