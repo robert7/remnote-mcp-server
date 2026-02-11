@@ -7,6 +7,8 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-02-11
+
 ### Added
 
 - `publish-to-npm.sh` script to automate npm publishing workflow with proper error checking
