@@ -125,11 +125,13 @@ echo ""
 # Post-Publication
 # ========================================
 
-echo -e "${YELLOW}[9/9] Creating git tag...${NC}"
-git tag -a "v${VERSION}" -m "Release v${VERSION}"
-git push origin "v${VERSION}"
-echo -e "${GREEN}✓ Tag v${VERSION} created and pushed${NC}"
-echo ""
+# the git tag is expected to be created BEFORE this script is run, so we skip that step here. 
+#
+#echo -e "${YELLOW}[9/9] Creating git tag...${NC}"
+#git tag -a "v${VERSION}" -m "Release v${VERSION}"
+#git push origin "v${VERSION}"
+#echo -e "${GREEN}✓ Tag v${VERSION} created and pushed${NC}"
+#echo ""
 
 # ========================================
 # Success Summary
