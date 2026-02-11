@@ -319,12 +319,11 @@ Use remnote_status to check the connection
 Expected response:
 
 ```json
-{
-  "connected": true,
-  "actionsProcessed": 0,
-  "pluginVersion": "1.1.0",
-  "timestamp": "2026-02-07T..."
-}
+⏺ remnote - remnote_status (MCP)
+  ⎿ {
+       "connected": true,
+       "pluginVersion": "0.3.2"
+     }
 ```
 
 ### Test RemNote Integration
