@@ -7,6 +7,16 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- `publish-to-npm.sh` script to automate npm publishing workflow with proper error checking
+  - Pre-flight checks: git clean, npm authentication, package.json validation
+  - Automatic code quality verification via `./code-quality.sh`
+  - Package contents verification with `npm pack --dry-run`
+  - User confirmation required before actual publish
+  - Post-publication git tag creation and push
+  - Success summary with next-step reminders (GitHub release, CHANGELOG update)
+
 ## [0.2.0] - 2026-02-11
 
 ### Changed
