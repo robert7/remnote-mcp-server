@@ -106,37 +106,7 @@ npm uninstall -g remnote-mcp-server
 git clone https://github.com/robert7/remnote-mcp-server.git
 cd remnote-mcp-server
 npm install
-npm run build
-
-# Creates global symlink: makes remnote-mcp-server command available system-wide
-npm link
-
-# Verify it worked
-which remnote-mcp-server
-# Should output e.g.: /Users/<username>/.nvm/versions/node/<version>/bin/remnote-mcp-server
 ```
-
-**What npm link does:** Creates a symbolic link from your global `node_modules` bin directory to this project's
-executable, allowing Claude Code to launch `remnote-mcp-server` from anywhere without publishing to npm.
-
-**Important:** Claude Code CLI must have access to the same Node.js environment where you ran `npm link`. If Claude Code
-uses a different Node.js version or environment (e.g., different shell PATH), it won't find the command. Ensure your
-shell configuration (`.bashrc`, `.zshrc`) properly exposes your Node.js environment.
-
-**Unlinking the source installation:**
-
-When you no longer want the global `remnote-mcp-server` command to point to your local repository:
-
-```bash
-# Remove the global symlink
-npm unlink -g remnote-mcp-server
-
-# Verify it's removed
-which remnote-mcp-server
-# Should output nothing if successfully unlinked
-```
-
-After unlinking, you can install the published npm package globally with `npm install -g remnote-mcp-server` if needed.
 
 **About Streamable HTTP Transport**
 
@@ -171,8 +141,8 @@ Install the [RemNote MCP Bridge plugin](https://github.com/robert7/remnote-mcp-b
 **IMPORTANT:** You must start the server before using it with Claude Code.
 
 ```bash
-# Production mode
-npm start
+# if you installed globally
+remnote-mcp-server
 
 # OR development mode (with hot reload)
 npm run dev
