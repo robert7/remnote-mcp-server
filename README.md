@@ -41,6 +41,25 @@ The server acts as a bridge:
 - WebSocket server (port 3002) connects to the RemNote browser plugin
 - Translates MCP tool calls into RemNote API actions
 
+**About Streamable HTTP Transport**
+
+This MCP server uses [Streamable HTTP
+transport](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports#http-with-sse), a communication
+mechanism for MCP that supports multiple concurrent clients.
+
+**Key characteristics:**
+
+- **Lifecycle management**: You must start the server independently (`npm start` or `npm run dev`). Claude Code connects
+  to the running server via HTTP.
+- **Message protocol**: Communication uses JSON-RPC over HTTP POST for requests and Server-Sent Events (SSE) for
+  notifications.
+- **Multi-client support**: Multiple AI agents can connect simultaneously, each with their own MCP session.
+- **Session management**: Server tracks sessions via `mcp-session-id` headers and UUID-based request correlation.
+
+This architecture enables multiple Claude Code windows to access RemNote concurrently while maintaining process
+isolation and security boundaries. For technical details, see the [MCP
+specification](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports).
+
 ## Features
 
 - **Create Notes** - Create new notes with optional parent hierarchy and tags
@@ -108,33 +127,12 @@ cd remnote-mcp-server
 npm install
 ```
 
-**About Streamable HTTP Transport**
-
-This MCP server uses [Streamable HTTP
-transport](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports#http-with-sse), a communication
-mechanism for MCP that supports multiple concurrent clients.
-
-**Key characteristics:**
-
-- **Lifecycle management**: You must start the server independently (`npm start` or `npm run dev`). Claude Code connects
-  to the running server via HTTP.
-- **Message protocol**: Communication uses JSON-RPC over HTTP POST for requests and Server-Sent Events (SSE) for
-  notifications.
-- **Multi-client support**: Multiple AI agents can connect simultaneously, each with their own MCP session.
-- **Session management**: Server tracks sessions via `mcp-session-id` headers and UUID-based request correlation.
-
-This architecture enables multiple Claude Code windows to access RemNote concurrently while maintaining process
-isolation and security boundaries. For technical details, see the [MCP
-specification](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports).
-
 ### 2. Install RemNote MCP Bridge Plugin
 
 Install the [RemNote MCP Bridge plugin](https://github.com/robert7/remnote-mcp-bridge) in your RemNote app:
 
 1. Open RemNote
 2. Navigate to plugin installation (see plugin repository for instructions)
-3. Configure WebSocket URL: `ws://127.0.0.1:3002`
-4. Enable auto-reconnect
 
 ### 3. Start the Server
 
@@ -508,35 +506,6 @@ npm run test:coverage # With coverage report
 npm run lint         # ESLint only
 npm run format       # Format code
 ```
-
-### Before Committing
-
-Run `./code-quality.sh` to ensure all checks pass.
-
-### Manual Testing
-
-To test the server:
-
-```bash
-cd ~/Projects/_private/remnote-mcp-server
-npm run dev
-```
-
-Expected output:
-```
-[WebSocket Server] Listening on port 3002
-[HTTP Server] Listening on port 3001
-```
-
-When the RemNote plugin connects:
-```
-[WebSocket Server] Client connected
-[RemNote Bridge] RemNote plugin connected
-```
-
-When Claude Code connects, you'll see HTTP requests in the logs.
-
-Press Ctrl+C to stop.
 
 ### Development Documentation
 
