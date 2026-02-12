@@ -7,6 +7,8 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-02-12
+
 ### Fixed
 
 - Fixed crash on global installation when `pino-pretty` (devDependency) is unavailable
