@@ -1,11 +1,15 @@
 import { WebSocketServer as WSServer, WebSocket } from 'ws';
 import { randomUUID } from 'crypto';
 import { BridgeRequest, BridgeResponse, BridgeMessage } from './types/bridge.js';
+import type { Logger } from './logger.js';
 
 export class WebSocketServer {
   private wss: WSServer | null = null;
   private client: WebSocket | null = null;
   private port: number;
+  private logger: Logger;
+  private requestLogger: Logger | null = null;
+  private responseLogger: Logger | null = null;
   private pendingRequests = new Map<
     string,
     {
@@ -17,43 +21,47 @@ export class WebSocketServer {
   private connectCallbacks: Array<() => void> = [];
   private disconnectCallbacks: Array<() => void> = [];
 
-  constructor(port: number) {
+  constructor(port: number, logger: Logger, requestLogger?: Logger, responseLogger?: Logger) {
     this.port = port;
+    this.logger = logger.child({ context: 'websocket-server' });
+    this.requestLogger = requestLogger || null;
+    this.responseLogger = responseLogger || null;
   }
 
   async start(): Promise<void> {
     return new Promise((resolve, reject) => {
       this.wss = new WSServer({ port: this.port }, () => {
+        this.logger.debug({ port: this.port }, 'WebSocket server started');
         resolve();
       });
 
       this.wss.on('error', (error) => {
-        console.error('[WebSocket Server] Error:', error);
+        this.logger.error({ error }, 'WebSocket server error');
         reject(error);
       });
 
       this.wss.on('connection', (ws) => {
         // Only allow single client connection
         if (this.client && this.client.readyState === WebSocket.OPEN) {
-          console.error('[WebSocket Server] Rejecting connection: client already connected');
+          this.logger.warn('Rejecting connection: client already connected');
           ws.close(1008, 'Only one client allowed');
           return;
         }
 
         this.client = ws;
-        console.error('[WebSocket Server] Client connected');
+        this.logger.info('WebSocket client connected');
         this.connectCallbacks.forEach((cb) => cb());
 
         ws.on('message', (data) => {
           try {
             this.handleMessage(data.toString());
           } catch (error) {
-            console.error('[WebSocket Server] Error handling message:', error);
+            this.logger.error({ error }, 'Error handling message');
           }
         });
 
         ws.on('close', () => {
-          console.error('[WebSocket Server] Client disconnected');
+          this.logger.info('WebSocket client disconnected');
           this.client = null;
 
           // Reject all pending requests
@@ -67,7 +75,7 @@ export class WebSocketServer {
         });
 
         ws.on('error', (error) => {
-          console.error('[WebSocket Server] Client error:', error);
+          this.logger.error({ error }, 'WebSocket client error');
         });
       });
     });
@@ -82,6 +90,7 @@ export class WebSocketServer {
 
       if (this.wss) {
         this.wss.close(() => {
+          this.logger.debug('WebSocket server stopped');
           this.wss = null;
           resolve();
         });
@@ -100,6 +109,14 @@ export class WebSocketServer {
 
     const id = randomUUID();
     const request: BridgeRequest = { id, action, payload };
+    const startTime = Date.now();
+
+    this.logger.debug({ id, action }, 'Sending request');
+
+    // Log request if configured
+    if (this.requestLogger) {
+      this.requestLogger.info({ type: 'request', id, action, payload });
+    }
 
     return new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
@@ -107,7 +124,33 @@ export class WebSocketServer {
         reject(new Error(`Request timeout: ${action}`));
       }, 5000);
 
-      this.pendingRequests.set(id, { resolve, reject, timeout });
+      this.pendingRequests.set(id, {
+        resolve: (result) => {
+          // Log response if configured
+          if (this.responseLogger) {
+            this.responseLogger.info({
+              type: 'response',
+              id,
+              duration_ms: Date.now() - startTime,
+              error: null,
+            });
+          }
+          resolve(result);
+        },
+        reject: (error) => {
+          // Log error response if configured
+          if (this.responseLogger) {
+            this.responseLogger.info({
+              type: 'response',
+              id,
+              duration_ms: Date.now() - startTime,
+              error: error.message,
+            });
+          }
+          reject(error);
+        },
+        timeout,
+      });
 
       try {
         this.client!.send(JSON.stringify(request));
@@ -134,6 +177,13 @@ export class WebSocketServer {
   private handleMessage(data: string): void {
     try {
       const message = JSON.parse(data) as BridgeMessage;
+
+      this.logger.debug(
+        {
+          type: 'type' in message ? message.type : 'response',
+        },
+        'Received message'
+      );
 
       // Handle pong response to ping
       if ('type' in message && message.type === 'pong') {
@@ -163,14 +213,11 @@ export class WebSocketServer {
             pending.resolve(response.result);
           }
         } else {
-          console.error(
-            '[WebSocket Server] Received response for unknown request ID:',
-            response.id
-          );
+          this.logger.warn({ id: response.id }, 'Unknown request ID');
         }
       }
     } catch (error) {
-      console.error('[WebSocket Server] Error parsing message:', error);
+      this.logger.error({ error }, 'Error parsing message');
     }
   }
 }

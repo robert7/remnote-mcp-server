@@ -4,6 +4,7 @@ import express, { type Express, type Request, type Response } from 'express';
 import { randomUUID } from 'crypto';
 import { WebSocketServer } from './websocket-server.js';
 import { registerAllTools } from './tools/index.js';
+import type { Logger } from './logger.js';
 
 interface ServerInfo {
   name: string;
@@ -16,12 +17,14 @@ export class HttpMcpServer {
   private port: number;
   private wsServer: WebSocketServer;
   private serverInfo: ServerInfo;
+  private logger: Logger;
   private transports = new Map<string, StreamableHTTPServerTransport>();
 
-  constructor(port: number, wsServer: WebSocketServer, serverInfo: ServerInfo) {
+  constructor(port: number, wsServer: WebSocketServer, serverInfo: ServerInfo, logger: Logger) {
     this.port = port;
     this.wsServer = wsServer;
     this.serverInfo = serverInfo;
+    this.logger = logger.child({ context: 'http-server' });
 
     // Create Express app with JSON parsing
     this.app = express();
@@ -41,6 +44,14 @@ export class HttpMcpServer {
         // Check if this is an initialize request
         const isInitializeRequest = body && body.method === 'initialize' && body.jsonrpc === '2.0';
 
+        this.logger.debug(
+          {
+            sessionId: sessionId || 'none',
+            method: body?.method || 'unknown',
+          },
+          'POST request received'
+        );
+
         if (!sessionId && isInitializeRequest) {
           // New session initialization
           await this.initializeNewSession(req, res, body);
@@ -59,7 +70,13 @@ export class HttpMcpServer {
           });
         }
       } catch (error) {
-        console.error('[HTTP Server] Error handling POST request:', error);
+        this.logger.error(
+          {
+            error,
+            sessionId: req.headers['mcp-session-id'] as string | undefined,
+          },
+          'Error handling POST request'
+        );
         res.status(500).json({
           jsonrpc: '2.0',
           error: {
@@ -74,6 +91,8 @@ export class HttpMcpServer {
     // GET: SSE stream for session notifications
     this.app.get('/mcp', async (req: Request, res: Response) => {
       const sessionId = req.headers['mcp-session-id'] as string | undefined;
+
+      this.logger.debug({ sessionId: sessionId || 'none' }, 'SSE stream opened');
 
       if (!sessionId) {
         res.status(400).json({ error: 'Missing mcp-session-id header' });
@@ -93,6 +112,8 @@ export class HttpMcpServer {
     // DELETE: Terminate session
     this.app.delete('/mcp', async (req: Request, res: Response) => {
       const sessionId = req.headers['mcp-session-id'] as string | undefined;
+
+      this.logger.debug({ sessionId: sessionId || 'none' }, 'Session termination requested');
 
       if (!sessionId) {
         res.status(400).json({ error: 'Missing mcp-session-id header' });
@@ -116,7 +137,7 @@ export class HttpMcpServer {
       sessionIdGenerator: () => randomUUID(),
       onsessioninitialized: (sessionId: string) => {
         this.transports.set(sessionId, transport);
-        console.error(`[HTTP Server] New session initialized: ${sessionId}`);
+        this.logger.info({ sessionId }, 'New MCP session initialized');
       },
     });
 
@@ -124,7 +145,7 @@ export class HttpMcpServer {
     transport.onclose = () => {
       const sessionId = transport.sessionId;
       if (sessionId && this.transports.has(sessionId)) {
-        console.error(`[HTTP Server] Session closed: ${sessionId}`);
+        this.logger.info({ sessionId }, 'MCP session closed');
         this.transports.delete(sessionId);
       }
     };
@@ -137,7 +158,7 @@ export class HttpMcpServer {
     });
 
     // Register all tools with the shared WebSocket server
-    registerAllTools(server, this.wsServer);
+    registerAllTools(server, this.wsServer, this.logger);
 
     // Connect server to transport
     await server.connect(transport);
@@ -173,12 +194,12 @@ export class HttpMcpServer {
     return new Promise((resolve, reject) => {
       try {
         this.server = this.app.listen(this.port, () => {
-          console.error(`[HTTP Server] Listening on port ${this.port}`);
+          this.logger.info({ port: this.port }, 'HTTP server started');
           resolve();
         });
 
         this.server.on('error', (error) => {
-          console.error('[HTTP Server] Server error:', error);
+          this.logger.error({ error }, 'HTTP server error');
           reject(error);
         });
       } catch (error) {
@@ -191,11 +212,11 @@ export class HttpMcpServer {
     // Close all active transports
     for (const [sessionId, transport] of this.transports.entries()) {
       try {
-        console.error(`[HTTP Server] Closing session: ${sessionId}`);
+        this.logger.debug({ sessionId }, 'Closing MCP session');
         await transport.close();
         this.transports.delete(sessionId);
       } catch (error) {
-        console.error(`[HTTP Server] Error closing session ${sessionId}:`, error);
+        this.logger.error({ sessionId, error }, 'Error closing session');
       }
     }
 
@@ -203,7 +224,7 @@ export class HttpMcpServer {
     return new Promise((resolve) => {
       if (this.server) {
         this.server.close(() => {
-          console.error('[HTTP Server] Server stopped');
+          this.logger.info('HTTP server stopped');
           this.server = null;
           resolve();
         });

@@ -139,17 +139,45 @@ Install the [RemNote MCP Bridge plugin](https://github.com/robert7/remnote-mcp-b
 **IMPORTANT:** You must start the server before using it with Claude Code.
 
 ```bash
-# if you installed globally
+# Start with default settings
 remnote-mcp-server
+
+# With custom ports
+remnote-mcp-server --ws-port 4002 --http-port 4001
+
+# With verbose logging
+remnote-mcp-server --verbose
+
+# With file logging
+remnote-mcp-server --log-file /tmp/remnote-mcp.log --log-level-file debug
 
 # OR development mode (with hot reload)
 npm run dev
+# you can also pass CLI options after `--`, e.g.
+npm run dev -- -h
 ```
+
+**CLI Options:**
+
+Server Configuration:
+- `--ws-port <number>` - WebSocket port (default: 3002, env: REMNOTE_WS_PORT)
+- `--http-port <number>` - HTTP MCP port (default: 3001, env: REMNOTE_HTTP_PORT)
+
+Logging Configuration:
+- `--log-level <level>` - Console log level: debug, info, warn, error (default: info)
+- `--log-level-file <level>` - File log level (default: same as --log-level)
+- `--verbose` - Shorthand for --log-level debug
+- `--log-file <path>` - Log to file (default: console only)
+- `--request-log <path>` - Log all WebSocket requests to file (JSON Lines)
+- `--response-log <path>` - Log all WebSocket responses to file (JSON Lines)
+
+Information:
+- `-h, --help` - Display help message
+- `-v, --version` - Display version number
 
 Expected output:
 ```
-[WebSocket Server] Listening on port 3002
-[HTTP Server] Listening on port 3001
+RemNote MCP Server v0.2.1 listening { wsPort: 3002, httpPort: 3001 }
 ```
 
 Keep this terminal running. The server must be running for Claude Code to connect.
@@ -367,6 +395,8 @@ Check if RemNote is connected
 export REMNOTE_HTTP_PORT=3003
 export REMNOTE_WS_PORT=3004
 npm start
+# you can pass CLI options after `--`, e.g.
+npm start -- -h
 ```
 
 Then update your `~/.claude.json` and RemNote plugin settings to use the new ports.
