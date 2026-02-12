@@ -7,6 +7,34 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- Comprehensive logging infrastructure with Pino logger
+- CLI argument parsing with Commander for server configuration
+- Configurable log levels (debug, info, warn, error) for console and file output
+- Optional file logging with separate log level control
+- Optional request/response logging to JSON Lines files for debugging
+- Verbose mode (`--verbose`) for quick debug logging enablement
+- CLI flags for port configuration (`--ws-port`, `--http-port`)
+- Structured logging throughout the application with contextual information
+- Debug-level logging for detailed troubleshooting
+- Request timing and duration tracking in logs
+- Graceful error handling with comprehensive error logging
+
+### Changed
+
+- Startup message now includes version number and port information
+- All console.error calls replaced with structured Pino logging
+- Server startup sequence now validates configuration before starting services
+- Environment variable configuration now validated with better error messages
+- Port validation moved earlier in startup process for faster failure feedback
+
+### Dependencies
+
+- Added `pino@^9.6.0` for structured logging
+- Added `commander@^13.0.0` for CLI argument parsing
+- Added `pino-pretty@^11.0.0` (dev) for human-readable development logs
+
 ## [0.2.1] - 2026-02-11
 
 ### Added
