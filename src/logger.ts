@@ -17,7 +17,7 @@ export interface LoggerConfig {
 export function createLogger(config: LoggerConfig): pino.Logger {
   const targets: pino.TransportTargetOptions[] = [];
 
-  // Console transport
+  // Console transport with graceful fallback
   if (config.pretty) {
     targets.push({
       level: config.consoleLevel,
@@ -45,12 +45,48 @@ export function createLogger(config: LoggerConfig): pino.Logger {
     });
   }
 
-  return pino({
-    level: getMinLevel(config.consoleLevel, config.fileLevel),
-    transport: {
-      targets,
-    },
-  });
+  // Wrap initialization to handle transport errors
+  try {
+    return pino({
+      level: getMinLevel(config.consoleLevel, config.fileLevel),
+      transport: {
+        targets,
+      },
+    });
+  } catch (error) {
+    // Fall back to basic JSON logger if transport fails
+    const message = error instanceof Error ? error.message : String(error);
+
+    // Only warn if pretty was requested (otherwise it's expected behavior)
+    if (config.pretty) {
+      console.error('[Logger] pino-pretty not available, falling back to JSON logging:', message);
+    }
+
+    // Create fallback logger with JSON output to stderr
+    const fallbackTargets: pino.TransportTargetOptions[] = [
+      {
+        level: config.consoleLevel,
+        target: 'pino/file',
+        options: { destination: 2 }, // stderr
+      },
+    ];
+
+    // Add file transport if configured
+    if (config.filePath && config.fileLevel) {
+      fallbackTargets.push({
+        level: config.fileLevel,
+        target: 'pino/file',
+        options: { destination: config.filePath },
+      });
+    }
+
+    return pino({
+      level: getMinLevel(config.consoleLevel, config.fileLevel),
+      transport: {
+        targets: fallbackTargets,
+      },
+    });
+  }
 }
 
 /**

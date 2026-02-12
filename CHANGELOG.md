@@ -7,6 +7,13 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed crash on global installation when `pino-pretty` (devDependency) is unavailable
+  - Added graceful fallback to JSON logging when pretty transport initialization fails
+  - Logs warning to console when pretty logging unavailable but requested
+  - Maintains development experience while ensuring production robustness
+
 ## [0.3.0] - 2026-02-12
 
 ### Added

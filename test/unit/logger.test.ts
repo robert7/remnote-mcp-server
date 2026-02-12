@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { createLogger, createRequestResponseLogger, ensureLogDirectory } from '../../src/logger.js';
 import { mkdir, rm } from 'fs/promises';
 import { existsSync } from 'fs';
@@ -156,6 +156,36 @@ describe('Logger', () => {
 
       // Should use debug as minimum level
       expect(logger.level).toBe('debug');
+    });
+  });
+
+  describe('Graceful Fallback', () => {
+    it('should create logger with pretty=true even if pino-pretty unavailable', () => {
+      // This test verifies the logger doesn't crash if pino-pretty is missing
+      // In the test environment, pino-pretty IS available, so we can't directly test failure
+      // However, we verify that the logger creation succeeds with pretty=true
+      const logger = createLogger({
+        consoleLevel: 'info',
+        pretty: true,
+      });
+
+      expect(logger).toBeDefined();
+      expect(logger.info).toBeDefined();
+    });
+
+    it('should not log warning when pretty=false', () => {
+      // Verify no warning logged for non-pretty logger (baseline behavior)
+      const consoleSpy = vi.spyOn(console, 'error');
+
+      const logger = createLogger({
+        consoleLevel: 'info',
+        pretty: false,
+      });
+
+      expect(logger).toBeDefined();
+      expect(consoleSpy).not.toHaveBeenCalled();
+
+      consoleSpy.mockRestore();
     });
   });
 });

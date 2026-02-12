@@ -149,6 +149,11 @@ Expected output when starting:
 [HTTP Server] Listening on port 3001
 ```
 
+**Note on Logging:**
+- Development environment (with `npm install`): Pretty-formatted colored logs
+- Global installation (via `npm link`): JSON logs to stderr (pino-pretty not included)
+- Both modes are fully functional - formatting is the only difference
+
 ## Testing and Verification
 
 **Automated test suite with 95+ tests.**

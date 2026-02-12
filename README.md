@@ -180,6 +180,11 @@ Expected output:
 RemNote MCP Server v0.2.1 listening { wsPort: 3002, httpPort: 3001 }
 ```
 
+**Note on Logging:**
+- Development environment (with `npm install`): Pretty-formatted colored logs
+- Global installation (via `npm link`): JSON logs to stderr (pino-pretty not included)
+- Both modes are fully functional - formatting is the only difference
+
 Keep this terminal running. The server must be running for Claude Code to connect.
 
 ## Configuration of AI Agents
@@ -380,6 +385,15 @@ Add to my journal: "Completed the RemNote MCP integration"
 ```
 Check if RemNote is connected
 ```
+
+## Dependencies
+
+### Optional Development Dependencies
+
+- **pino-pretty** - Provides formatted console output in development
+  - Automatically used when stdout is a TTY (interactive terminal)
+  - Gracefully falls back to JSON logging if unavailable (e.g., global installations)
+  - To enable in development: `npm install` (installs devDependencies)
 
 ## Configuration
 
