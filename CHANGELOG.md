@@ -7,6 +7,8 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-02-12
+
 ### Added
 
 - Comprehensive logging infrastructure with Pino logger
