@@ -2,6 +2,9 @@
 # Code quality checker - runs all quality checks
 set -e
 
+# Ensure Node.js is available via PATH or NVM
+source "$(dirname "$0")/node-check.sh" || exit 1
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
