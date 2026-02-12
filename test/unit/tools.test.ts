@@ -25,6 +25,7 @@ import {
   sampleSearchResults,
   sampleStatusResult,
 } from '../helpers/fixtures.js';
+import { createMockLogger } from '../setup.js';
 
 // Mock MCP Server
 class MockMCPServer {
@@ -107,17 +108,17 @@ describe('Tool Registration', () => {
   });
 
   it('should register CallTool handler', () => {
-    registerAllTools(mockServer as never, mockWsServer);
+    registerAllTools(mockServer as never, mockWsServer as never, createMockLogger());
     expect(mockServer.hasHandler(CallToolRequestSchema)).toBe(true);
   });
 
   it('should register ListTools handler', () => {
-    registerAllTools(mockServer as never, mockWsServer);
+    registerAllTools(mockServer as never, mockWsServer as never, createMockLogger());
     expect(mockServer.hasHandler(ListToolsRequestSchema)).toBe(true);
   });
 
   it('should return all 6 tools in list', async () => {
-    registerAllTools(mockServer as never, mockWsServer);
+    registerAllTools(mockServer as never, mockWsServer as never, createMockLogger());
 
     const result = (await mockServer.callHandler(ListToolsRequestSchema, {})) as {
       tools: unknown[];
@@ -127,7 +128,7 @@ describe('Tool Registration', () => {
   });
 
   it('should include all tool names in list', async () => {
-    registerAllTools(mockServer as never, mockWsServer);
+    registerAllTools(mockServer as never, mockWsServer as never, createMockLogger());
 
     const result = (await mockServer.callHandler(ListToolsRequestSchema, {})) as {
       tools: { name: string }[];
@@ -152,7 +153,7 @@ describe('Tool Handlers - create_note', () => {
     mockWsServer = {
       sendRequest: vi.fn().mockResolvedValue(sampleNoteResult),
     };
-    registerAllTools(mockServer as never, mockWsServer as never);
+    registerAllTools(mockServer as never, mockWsServer as never, createMockLogger() as never);
   });
 
   it('should call wsServer.sendRequest with create_note action', async () => {
@@ -194,7 +195,7 @@ describe('Tool Handlers - search', () => {
     mockWsServer = {
       sendRequest: vi.fn().mockResolvedValue(sampleSearchResults),
     };
-    registerAllTools(mockServer as never, mockWsServer as never);
+    registerAllTools(mockServer as never, mockWsServer as never, createMockLogger() as never);
   });
 
   it('should call wsServer.sendRequest with search action', async () => {
@@ -236,7 +237,7 @@ describe('Tool Handlers - read_note', () => {
     mockWsServer = {
       sendRequest: vi.fn().mockResolvedValue(sampleNoteResult),
     };
-    registerAllTools(mockServer as never, mockWsServer as never);
+    registerAllTools(mockServer as never, mockWsServer as never, createMockLogger() as never);
   });
 
   it('should call wsServer.sendRequest with read_note action', async () => {
@@ -268,7 +269,7 @@ describe('Tool Handlers - update_note', () => {
     mockWsServer = {
       sendRequest: vi.fn().mockResolvedValue({ success: true }),
     };
-    registerAllTools(mockServer as never, mockWsServer as never);
+    registerAllTools(mockServer as never, mockWsServer as never, createMockLogger() as never);
   });
 
   it('should call wsServer.sendRequest with update_note action', async () => {
@@ -297,7 +298,7 @@ describe('Tool Handlers - append_journal', () => {
     mockWsServer = {
       sendRequest: vi.fn().mockResolvedValue({ success: true }),
     };
-    registerAllTools(mockServer as never, mockWsServer as never);
+    registerAllTools(mockServer as never, mockWsServer as never, createMockLogger() as never);
   });
 
   it('should call wsServer.sendRequest with append_journal action', async () => {
@@ -336,7 +337,7 @@ describe('Tool Handlers - status', () => {
       sendRequest: vi.fn().mockResolvedValue(sampleStatusResult),
       isConnected: vi.fn().mockReturnValue(true),
     };
-    registerAllTools(mockServer as never, mockWsServer as never);
+    registerAllTools(mockServer as never, mockWsServer as never, createMockLogger() as never);
   });
 
   it('should check connection before sending request', async () => {
@@ -397,7 +398,7 @@ describe('Tool Handler - Error Handling', () => {
     mockWsServer = {
       sendRequest: vi.fn(),
     };
-    registerAllTools(mockServer as never, mockWsServer as never);
+    registerAllTools(mockServer as never, mockWsServer as never, createMockLogger() as never);
   });
 
   it('should return error for unknown tool name', async () => {
@@ -429,5 +430,74 @@ describe('Tool Handler - Error Handling', () => {
 
     expect(result.isError).toBe(true);
     expect(result.content[0].text).toBe('Error: string error');
+  });
+});
+
+describe('Tool Logging', () => {
+  let mockServer: MockMCPServer;
+  let mockWsServer: { sendRequest: ReturnType<typeof vi.fn> };
+  let mockLogger: ReturnType<typeof createMockLogger>;
+
+  beforeEach(() => {
+    mockServer = new MockMCPServer();
+    mockWsServer = {
+      sendRequest: vi.fn().mockResolvedValue({ success: true }),
+    };
+    mockLogger = createMockLogger();
+    registerAllTools(mockServer as never, mockWsServer as never, mockLogger);
+  });
+
+  it('should create child logger with tools context', () => {
+    expect(mockLogger.child).toHaveBeenCalledWith({ context: 'tools' });
+  });
+
+  it('should log tool execution', async () => {
+    await mockServer.callHandler(CallToolRequestSchema, {
+      params: { name: 'remnote_search', arguments: validSearchInput },
+    });
+
+    expect(mockLogger.debug).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tool: 'remnote_search',
+        args: validSearchInput,
+      }),
+      'Executing tool'
+    );
+  });
+
+  it('should log tool completion with duration', async () => {
+    await mockServer.callHandler(CallToolRequestSchema, {
+      params: { name: 'remnote_search', arguments: validSearchInput },
+    });
+
+    expect(mockLogger.debug).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tool: 'remnote_search',
+        duration_ms: expect.any(Number),
+      }),
+      'Tool completed'
+    );
+  });
+
+  it('should log tool failures', async () => {
+    mockWsServer.sendRequest.mockRejectedValue(new Error('Test error'));
+
+    await mockServer.callHandler(CallToolRequestSchema, {
+      params: { name: 'remnote_search', arguments: validSearchInput },
+    });
+
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tool: 'remnote_search',
+        error: 'Test error',
+      }),
+      'Tool failed'
+    );
+  });
+
+  it('should log list_tools requests', async () => {
+    await mockServer.callHandler(ListToolsRequestSchema, {});
+
+    expect(mockLogger.debug).toHaveBeenCalledWith('Listing available tools');
   });
 });

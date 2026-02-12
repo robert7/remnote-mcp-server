@@ -2,6 +2,31 @@
 
 Maintainer guide for publishing new versions of `remnote-mcp-server` to npm.
 
+## Automated Publishing (Recommended)
+
+The `npm-publish.sh` script automates the complete publishing workflow with proper error checking:
+
+```bash
+./npm-publish.sh
+```
+
+**What it does:**
+1. Pre-flight checks (git clean, npm auth, package.json exists)
+2. Runs full code quality suite (`./code-quality.sh`)
+3. Verifies package contents (`npm pack --dry-run`)
+4. Runs publish dry-run for review
+5. Prompts for confirmation before actual publish
+6. Publishes to npm
+7. Verifies publication succeeded
+8. Creates and pushes git tag (`vX.Y.Z`)
+9. Displays next steps (GitHub release, CHANGELOG update)
+
+**Note:** The script assumes version has already been bumped in `package.json` and `CHANGELOG.md` has been updated. See "Pre-Publication Checklist" below.
+
+## Manual Publishing
+
+The following manual workflow is documented for reference and advanced use cases. For standard releases, use `./npm-publish.sh` instead.
+
 ## Prerequisites
 
 - npm account with publish permissions for `remnote-mcp-server`

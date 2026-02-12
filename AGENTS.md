@@ -239,7 +239,7 @@ MCP servers are configured in `~/.claude.json` under the `mcpServers` key. Confi
     "/Users/username/path/to/project": {
       "mcpServers": {
         "remnote": {
-          "type": "streamable-http",
+          "type": "http",
           "url": "http://127.0.0.1:3001/mcp"
         }
       }

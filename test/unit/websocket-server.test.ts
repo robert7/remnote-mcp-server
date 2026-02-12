@@ -6,18 +6,21 @@
  * to avoid complex mocking issues while still providing good test coverage
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { WebSocketServer } from '../../src/websocket-server.js';
 import { WebSocket } from 'ws';
 import { getRandomPort, wait } from '../helpers/test-server.js';
+import { createMockLogger } from '../setup.js';
 
 describe('WebSocketServer - Lifecycle', () => {
   let wsServer: WebSocketServer;
   let port: number;
+  let mockLogger: ReturnType<typeof createMockLogger>;
 
   beforeEach(() => {
     port = getRandomPort();
-    wsServer = new WebSocketServer(port);
+    mockLogger = createMockLogger();
+    wsServer = new WebSocketServer(port, mockLogger);
   });
 
   afterEach(async () => {
@@ -50,7 +53,7 @@ describe('WebSocketServer - Lifecycle', () => {
   it('should reject when port is already in use', async () => {
     await wsServer.start();
 
-    const duplicateServer = new WebSocketServer(port);
+    const duplicateServer = new WebSocketServer(port, createMockLogger());
     await expect(duplicateServer.start()).rejects.toThrow();
     await duplicateServer.stop();
   });
@@ -60,10 +63,12 @@ describe('WebSocketServer - Connection State', () => {
   let wsServer: WebSocketServer;
   let port: number;
   let client: WebSocket;
+  let mockLogger: ReturnType<typeof createMockLogger>;
 
   beforeEach(async () => {
     port = getRandomPort();
-    wsServer = new WebSocketServer(port);
+    mockLogger = createMockLogger();
+    wsServer = new WebSocketServer(port, mockLogger);
     await wsServer.start();
   });
 
@@ -138,10 +143,12 @@ describe('WebSocketServer - Single Client Model', () => {
   let port: number;
   let client1: WebSocket;
   let client2: WebSocket;
+  let mockLogger: ReturnType<typeof createMockLogger>;
 
   beforeEach(async () => {
     port = getRandomPort();
-    wsServer = new WebSocketServer(port);
+    mockLogger = createMockLogger();
+    wsServer = new WebSocketServer(port, mockLogger);
     await wsServer.start();
   });
 
@@ -196,10 +203,12 @@ describe('WebSocketServer - Request/Response', () => {
   let wsServer: WebSocketServer;
   let port: number;
   let client: WebSocket;
+  let mockLogger: ReturnType<typeof createMockLogger>;
 
   beforeEach(async () => {
     port = getRandomPort();
-    wsServer = new WebSocketServer(port);
+    mockLogger = createMockLogger();
+    wsServer = new WebSocketServer(port, mockLogger);
     await wsServer.start();
 
     client = new WebSocket(`ws://localhost:${port}`);
@@ -321,10 +330,12 @@ describe('WebSocketServer - Heartbeat Protocol', () => {
   let wsServer: WebSocketServer;
   let port: number;
   let client: WebSocket;
+  let mockLogger: ReturnType<typeof createMockLogger>;
 
   beforeEach(async () => {
     port = getRandomPort();
-    wsServer = new WebSocketServer(port);
+    mockLogger = createMockLogger();
+    wsServer = new WebSocketServer(port, mockLogger);
     await wsServer.start();
 
     client = new WebSocket(`ws://localhost:${port}`);
@@ -367,10 +378,12 @@ describe('WebSocketServer - Error Handling', () => {
   let wsServer: WebSocketServer;
   let port: number;
   let client: WebSocket;
+  let mockLogger: ReturnType<typeof createMockLogger>;
 
   beforeEach(async () => {
     port = getRandomPort();
-    wsServer = new WebSocketServer(port);
+    mockLogger = createMockLogger();
+    wsServer = new WebSocketServer(port, mockLogger);
     await wsServer.start();
   });
 
@@ -415,5 +428,212 @@ describe('WebSocketServer - Error Handling', () => {
 
     // Connection should still work
     expect(wsServer.isConnected()).toBe(true);
+  });
+});
+
+describe('WebSocketServer - Logging', () => {
+  let wsServer: WebSocketServer;
+  let port: number;
+  let client: WebSocket;
+  let mockLogger: ReturnType<typeof createMockLogger>;
+
+  beforeEach(async () => {
+    port = getRandomPort();
+    mockLogger = createMockLogger();
+    wsServer = new WebSocketServer(port, mockLogger);
+    await wsServer.start();
+  });
+
+  afterEach(async () => {
+    if (client && client.readyState === WebSocket.OPEN) {
+      client.close();
+    }
+    await wsServer.stop();
+  });
+
+  it('should create child logger with context', () => {
+    expect(mockLogger.child).toHaveBeenCalledWith({ context: 'websocket-server' });
+  });
+
+  it('should log server start', () => {
+    expect(mockLogger.debug).toHaveBeenCalledWith({ port }, 'WebSocket server started');
+  });
+
+  it('should log server stop', async () => {
+    mockLogger.debug = vi.fn(); // Reset
+    await wsServer.stop();
+    expect(mockLogger.debug).toHaveBeenCalledWith('WebSocket server stopped');
+  });
+
+  it('should log client connection', async () => {
+    mockLogger.info = vi.fn(); // Reset
+    client = new WebSocket(`ws://localhost:${port}`);
+    await wait(100);
+    expect(mockLogger.info).toHaveBeenCalledWith('WebSocket client connected');
+  });
+
+  it('should log client disconnection', async () => {
+    client = new WebSocket(`ws://localhost:${port}`);
+    await wait(100);
+    mockLogger.info = vi.fn(); // Reset
+    client.close();
+    await wait(100);
+    expect(mockLogger.info).toHaveBeenCalledWith('WebSocket client disconnected');
+  });
+
+  it('should log when rejecting multiple connections', async () => {
+    client = new WebSocket(`ws://localhost:${port}`);
+    await wait(100);
+    mockLogger.warn = vi.fn(); // Reset
+
+    const client2 = new WebSocket(`ws://localhost:${port}`);
+    await wait(100);
+
+    expect(mockLogger.warn).toHaveBeenCalledWith('Rejecting connection: client already connected');
+    client2.close();
+  });
+
+  it('should log sent requests', async () => {
+    client = new WebSocket(`ws://localhost:${port}`);
+    await wait(100);
+    mockLogger.debug = vi.fn(); // Reset
+
+    client.on('message', (data) => {
+      const request = JSON.parse(data.toString());
+      client.send(JSON.stringify({ id: request.id, result: 'ok' }));
+    });
+
+    await wsServer.sendRequest('test_action', { foo: 'bar' });
+
+    expect(mockLogger.debug).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'test_action' }),
+      'Sending request'
+    );
+  });
+
+  it('should log received messages', async () => {
+    client = new WebSocket(`ws://localhost:${port}`);
+    await wait(100);
+    mockLogger.debug = vi.fn(); // Reset
+
+    client.on('message', (data) => {
+      const request = JSON.parse(data.toString());
+      client.send(JSON.stringify({ id: request.id, result: 'ok' }));
+    });
+
+    await wsServer.sendRequest('test', {});
+
+    expect(mockLogger.debug).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'response' }),
+      'Received message'
+    );
+  });
+
+  it('should log warning for unknown request ID', async () => {
+    client = new WebSocket(`ws://localhost:${port}`);
+    await wait(100);
+    mockLogger.warn = vi.fn(); // Reset
+
+    client.send(JSON.stringify({ id: 'unknown-id', result: 'data' }));
+    await wait(100);
+
+    expect(mockLogger.warn).toHaveBeenCalledWith({ id: 'unknown-id' }, 'Unknown request ID');
+  });
+
+  it('should log errors', async () => {
+    client = new WebSocket(`ws://localhost:${port}`);
+    await wait(100);
+    mockLogger.error = vi.fn(); // Reset
+
+    client.send('invalid json');
+    await wait(100);
+
+    expect(mockLogger.error).toHaveBeenCalled();
+  });
+});
+
+describe('WebSocketServer - Request/Response Logging', () => {
+  let wsServer: WebSocketServer;
+  let port: number;
+  let client: WebSocket;
+  let mockLogger: ReturnType<typeof createMockLogger>;
+  let mockRequestLogger: ReturnType<typeof createMockLogger>;
+  let mockResponseLogger: ReturnType<typeof createMockLogger>;
+
+  beforeEach(async () => {
+    port = getRandomPort();
+    mockLogger = createMockLogger();
+    mockRequestLogger = createMockLogger();
+    mockResponseLogger = createMockLogger();
+    wsServer = new WebSocketServer(port, mockLogger, mockRequestLogger, mockResponseLogger);
+    await wsServer.start();
+  });
+
+  afterEach(async () => {
+    if (client && client.readyState === WebSocket.OPEN) {
+      client.close();
+    }
+    await wsServer.stop();
+  });
+
+  it('should log requests when request logger is provided', async () => {
+    client = new WebSocket(`ws://localhost:${port}`);
+    await wait(100);
+
+    client.on('message', (data) => {
+      const request = JSON.parse(data.toString());
+      client.send(JSON.stringify({ id: request.id, result: 'ok' }));
+    });
+
+    await wsServer.sendRequest('test_action', { foo: 'bar' });
+
+    expect(mockRequestLogger.info).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'request',
+        action: 'test_action',
+        payload: { foo: 'bar' },
+      })
+    );
+  });
+
+  it('should log responses when response logger is provided', async () => {
+    client = new WebSocket(`ws://localhost:${port}`);
+    await wait(100);
+
+    client.on('message', (data) => {
+      const request = JSON.parse(data.toString());
+      client.send(JSON.stringify({ id: request.id, result: 'ok' }));
+    });
+
+    await wsServer.sendRequest('test_action', {});
+
+    expect(mockResponseLogger.info).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'response',
+        duration_ms: expect.any(Number),
+        error: null,
+      })
+    );
+  });
+
+  it('should log error responses', async () => {
+    client = new WebSocket(`ws://localhost:${port}`);
+    await wait(100);
+
+    client.on('message', (data) => {
+      const request = JSON.parse(data.toString());
+      client.send(JSON.stringify({ id: request.id, error: 'Test error' }));
+    });
+
+    await wsServer.sendRequest('test_action', {}).catch(() => {
+      // Ignore error
+    });
+
+    expect(mockResponseLogger.info).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'response',
+        error: 'Test error',
+      })
+    );
   });
 });

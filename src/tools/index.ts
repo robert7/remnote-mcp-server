@@ -6,6 +6,7 @@ import { SearchSchema } from '../schemas/remnote-schemas.js';
 import { ReadNoteSchema } from '../schemas/remnote-schemas.js';
 import { UpdateNoteSchema } from '../schemas/remnote-schemas.js';
 import { AppendJournalSchema } from '../schemas/remnote-schemas.js';
+import type { Logger } from '../logger.js';
 
 export const CREATE_NOTE_TOOL = {
   name: 'remnote_create_note',
@@ -87,86 +88,85 @@ export const STATUS_TOOL = {
   },
 };
 
-export function registerAllTools(server: Server, wsServer: WebSocketServer) {
+export function registerAllTools(server: Server, wsServer: WebSocketServer, logger: Logger) {
+  const toolLogger = logger.child({ context: 'tools' });
+
   // Single CallTool handler for all tools
   server.setRequestHandler(CallToolRequestSchema, async (request) => {
+    const toolName = request.params.name;
+    const startTime = Date.now();
+
+    toolLogger.debug({ tool: toolName, args: request.params.arguments }, 'Executing tool');
+
     try {
-      switch (request.params.name) {
+      let result;
+
+      switch (toolName) {
         case 'remnote_create_note': {
           const args = CreateNoteSchema.parse(request.params.arguments);
-          const result = await wsServer.sendRequest('create_note', args);
-          return {
-            content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
-          };
+          result = await wsServer.sendRequest('create_note', args);
+          break;
         }
 
         case 'remnote_search': {
           const args = SearchSchema.parse(request.params.arguments);
-          const result = await wsServer.sendRequest('search', args);
-          return {
-            content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
-          };
+          result = await wsServer.sendRequest('search', args);
+          break;
         }
 
         case 'remnote_read_note': {
           const args = ReadNoteSchema.parse(request.params.arguments);
-          const result = await wsServer.sendRequest('read_note', args);
-          return {
-            content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
-          };
+          result = await wsServer.sendRequest('read_note', args);
+          break;
         }
 
         case 'remnote_update_note': {
           const args = UpdateNoteSchema.parse(request.params.arguments);
-          const result = await wsServer.sendRequest('update_note', args);
-          return {
-            content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
-          };
+          result = await wsServer.sendRequest('update_note', args);
+          break;
         }
 
         case 'remnote_append_journal': {
           const args = AppendJournalSchema.parse(request.params.arguments);
-          const result = await wsServer.sendRequest('append_journal', args);
-          return {
-            content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
-          };
+          result = await wsServer.sendRequest('append_journal', args);
+          break;
         }
 
         case 'remnote_status': {
           const connected = wsServer.isConnected();
           if (!connected) {
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: JSON.stringify(
-                    { connected: false, message: 'RemNote plugin not connected' },
-                    null,
-                    2
-                  ),
-                },
-              ],
-            };
+            result = { connected: false, message: 'RemNote plugin not connected' };
+          } else {
+            const statusResult = await wsServer.sendRequest('get_status', {});
+            result = { connected: true, ...(typeof statusResult === 'object' ? statusResult : {}) };
           }
-          const result = await wsServer.sendRequest('get_status', {});
-          return {
-            content: [
-              {
-                type: 'text',
-                text: JSON.stringify(
-                  { connected: true, ...(typeof result === 'object' ? result : {}) },
-                  null,
-                  2
-                ),
-              },
-            ],
-          };
+          break;
         }
 
         default:
-          throw new Error(`Unknown tool: ${request.params.name}`);
+          throw new Error(`Unknown tool: ${toolName}`);
       }
+
+      toolLogger.debug(
+        {
+          tool: toolName,
+          duration_ms: Date.now() - startTime,
+        },
+        'Tool completed'
+      );
+
+      return {
+        content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+      };
     } catch (error) {
+      toolLogger.error(
+        {
+          tool: toolName,
+          error: error instanceof Error ? error.message : String(error),
+        },
+        'Tool failed'
+      );
+
       return {
         content: [
           {
@@ -180,14 +180,18 @@ export function registerAllTools(server: Server, wsServer: WebSocketServer) {
   });
 
   // Register list_tools handler
-  server.setRequestHandler(ListToolsRequestSchema, async () => ({
-    tools: [
-      CREATE_NOTE_TOOL,
-      SEARCH_TOOL,
-      READ_NOTE_TOOL,
-      UPDATE_NOTE_TOOL,
-      APPEND_JOURNAL_TOOL,
-      STATUS_TOOL,
-    ],
-  }));
+  server.setRequestHandler(ListToolsRequestSchema, async () => {
+    toolLogger.debug('Listing available tools');
+
+    return {
+      tools: [
+        CREATE_NOTE_TOOL,
+        SEARCH_TOOL,
+        READ_NOTE_TOOL,
+        UPDATE_NOTE_TOOL,
+        APPEND_JOURNAL_TOOL,
+        STATUS_TOOL,
+      ],
+    };
+  });
 }

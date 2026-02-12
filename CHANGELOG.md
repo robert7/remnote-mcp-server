@@ -7,12 +7,54 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- Comprehensive logging infrastructure with Pino logger
+- CLI argument parsing with Commander for server configuration
+- Configurable log levels (debug, info, warn, error) for console and file output
+- Optional file logging with separate log level control
+- Optional request/response logging to JSON Lines files for debugging
+- Verbose mode (`--verbose`) for quick debug logging enablement
+- CLI flags for port configuration (`--ws-port`, `--http-port`)
+- Structured logging throughout the application with contextual information
+- Debug-level logging for detailed troubleshooting
+- Request timing and duration tracking in logs
+- Graceful error handling with comprehensive error logging
+
+### Changed
+
+- Startup message now includes version number and port information
+- All console.error calls replaced with structured Pino logging
+- Server startup sequence now validates configuration before starting services
+- Environment variable configuration now validated with better error messages
+- Port validation moved earlier in startup process for faster failure feedback
+
+### Dependencies
+
+- Added `pino@^9.6.0` for structured logging
+- Added `commander@^13.0.0` for CLI argument parsing
+- Added `pino-pretty@^11.0.0` (dev) for human-readable development logs
+
+## [0.2.1] - 2026-02-11
+
+### Added
+
+- `publish-to-npm.sh` script to automate npm publishing workflow with proper error checking
+  - Pre-flight checks: git clean, npm authentication, package.json validation
+  - Automatic code quality verification via `./code-quality.sh`
+  - Package contents verification with `npm pack --dry-run`
+  - User confirmation required before actual publish
+  - Post-publication git tag creation and push
+  - Success summary with next-step reminders (GitHub release, CHANGELOG update)
+
+## [0.2.0] - 2026-02-11
+
 ### Changed
 
 - **BREAKING**: Transport refactored from stdio to Streamable HTTP (SSE)
   - Users must start server independently with `npm start` or `npm run dev`
   - Server runs as long-running process on port 3001 (HTTP) and 3002 (WebSocket)
-  - Claude Code configuration must use `streamable-http` transport type instead of `stdio`
+  - Claude Code configuration must use `http` transport type instead of `stdio`
   - Multiple Claude Code sessions can now connect to a single server instance
 - TypeScript module resolution changed from "node" to "Node16" for SDK deep imports compatibility
 - README.md "Claude Code CLI" section now includes complete `claude mcp` command examples

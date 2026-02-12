@@ -41,6 +41,25 @@ The server acts as a bridge:
 - WebSocket server (port 3002) connects to the RemNote browser plugin
 - Translates MCP tool calls into RemNote API actions
 
+**About Streamable HTTP Transport**
+
+This MCP server uses [Streamable HTTP
+transport](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports#http-with-sse), a communication
+mechanism for MCP that supports multiple concurrent clients.
+
+**Key characteristics:**
+
+- **Lifecycle management**: You must start the server independently (`npm start` or `npm run dev`). Claude Code connects
+  to the running server via HTTP.
+- **Message protocol**: Communication uses JSON-RPC over HTTP POST for requests and Server-Sent Events (SSE) for
+  notifications.
+- **Multi-client support**: Multiple AI agents can connect simultaneously, each with their own MCP session.
+- **Session management**: Server tracks sessions via `mcp-session-id` headers and UUID-based request correlation.
+
+This architecture enables multiple Claude Code windows to access RemNote concurrently while maintaining process
+isolation and security boundaries. For technical details, see the [MCP
+specification](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports).
+
 ## Features
 
 - **Create Notes** - Create new notes with optional parent hierarchy and tags
@@ -82,6 +101,8 @@ The WebSocket bridge still enforces a **single RemNote plugin connection**. This
 
 **From npm (recommended for most users):**
 
+See [MCP Server npm Package](https://www.npmjs.com/package/remnote-mcp-server).
+
 ```bash
 # Install globally
 npm install -g remnote-mcp-server
@@ -104,56 +125,7 @@ npm uninstall -g remnote-mcp-server
 git clone https://github.com/robert7/remnote-mcp-server.git
 cd remnote-mcp-server
 npm install
-npm run build
-
-# Creates global symlink: makes remnote-mcp-server command available system-wide
-npm link
-
-# Verify it worked
-which remnote-mcp-server
-# Should output e.g.: /Users/<username>/.nvm/versions/node/<version>/bin/remnote-mcp-server
 ```
-
-**What npm link does:** Creates a symbolic link from your global `node_modules` bin directory to this project's
-executable, allowing Claude Code to launch `remnote-mcp-server` from anywhere without publishing to npm.
-
-**Important:** Claude Code CLI must have access to the same Node.js environment where you ran `npm link`. If Claude Code
-uses a different Node.js version or environment (e.g., different shell PATH), it won't find the command. Ensure your
-shell configuration (`.bashrc`, `.zshrc`) properly exposes your Node.js environment.
-
-**Unlinking the source installation:**
-
-When you no longer want the global `remnote-mcp-server` command to point to your local repository:
-
-```bash
-# Remove the global symlink
-npm unlink -g remnote-mcp-server
-
-# Verify it's removed
-which remnote-mcp-server
-# Should output nothing if successfully unlinked
-```
-
-After unlinking, you can install the published npm package globally with `npm install -g remnote-mcp-server` if needed.
-
-**About Streamable HTTP Transport**
-
-This MCP server uses [Streamable HTTP
-transport](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports#http-with-sse), a communication
-mechanism for MCP that supports multiple concurrent clients.
-
-**Key characteristics:**
-
-- **Lifecycle management**: You must start the server independently (`npm start` or `npm run dev`). Claude Code connects
-  to the running server via HTTP.
-- **Message protocol**: Communication uses JSON-RPC over HTTP POST for requests and Server-Sent Events (SSE) for
-  notifications.
-- **Multi-client support**: Multiple AI agents can connect simultaneously, each with their own MCP session.
-- **Session management**: Server tracks sessions via `mcp-session-id` headers and UUID-based request correlation.
-
-This architecture enables multiple Claude Code windows to access RemNote concurrently while maintaining process
-isolation and security boundaries. For technical details, see the [MCP
-specification](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports).
 
 ### 2. Install RemNote MCP Bridge Plugin
 
@@ -161,25 +133,51 @@ Install the [RemNote MCP Bridge plugin](https://github.com/robert7/remnote-mcp-b
 
 1. Open RemNote
 2. Navigate to plugin installation (see plugin repository for instructions)
-3. Configure WebSocket URL: `ws://127.0.0.1:3002`
-4. Enable auto-reconnect
 
 ### 3. Start the Server
 
 **IMPORTANT:** You must start the server before using it with Claude Code.
 
 ```bash
-# Production mode
-npm start
+# Start with default settings
+remnote-mcp-server
+
+# With custom ports
+remnote-mcp-server --ws-port 4002 --http-port 4001
+
+# With verbose logging
+remnote-mcp-server --verbose
+
+# With file logging
+remnote-mcp-server --log-file /tmp/remnote-mcp.log --log-level-file debug
 
 # OR development mode (with hot reload)
 npm run dev
+# you can also pass CLI options after `--`, e.g.
+npm run dev -- -h
 ```
+
+**CLI Options:**
+
+Server Configuration:
+- `--ws-port <number>` - WebSocket port (default: 3002, env: REMNOTE_WS_PORT)
+- `--http-port <number>` - HTTP MCP port (default: 3001, env: REMNOTE_HTTP_PORT)
+
+Logging Configuration:
+- `--log-level <level>` - Console log level: debug, info, warn, error (default: info)
+- `--log-level-file <level>` - File log level (default: same as --log-level)
+- `--verbose` - Shorthand for --log-level debug
+- `--log-file <path>` - Log to file (default: console only)
+- `--request-log <path>` - Log all WebSocket requests to file (JSON Lines)
+- `--response-log <path>` - Log all WebSocket responses to file (JSON Lines)
+
+Information:
+- `-h, --help` - Display help message
+- `-v, --version` - Display version number
 
 Expected output:
 ```
-[WebSocket Server] Listening on port 3002
-[HTTP Server] Listening on port 3001
+RemNote MCP Server v0.2.1 listening { wsPort: 3002, httpPort: 3001 }
 ```
 
 Keep this terminal running. The server must be running for Claude Code to connect.
@@ -317,12 +315,11 @@ Use remnote_status to check the connection
 Expected response:
 
 ```json
-{
-  "connected": true,
-  "actionsProcessed": 0,
-  "pluginVersion": "1.1.0",
-  "timestamp": "2026-02-07T..."
-}
+⏺ remnote - remnote_status (MCP)
+  ⎿ {
+       "connected": true,
+       "pluginVersion": "0.3.2"
+     }
 ```
 
 ### Test RemNote Integration
@@ -398,6 +395,8 @@ Check if RemNote is connected
 export REMNOTE_HTTP_PORT=3003
 export REMNOTE_WS_PORT=3004
 npm start
+# you can pass CLI options after `--`, e.g.
+npm start -- -h
 ```
 
 Then update your `~/.claude.json` and RemNote plugin settings to use the new ports.
@@ -537,35 +536,6 @@ npm run test:coverage # With coverage report
 npm run lint         # ESLint only
 npm run format       # Format code
 ```
-
-### Before Committing
-
-Run `./code-quality.sh` to ensure all checks pass.
-
-### Manual Testing
-
-To test the server:
-
-```bash
-cd ~/Projects/_private/remnote-mcp-server
-npm run dev
-```
-
-Expected output:
-```
-[WebSocket Server] Listening on port 3002
-[HTTP Server] Listening on port 3001
-```
-
-When the RemNote plugin connects:
-```
-[WebSocket Server] Client connected
-[RemNote Bridge] RemNote plugin connected
-```
-
-When Claude Code connects, you'll see HTTP requests in the logs.
-
-Press Ctrl+C to stop.
 
 ### Development Documentation
 
