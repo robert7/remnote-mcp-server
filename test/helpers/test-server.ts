@@ -43,18 +43,18 @@ export function withTimeout<T>(promise: Promise<T>, ms: number, message?: string
  * errors on slower CI environments where there's a small delay between
  * listen() callback firing and actual connection readiness.
  *
- * Performance: ~1-2ms on local machines (typical), up to ~127ms on slow CI
+ * Performance: ~1-2ms on local machines (typical), up to ~5s on slow CI
  *
  * @param port - Port number to check
- * @param maxAttempts - Maximum retry attempts (default: 10)
- * @param initialDelayMs - Initial delay between retries (default: 1ms)
+ * @param maxAttempts - Maximum retry attempts (default: 15)
+ * @param initialDelayMs - Initial delay between retries (default: 10ms)
  * @returns Promise that resolves when server is ready
  * @throws Error if server not ready after max attempts
  */
 export async function waitForHttpServer(
   port: number,
-  maxAttempts = 10,
-  initialDelayMs = 1
+  maxAttempts = 15,
+  initialDelayMs = 10
 ): Promise<void> {
   let lastError: Error | undefined;
 
