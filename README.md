@@ -90,36 +90,10 @@ Keep this terminal running.
 
 ### 4. Configure Your AI Client
 
-**For Claude Code CLI:**
-
-```bash
-cd /Users/username/Projects/your-project
-claude mcp add remnote --transport http http://localhost:3001/mcp
-```
-
-**Verify connection:**
-
-```bash
-claude mcp list
-# Should show: remnote: http://localhost:3001/mcp (HTTP) - ✓ Connected
-```
-
-**For other clients:**
-
 - [Configuration Guide](docs/guides/configuration.md) - Overview and generic setup
   - [Claude Code](docs/guides/configuration-claude-code-CLI.md) - Detailed Claude Code CLI configuration
   - [Accomplish](docs/guides/configuration-accomplish.md) - Accomplish (Openwork) configuration
   - [Claude Cowork](docs/guides/configuration-claude-cowork.md) - Cloud-based (requires remote access setup)
-
-### 5. Start Using RemNote
-
-In any Claude Code session:
-
-```text
-Search my RemNote for notes about "AI"
-```
-
-Claude will automatically use the `remnote_search` tool and other RemNote tools as needed.
 
 ## Documentation
 
