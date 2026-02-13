@@ -23,69 +23,10 @@ remnote-mcp-server
 
 Choose your AI client and follow its configuration guide:
 
-- **[Claude Code CLI](configuration-claude-code-CLI.md)** - Local terminal-based agent
-- **[Accomplish](configuration-accomplish.md)** - Task-based MCP client (formerly Openwork)
-- **[Claude Cowork](configuration-claude-cowork.md)** - Cloud-based workspace (requires remote access)
-
-## AI Client Configuration Guides
-
-### Claude Code CLI (Local)
-
-Local terminal-based agent that runs on your machine.
-
-**Quick setup:**
-
-```bash
-cd /Users/username/Projects/your-project
-claude mcp add remnote --transport http http://localhost:3001/mcp
-```
-
-**📖 [Full Claude Code Configuration Guide →](configuration-claude-code-CLI.md)**
-
-### Accomplish (Local)
-
-Task-based MCP client supporting multiple AI models.
-
-**Quick setup:**
-
-Edit `~/.config/opencode/opencode.json`:
-
-```json
-{
-  "$schema": "https://opencode.ai/config.json",
-  "mcp": {
-    "remnote": {
-      "type": "remote",
-      "url": "http://localhost:3001/mcp",
-      "enabled": true
-    }
-  }
-}
-```
-
-**📖 [Full Accomplish Configuration Guide →](configuration-accomplish.md)**
-
-### Claude Cowork (Cloud-based)
-
-Cloud-based AI workspace that requires remote access setup.
-
-**Quick setup with ngrok:**
-
-```bash
-# Terminal 1: Start server
-remnote-mcp-server
-
-# Terminal 2: Start ngrok tunnel
-ngrok http 3001
-
-# Use the HTTPS URL in Claude Cowork
-# Server URL: https://abc123.ngrok-free.app/mcp
-```
-
-**📖 [Full Claude Cowork Configuration Guide →](configuration-claude-cowork.md)**
-
-**⚠️ Security Note:** Remote access exposes your RemNote to anyone with the URL. Use only for development/testing. See
-the [Remote Access Guide](remote-access.md) for details.
+- **[Claude Code CLI](configuration-claude-code-CLI.md)** - Anthropic's command-line interface tool that integrates with their Claude AI models
+- **[Accomplish](configuration-accomplish.md)** - open source AI desktop agent that automates file management, document creation, and browser tasks
+- **[Claude Cowork](configuration-claude-cowork.md)** - Anthropic's research preview feature in the Claude Desktop app that extends the agentic architecture
+of Claude Code to non-coding knowledge work
 
 ## Other MCP Clients
 
