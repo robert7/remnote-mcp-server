@@ -31,12 +31,14 @@ AI agents (HTTP) ↔ MCP HTTP Server :3001 ↔ WebSocket Server :3002 ↔ RemNot
 
 The server acts as a bridge:
 
-- Communicates with AI agents via Streamable HTTP transport (MCP protocol)
+- Communicates with AI agents via Streamable HTTP transport (MCP protocol) - supports both local and remote access
 - HTTP server (port 3001) manages MCP sessions for multiple concurrent agents
 - WebSocket server (port 3002) connects to the RemNote browser plugin
 - Translates MCP tool calls into RemNote API actions
 
 **Multi-Agent Support:** Multiple AI agents can connect simultaneously to the same RemNote knowledge base. Each agent gets its own MCP session while sharing the WebSocket bridge.
+
+**Remote Access:** By default, the server binds to localhost (127.0.0.1) for local AI agents. Cloud-based services like Claude Cowork require remote access—use tunneling tools like ngrok to expose the HTTP endpoint securely. The WebSocket connection always stays local for security. See [Remote Access Guide](docs/guides/remote-access.md) for setup.
 
 ## Features
 
