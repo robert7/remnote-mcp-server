@@ -592,12 +592,6 @@ Include in your bug report:
 
 **File issues:** [github.com/robert7/remnote-mcp-server/issues](https://github.com/robert7/remnote-mcp-server/issues)
 
-### Community Support
-
-- **GitHub Discussions:**
-  [github.com/robert7/remnote-mcp-server/discussions](https://github.com/robert7/remnote-mcp-server/discussions)
-- **Discord:** (coming soon)
-
 ## Related Documentation
 
 - [Installation Guide](installation.md) - Installation instructions

@@ -378,4 +378,3 @@ Before submitting a pull request:
 ## Getting Help
 
 - [GitHub Issues](https://github.com/robert7/remnote-mcp-server/issues) - Bug reports and feature requests
-- [GitHub Discussions](https://github.com/robert7/remnote-mcp-server/discussions) - Questions and community support

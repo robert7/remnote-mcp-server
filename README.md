@@ -16,6 +16,10 @@ The RemNote MCP Server enables AI assistants like Claude Code to interact direct
 through the Model Context Protocol (MCP). Create notes, search your knowledge base, update existing notes, and maintain
 your daily journal—all through conversational commands.
 
+## Demo
+
+See AI agent examples in action with RemNote: **[View Demo →](docs/demo.md)**
+
 ### Two-Component Architecture
 
 This system consists of **two separate components** that work together:

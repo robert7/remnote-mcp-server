@@ -487,4 +487,3 @@ AI agents can chain multiple tools:
 ## Need Help?
 
 - [GitHub Issues](https://github.com/robert7/remnote-mcp-server/issues) - Report bugs or ask questions
-- [GitHub Discussions](https://github.com/robert7/remnote-mcp-server/discussions) - Community support
