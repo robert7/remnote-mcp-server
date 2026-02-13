@@ -20,7 +20,7 @@ This system consists of **two separate components** that work together:
 
 1. **[RemNote MCP Bridge](https://github.com/robert7/remnote-mcp-bridge)** - A RemNote plugin that runs in your browser
    or RemNote desktop app and exposes RemNote API functionality via WebSocket
-2. **RemNote MCP Server** (this repository) - A standalone server that connects your AI assistant to the bridge using
+2. **RemNote MCP Server** (this project) - A standalone server that connects your AI assistant to the bridge using
    MCP protocol
 
 **Both components are required** for AI integration with RemNote.
