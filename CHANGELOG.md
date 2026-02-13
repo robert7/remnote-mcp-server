@@ -7,41 +7,13 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-### Documentation
-
-- **Fixed curl examples in documentation** to include required Accept headers
-  - Created canonical MCP endpoint testing example in `docs/guides/troubleshooting.md#testing-the-mcp-http-endpoint`
-  - Added required `Accept: application/json, text/event-stream` header for MCP HTTP/SSE transport
-  - Replaced all duplicate curl examples throughout documentation with references to canonical example
-  - Updated `docs/guides/remote-access.md` and `docs/guides/troubleshooting.md`
-  - Fixed error: "Not Acceptable: Client must accept both application/json and text/event-stream"
-- **Major documentation restructuring** for better navigation and discoverability
-  - Streamlined README.md from 17.2 KB to ~6 KB with quick-start focus
-  - Created `docs/guides/` directory with 7 focused guides:
-    - `installation.md` - Complete installation guide for users
-    - `development-setup.md` - Developer setup and contributing guide
-    - `configuration.md` - MCP client configuration (Claude Code, Accomplish, Claude Cowork)
-    - `cli-options.md` - Command-line options reference
-    - `tools-reference.md` - Detailed MCP tools documentation
-    - `remote-access.md` - Remote access setup (replaces `ngrok-setup.md`)
-    - `troubleshooting.md` - Comprehensive troubleshooting guide
-  - Created `docs/images/` directory for demo screenshots
-  - Deleted `docs/ngrok-setup.md` (content moved to `docs/guides/remote-access.md`)
-  - Updated `docs/demo.md` image paths to use `images/` subdirectory
-  - README.md now serves as clear entry point with navigation to all guides
-  - No information lost - all content preserved and reorganized
-  - Improved searchability and user experience for new and experienced users
-
 ### Added
 
 - Host binding configuration for HTTP and WebSocket servers
 - `--http-host` CLI option to control HTTP server binding address
 - `REMNOTE_HTTP_HOST` environment variable for HTTP server binding
-- ngrok setup documentation for Claude Cowork integration (docs/ngrok-setup.md)
-- Support for binding HTTP server to `0.0.0.0` for remote access (e.g., Docker, VPS deployments)
-- Security enforcement: WebSocket server always binds to localhost (127.0.0.1)
+- Support for binding HTTP server to `0.0.0.0` for remote access (Docker, VPS deployments)
 - Host validation in CLI with support for localhost, 127.0.0.1, 0.0.0.0, and valid IPv4 addresses
-- Note: ngrok/Claude Cowork work with default localhost binding (no 0.0.0.0 needed)
 
 ### Changed
 
@@ -51,25 +23,16 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Security
 
-- WebSocket server host binding is now enforced to localhost (127.0.0.1) only
-- Cannot be overridden via environment variables or CLI options
+- WebSocket server host binding enforced to localhost (127.0.0.1) only - cannot be overridden
 - Ensures RemNote plugin connection is never exposed remotely
 
 ### Documentation
 
-- Added experimental/proof-of-concept disclaimer to README
-- Corrected ngrok setup documentation to remove incorrect 0.0.0.0 binding requirement
-  - Updated architecture diagram in docs/ngrok-setup.md (shows 127.0.0.1 instead of 0.0.0.0)
-  - Simplified Step 1 instructions to use default localhost binding
-  - Added "When Do I Need 0.0.0.0?" section explaining actual use cases (Docker, VPS, not ngrok)
-  - Updated README.md Remote Access section to show correct ngrok usage
-  - Updated CLI help text (--http-host) to clarify 0.0.0.0 is for Docker/VPS, not ngrok
-  - Updated .agents/oauth-implementation-plan.md with correct environment variable examples
-- Enhanced demo documentation with multiple AI client examples (docs/demo.md)
-  - Added screenshots showing cloud-based AI integration via ngrok (Claude Cowork)
-  - Added Accomplish (formerly Openwork) with GPT 5.2 example showing task-based interface
-  - Restructured to show local (Claude Code, Accomplish) and remote (Claude Cowork) usage patterns
-- Stage 2 roadmap includes JWT token validation, PKCE flow, and production deployment guide
+- Major restructuring: streamlined README.md, created `docs/guides/` with 7 focused guides
+- Created dedicated configuration guides for each AI client (Claude Code, Accomplish, Claude Cowork)
+- Fixed curl examples to include required `Accept: application/json, text/event-stream` header
+- Corrected ngrok documentation: clarified 0.0.0.0 is for Docker/VPS, not needed for ngrok
+- Enhanced demo documentation with multi-client examples (Claude Code, Accomplish, Claude Cowork)
 
 ### Internal
 

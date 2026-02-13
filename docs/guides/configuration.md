@@ -11,153 +11,44 @@ The RemNote MCP Server uses Streamable HTTP transport, which means:
 - Multiple clients can connect simultaneously
 - Each client gets its own MCP session
 
-## Claude Code CLI
+## Quick Start
 
-### Using the CLI Tool (Recommended)
-
-Claude Code provides CLI commands to manage MCP servers.
-
-**Add the server:**
+**1. Start the server:**
 
 ```bash
-# Navigate to your project directory
-cd /Users/username/Projects/sample-project
+remnote-mcp-server
+```
 
-# Add the MCP server
+**2. Configure your AI client:**
+
+Choose your AI client and follow its configuration guide:
+
+- **[Claude Code CLI](configuration-claude-code-CLI.md)** - Local terminal-based agent
+- **[Accomplish](configuration-accomplish.md)** - Task-based MCP client (formerly Openwork)
+- **[Claude Cowork](configuration-claude-cowork.md)** - Cloud-based workspace (requires remote access)
+
+## AI Client Configuration Guides
+
+### Claude Code CLI (Local)
+
+Local terminal-based agent that runs on your machine.
+
+**Quick setup:**
+
+```bash
+cd /Users/username/Projects/your-project
 claude mcp add remnote --transport http http://localhost:3001/mcp
 ```
 
-Example output:
-```
-Added HTTP MCP server remnote with URL: http://localhost:3001/mcp to local config
-File modified: /Users/username/.claude.json [project: /Users/username/Projects/sample-project]
-```
+**📖 [Full Claude Code Configuration Guide →](configuration-claude-code-CLI.md)**
 
-**Verify connection:**
+### Accomplish (Local)
 
-```bash
-claude mcp list
-```
+Task-based MCP client supporting multiple AI models.
 
-Example output:
-```
-remnote: http://localhost:3001/mcp (HTTP) - ✓ Connected
-```
+**Quick setup:**
 
-**Using the server:**
-
-Once configured, Claude Code automatically loads RemNote tools in your sessions:
-
-```bash
-claude
-
-prompt: show remnote note titles related to AI assisted coding
-```
-
-The AI will automatically use `remnote_search` and other tools as needed.
-
-**Remove the server:**
-
-```bash
-claude mcp remove remnote
-```
-
-Example output:
-```
-✓ Removed MCP server "remnote"
-  Config: /Users/username/.claude.json
-```
-
-### Manual Configuration
-
-If you prefer to manually configure the MCP server instead of using `claude mcp add`, you can directly edit your
-`~/.claude.json` file.
-
-**Configuration structure:**
-
-MCP servers are configured in `~/.claude.json` under the `mcpServers` key within project-specific sections.
-
-**Add to `~/.claude.json`:**
-
-```json
-{
-  "projects": {
-    "/Users/username": {
-      "mcpServers": {
-        "remnote": {
-          "type": "http",
-          "url": "http://localhost:3001/mcp"
-        }
-      }
-    }
-  }
-}
-```
-
-**For global configuration (all projects):**
-
-Place the `mcpServers` configuration under your home directory path:
-
-```json
-{
-  "projects": {
-    "/Users/username": {
-      "mcpServers": {
-        "remnote": {
-          "type": "http",
-          "url": "http://localhost:3001/mcp"
-        }
-      }
-    }
-  }
-}
-```
-
-**For project-specific configuration:**
-
-Place under the specific project path:
-
-```json
-{
-  "projects": {
-    "/Users/username/Projects/my-project": {
-      "mcpServers": {
-        "remnote": {
-          "type": "http",
-          "url": "http://localhost:3001/mcp"
-        }
-      }
-    }
-  }
-}
-```
-
-**After editing:**
-
-Restart Claude Code completely to load the new configuration.
-
-### Verifying Configuration
-
-**In any Claude Code session:**
-
-```
-Use remnote_status to check the connection
-```
-
-Or use the `/mcp` command to see all connected MCP servers and their health.
-
-## Accomplish
-
-[Accomplish](https://github.com/accomplish-ai/accomplish) (formerly Openwork) is a task-based MCP client.
-
-### Configuration
-
-Edit Accomplish's MCP configuration file to add the RemNote server.
-
-**Location:** Typically in Accomplish's settings or configuration directory - `~/.config/opencode/opencode.json`. See
-details in [Accomplish MCP documentation](https://opencode.ai/docs/mcp-servers/).
-
-**Configuration format:**
+Edit `~/.config/opencode/opencode.json`:
 
 ```json
 {
@@ -172,47 +63,28 @@ details in [Accomplish MCP documentation](https://opencode.ai/docs/mcp-servers/)
 }
 ```
 
-**Restart Accomplish** after editing the configuration.
+**📖 [Full Accomplish Configuration Guide →](configuration-accomplish.md)**
 
-### Verification
+### Claude Cowork (Cloud-based)
 
-In Accomplish, try a task that requires RemNote access:
-
-```
-Search my RemNote for notes about "project management"
-```
-
-Accomplish should automatically invoke the `remnote_search` tool.
-
-## Claude Cowork
-
-[Claude Cowork](https://claude.com/claude-cowork) is a cloud-based AI workspace. To use the RemNote MCP Server with
-Claude Cowork, you need to expose your local server to the internet.
-
-**Prerequisites:**
-
-- RemNote MCP Server running locally
-- Remote access tool (ngrok, localtunnel, etc.)
-
-**See the [Remote Access Setup Guide](remote-access.md) for detailed instructions.**
+Cloud-based AI workspace that requires remote access setup.
 
 **Quick setup with ngrok:**
 
 ```bash
-# 1. Start server normally
+# Terminal 1: Start server
 remnote-mcp-server
 
-# 2. In another terminal, start ngrok
+# Terminal 2: Start ngrok tunnel
 ngrok http 3001
 
-# 3. Copy the HTTPS URL (e.g., https://abc123.ngrok-free.app)
-
-# 4. Configure in Claude Cowork:
-#    Server URL: https://abc123.ngrok-free.app/mcp
+# Use the HTTPS URL in Claude Cowork
+# Server URL: https://abc123.ngrok-free.app/mcp
 ```
 
-**Security note:** This exposes your RemNote access to anyone with the URL. Use only for development/testing. See the
-[Remote Access Guide](remote-access.md) for security considerations.
+**📖 [Full Claude Cowork Configuration Guide →](configuration-claude-cowork.md)**
+
+**⚠️ Security Note:** Remote access exposes your RemNote to anyone with the URL. Use only for development/testing. See the [Remote Access Guide](remote-access.md) for details.
 
 ## Other MCP Clients
 
@@ -233,8 +105,7 @@ Any MCP client that supports Streamable HTTP transport can connect to the RemNot
 3. Client includes session ID in subsequent requests
 4. Server uses SSE for notifications and streaming responses
 
-For technical details, see the [MCP
-Specification](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports#http-with-sse).
+For technical details, see the [MCP Specification](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports#http-with-sse).
 
 ## Environment Variables
 
@@ -368,7 +239,7 @@ remnote-mcp-server
 # Check what port the server is using
 lsof -i :3001
 
-# Verify your configuration
+# Verify your configuration (example for Claude Code)
 cat ~/.claude.json | grep -A 5 remnote
 ```
 
@@ -381,7 +252,8 @@ cat ~/.claude.json | grep -A 5 remnote
 
 **Current location:**
 
-- `~/.claude.json` with `mcpServers` under project paths
+- `~/.claude.json` with `mcpServers` under project paths (Claude Code)
+- `~/.config/opencode/opencode.json` (Accomplish)
 
 If you have old configuration, migrate to the new format.
 
@@ -449,10 +321,16 @@ remnote-mcp-server --http-port 3005
 
 ## Next Steps
 
-- [CLI Options Reference](cli-options.md) - Complete CLI flag documentation
-- [Tools Reference](tools-reference.md) - Available MCP tools
-- [Troubleshooting](troubleshooting.md) - Common configuration issues
-- [Remote Access Setup](remote-access.md) - Expose server for Claude Cowork
+- **AI Client Guides:**
+  - [Claude Code Configuration](configuration-claude-code-CLI.md)
+  - [Accomplish Configuration](configuration-accomplish.md)
+  - [Claude Cowork Configuration](configuration-claude-cowork.md)
+- **Server Configuration:**
+  - [CLI Options Reference](cli-options.md) - Complete CLI flag documentation
+  - [Remote Access Setup](remote-access.md) - Expose server for cloud-based clients
+- **Usage:**
+  - [Tools Reference](tools-reference.md) - Available MCP tools
+  - [Troubleshooting](troubleshooting.md) - Common configuration issues
 
 ## Need Help?
 

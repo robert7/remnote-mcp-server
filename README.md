@@ -104,7 +104,12 @@ claude mcp list
 # Should show: remnote: http://localhost:3001/mcp (HTTP) - ✓ Connected
 ```
 
-**For other clients:** See the [Configuration Guide](docs/guides/configuration.md).
+**For other clients:**
+
+- [Configuration Guide](docs/guides/configuration.md) - Overview and generic setup
+- [Claude Code](docs/guides/configuration-claude-code-CLI.md) - Detailed Claude Code CLI configuration
+- [Accomplish](docs/guides/configuration-accomplish.md) - Accomplish configuration
+- [Claude Cowork](docs/guides/configuration-claude-cowork.md) - Cloud-based workspace (requires ngrok)
 
 ### 5. Start Using RemNote
 

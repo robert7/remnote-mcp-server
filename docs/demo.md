@@ -4,7 +4,9 @@ Visual demonstrations of the RemNote MCP Server with different AI clients.
 
 ## Claude Cowork (Cloud-based via ngrok)
 
-Cloud-based integration through web interface. See [remote access guide](guides/remote-access.md) for configuration.
+Cloud-based integration through web interface.
+
+**Setup:** [Claude Cowork Configuration Guide](guides/configuration-claude-cowork.md) | [Remote Access Guide](guides/remote-access.md)
 
 ### Connection Status Check
 
@@ -22,8 +24,9 @@ side) shows connection statistics and recent actions.
 
 ## Accomplish with GPT 5.2 (Local)
 
-Task-based interface using [Accomplish (formerly Openwork)](https://github.com/accomplish-ai/accomplish) with [OpenAI's
-GPT 5.2 model](https://openai.com/):
+Task-based interface using [Accomplish (formerly Openwork)](https://github.com/accomplish-ai/accomplish) with [OpenAI's GPT 5.2 model](https://openai.com/).
+
+**Setup:** [Accomplish Configuration Guide](guides/configuration-accomplish.md)
 
 ![RemNote Search via Accomplish (GPT 5.2)](images/remnote-mcp-server-demo-accomplish-with-gpt52.jpg)
 
@@ -33,7 +36,9 @@ of findings from the knowledge base.
 
 ## Claude Code (Local)
 
-Local CLI-based integration showing search and connection logs:
+Local CLI-based integration showing search and connection logs.
+
+**Setup:** [Claude Code Configuration Guide](guides/configuration-claude-code-CLI.md)
 
 ![RemNote MCP Server Demo (Claude Code CLI)](images/remnote-mcp-server-demo-claude-code-CLI.jpg)
 
