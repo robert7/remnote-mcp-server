@@ -4,7 +4,8 @@ This guide explains how to expose the RemNote MCP server to cloud-based services
 
 ## Security Notice
 
-⚠️ **DEVELOPMENT/TESTING ONLY** - This setup provides no authentication and exposes your RemNote access to anyone with the ngrok URL. Use only for:
+⚠️ **DEVELOPMENT/TESTING ONLY** - This setup provides no authentication and exposes your RemNote access to anyone with
+the ngrok URL. Use only for:
 
 - Local development and testing
 - Short-term demonstrations
@@ -26,7 +27,8 @@ Claude Cowork (Cloud) ↔ ngrok HTTPS ↔ HTTP MCP Server :3001 (127.0.0.1)
                                       RemNote Plugin (Local)
 ```
 
-**Critical Security:** The WebSocket server ALWAYS binds to localhost (127.0.0.1) and cannot be overridden. Only the HTTP MCP endpoint is exposed via ngrok.
+**Critical Security:** The WebSocket server ALWAYS binds to localhost (127.0.0.1) and cannot be overridden. Only the
+HTTP MCP endpoint is exposed via ngrok.
 
 ## Prerequisites
 
@@ -59,7 +61,8 @@ choco install ngrok
 ### Authenticate ngrok
 
 1. Sign up at [ngrok.com](https://ngrok.com) (free tier is sufficient)
-2. Get your authtoken from [dashboard.ngrok.com/get-started/your-authtoken](https://dashboard.ngrok.com/get-started/your-authtoken)
+2. Get your authtoken from
+   [dashboard.ngrok.com/get-started/your-authtoken](https://dashboard.ngrok.com/get-started/your-authtoken)
 3. Configure ngrok:
 
 ```bash
@@ -83,7 +86,8 @@ Expected output:
 {"level":"info","time":1234567890,"wsPort":3002,"wsHost":"127.0.0.1","httpPort":3001,"httpHost":"127.0.0.1","msg":"RemNote MCP Server v0.3.1 listening"}
 ```
 
-**Note:** ngrok tunnels to localhost, so the default 127.0.0.1 binding works perfectly. No special host configuration is needed.
+**Note:** ngrok tunnels to localhost, so the default 127.0.0.1 binding works perfectly. No special host configuration
+is needed.
 
 ### Step 2: Start ngrok Tunnel
 
@@ -148,6 +152,7 @@ Expected: JSON response with server capabilities and a `mcp-session-id` header.
 - "ngrok Browser Warning" screen for first-time visitors
 
 **Solution:** Upgrade to ngrok paid plan for:
+
 - Static domains (e.g., `remnote-mcp.ngrok.app`)
 - Longer session durations
 - No browser warning screen
@@ -172,6 +177,7 @@ Expected: JSON response with server capabilities and a `mcp-session-id` header.
 **Symptom:** `curl` or Claude Cowork fails with "connection refused"
 
 **Solution:**
+
 - Verify server is running: `ps aux | grep remnote-mcp-server`
 - Verify ngrok is forwarding to port 3001: Check ngrok output
 
@@ -180,6 +186,7 @@ Expected: JSON response with server capabilities and a `mcp-session-id` header.
 **Symptom:** Server starts but RemNote plugin won't connect
 
 **Solution:**
+
 - WebSocket MUST be on localhost only
 - Plugin connects to `ws://127.0.0.1:3002` (NOT via ngrok)
 - Verify logs show `"wsHost":"127.0.0.1"`
@@ -188,6 +195,7 @@ Expected: JSON response with server capabilities and a `mcp-session-id` header.
 ### ngrok URL Changes Every Restart
 
 **Expected behavior** on free tier. Solutions:
+
 1. Use environment variable or script to update configuration automatically
 2. Upgrade to ngrok paid plan for static domains
 3. Use ngrok labeled tunnels feature (requires configuration file)
@@ -195,6 +203,7 @@ Expected: JSON response with server capabilities and a `mcp-session-id` header.
 ### Rate Limiting
 
 ngrok free tier has request rate limits. If you hit limits:
+
 - Reduce polling frequency in your application
 - Upgrade to ngrok paid plan
 - Use request batching where possible
@@ -204,6 +213,7 @@ ngrok free tier has request rate limits. If you hit limits:
 You do NOT need to bind to 0.0.0.0 for ngrok usage. ngrok tunnels to localhost.
 
 **Bind to 0.0.0.0 only when:**
+
 - Deploying on a VPS/cloud server and accessing from outside that machine
 - Running in Docker containers (container networking requires it)
 - Accessing the server from other devices on your local network

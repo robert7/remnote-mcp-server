@@ -11,6 +11,7 @@ The `npm-publish.sh` script automates the complete publishing workflow with prop
 ```
 
 **What it does:**
+
 1. Pre-flight checks (git clean, npm auth, package.json exists)
 2. Runs full code quality suite (`./code-quality.sh`)
 3. Verifies package contents (`npm pack --dry-run`)
@@ -21,11 +22,13 @@ The `npm-publish.sh` script automates the complete publishing workflow with prop
 8. Creates and pushes git tag (`vX.Y.Z`)
 9. Displays next steps (GitHub release, CHANGELOG update)
 
-**Note:** The script assumes version has already been bumped in `package.json` and `CHANGELOG.md` has been updated. See "Pre-Publication Checklist" below.
+**Note:** The script assumes version has already been bumped in `package.json` and `CHANGELOG.md` has been updated. See
+"Pre-Publication Checklist" below.
 
 ## Manual Publishing
 
-The following manual workflow is documented for reference and advanced use cases. For standard releases, use `./npm-publish.sh` instead.
+The following manual workflow is documented for reference and advanced use cases. For standard releases, use
+`./npm-publish.sh` instead.
 
 ## Prerequisites
 

@@ -8,12 +8,14 @@ implementation details, code patterns, and development workflows, see AGENTS.md 
 The multi-layer architecture was designed with several performance constraints:
 
 **HTTP MCP Layer:**
+
 - **Multiple concurrent sessions:** Supports multiple AI agents connecting simultaneously via Streamable HTTP (SSE)
 - **Per-session MCP Server instances:** Each MCP session gets its own Server instance, sharing the WebSocket bridge
 - **Stateful sessions:** Session state maintained in-memory via Map-based transport tracking
 - **DNS rebinding protection:** Uses SDK's `createMcpExpressApp()` to prevent DNS rebinding attacks
 
 **WebSocket Bridge Layer:**
+
 - **Single client connection model:** Prevents resource contention and simplifies state management. Only one RemNote
   plugin connection is allowed at a time, with additional connection attempts rejected with WebSocket close code 1008.
 - **5-second request timeout:** Prevents indefinite hanging of pending promises. Each request sent to the RemNote plugin
