@@ -32,6 +32,7 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Documentation
 
+- Added experimental/proof-of-concept disclaimer to README
 - Corrected ngrok setup documentation to remove incorrect 0.0.0.0 binding requirement
   - Updated architecture diagram in docs/ngrok-setup.md (shows 127.0.0.1 instead of 0.0.0.0)
   - Simplified Step 1 instructions to use default localhost binding
