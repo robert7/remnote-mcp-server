@@ -6,11 +6,12 @@ Complete installation instructions for the RemNote MCP Server.
 
 - **Node.js** >= 18.0.0
 - **RemNote app** (desktop or web browser)
-- **RemNote MCP Bridge plugin** - Install from [GitHub](https://github.com/robert7/remnote-mcp-bridge)
+- **RemNote MCP Bridge plugin** - Install from [GitHub](https://github.com/robert7/remnote-mcp-bridge) - registration in
+  the RemNote marketplace is pending approval
 - **An MCP client** - Examples:
   - [Claude Code CLI](https://claude.com/claude-code)
   - [Accomplish](https://github.com/accomplish-ai/accomplish) (formerly Openwork)
-  - [Claude Cowork](https://claude.com/claude-cowork) (requires [remote access setup](remote-access.md))
+  - [Claude Cowork](https://claude.com/blog/cowork-research-preview) (requires [remote access setup](remote-access.md))
 
 ## Installation from npm
 
@@ -59,7 +60,8 @@ The server requires the RemNote MCP Bridge plugin to communicate with RemNote.
 ### Installation
 
 1. Open your RemNote app
-2. Follow plugin installation instructions from the [RemNote MCP Bridge repository](https://github.com/robert7/remnote-mcp-bridge)
+2. Follow plugin installation instructions from the [RemNote MCP Bridge
+   repository](https://github.com/robert7/remnote-mcp-bridge)
 
 ### Plugin Configuration
 
@@ -155,7 +157,8 @@ Try creating a test note:
 Create a RemNote note titled "MCP Test" with content "Testing the bridge"
 ```
 
-This should use the `remnote_create_note` tool and create a new note in your RemNote knowledge base. Verify it appears in RemNote.
+This should use the `remnote_create_note` tool and create a new note in your RemNote knowledge base. Verify it appears
+in RemNote.
 
 ## Common Installation Issues
 

@@ -196,7 +196,6 @@ describe('Component Name', () => {
    ```
 
 2. Check plugin connection in RemNote control panel
-
 3. Test basic operations in your MCP client:
    - `remnote_status` - Check connection
    - `remnote_search` - Search your knowledge base

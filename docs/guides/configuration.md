@@ -70,7 +70,8 @@ Example output:
 
 ### Manual Configuration
 
-If you prefer to manually configure the MCP server instead of using `claude mcp add`, you can directly edit your `~/.claude.json` file.
+If you prefer to manually configure the MCP server instead of using `claude mcp add`, you can directly edit your
+`~/.claude.json` file.
 
 **Configuration structure:**
 
@@ -153,16 +154,19 @@ Or use the `/mcp` command to see all connected MCP servers and their health.
 
 Edit Accomplish's MCP configuration file to add the RemNote server.
 
-**Location:** Typically in Accomplish's settings or configuration directory.
+**Location:** Typically in Accomplish's settings or configuration directory - `~/.config/opencode/opencode.json`. See
+details in [Accomplish MCP documentation](https://opencode.ai/docs/mcp-servers/).
 
 **Configuration format:**
 
 ```json
 {
-  "mcpServers": {
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
     "remnote": {
-      "type": "http",
-      "url": "http://localhost:3001/mcp"
+      "type": "remote",
+      "url": "http://localhost:3001/mcp",
+      "enabled": true
     }
   }
 }
@@ -182,7 +186,8 @@ Accomplish should automatically invoke the `remnote_search` tool.
 
 ## Claude Cowork
 
-[Claude Cowork](https://claude.com/claude-cowork) is a cloud-based AI workspace. To use the RemNote MCP Server with Claude Cowork, you need to expose your local server to the internet.
+[Claude Cowork](https://claude.com/claude-cowork) is a cloud-based AI workspace. To use the RemNote MCP Server with
+Claude Cowork, you need to expose your local server to the internet.
 
 **Prerequisites:**
 
@@ -206,7 +211,8 @@ ngrok http 3001
 #    Server URL: https://abc123.ngrok-free.app/mcp
 ```
 
-**Security note:** This exposes your RemNote access to anyone with the URL. Use only for development/testing. See the [Remote Access Guide](remote-access.md) for security considerations.
+**Security note:** This exposes your RemNote access to anyone with the URL. Use only for development/testing. See the
+[Remote Access Guide](remote-access.md) for security considerations.
 
 ## Other MCP Clients
 
@@ -227,7 +233,8 @@ Any MCP client that supports Streamable HTTP transport can connect to the RemNot
 3. Client includes session ID in subsequent requests
 4. Server uses SSE for notifications and streaming responses
 
-For technical details, see the [MCP Specification](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports#http-with-sse).
+For technical details, see the [MCP
+Specification](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports#http-with-sse).
 
 ## Environment Variables
 
@@ -368,10 +375,12 @@ cat ~/.claude.json | grep -A 5 remnote
 ### Deprecated Configuration File
 
 **Old location (deprecated):**
+
 - `~/.claude/.mcp.json` (no longer used)
 - `enabledMcpjsonServers` setting (deprecated)
 
 **Current location:**
+
 - `~/.claude.json` with `mcpServers` under project paths
 
 If you have old configuration, migrate to the new format.

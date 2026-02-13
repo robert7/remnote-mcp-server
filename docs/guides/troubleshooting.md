@@ -37,7 +37,7 @@ cat ~/.claude.json | grep -A 5 remnote
    remnote-mcp-server: command not found
    ```
 
-   **Solution:**
+**Solution:**
    ```bash
    # Verify installation
    which remnote-mcp-server
@@ -157,7 +157,6 @@ RemNote MCP Server v0.2.1 listening { wsPort: 3002, httpPort: 3001 }
    - WebSocket URL: `ws://127.0.0.1:3002`
    - Auto-reconnect: Enabled
    - Check for typos in URL
-
 2. **Verify WebSocket port is listening:**
    ```bash
    lsof -i :3002
@@ -171,12 +170,10 @@ RemNote MCP Server v0.2.1 listening { wsPort: 3002, httpPort: 3001 }
    ```
 
 4. **Restart RemNote** after changing plugin settings
-
 5. **Reinstall plugin** if persistent:
    - Remove plugin from RemNote
    - Restart RemNote
    - Reinstall plugin from [GitHub](https://github.com/robert7/remnote-mcp-bridge)
-
 6. **Check plugin console for errors:**
    - Open RemNote Developer Tools: `Cmd+Option+I` (macOS) or `Ctrl+Shift+I` (Windows/Linux)
    - Look for error messages in Console tab
@@ -205,6 +202,7 @@ RemNote MCP Server v0.2.1 listening { wsPort: 3002, httpPort: 3001 }
   ```bash
   remnote-mcp-server --verbose --log-file /tmp/remnote-debug.log
   ```
+
 - Check logs for error messages
 - Enable plugin auto-reconnect
 
@@ -217,7 +215,6 @@ RemNote MCP Server v0.2.1 listening { wsPort: 3002, httpPort: 3001 }
 1. Update RemNote MCP Bridge plugin:
    - Visit [GitHub repository](https://github.com/robert7/remnote-mcp-bridge)
    - Follow update instructions
-
 2. Hard refresh RemNote (clear cache):
    - Close RemNote completely
    - Clear cache (method depends on platform)
@@ -243,7 +240,7 @@ RemNote MCP Server v0.2.1 listening { wsPort: 3002, httpPort: 3001 }
 
 3. **Verify configuration format is correct:**
 
-   ✅ **Correct:**
+✅ **Correct:**
    ```json
    {
      "projects": {
@@ -259,7 +256,7 @@ RemNote MCP Server v0.2.1 listening { wsPort: 3002, httpPort: 3001 }
    }
    ```
 
-   ❌ **Incorrect (old stdio format):**
+❌ **Incorrect (old stdio format):**
    ```json
    {
      "type": "stdio",
@@ -268,7 +265,6 @@ RemNote MCP Server v0.2.1 listening { wsPort: 3002, httpPort: 3001 }
    ```
 
 4. **Restart Claude Code completely** (not just reload)
-
 5. **Check MCP client logs:**
    ```bash
    tail -f ~/.claude/debug/mcp-*.log
@@ -294,7 +290,6 @@ RemNote MCP Server v0.2.1 listening { wsPort: 3002, httpPort: 3001 }
    ```
 
 2. **Check for firewall blocking localhost** (rare but possible)
-
 3. **Verify port number matches configuration:**
    ```bash
    # Check server port
@@ -319,7 +314,6 @@ RemNote MCP Server v0.2.1 listening { wsPort: 3002, httpPort: 3001 }
 1. **Ensure configuration is in correct location:**
    - Modern: `~/.claude.json` with `mcpServers` key
    - Old (deprecated): `~/.claude/.mcp.json`
-
 2. **Verify JSON syntax:**
    ```bash
    cat ~/.claude.json | jq .
@@ -329,12 +323,10 @@ RemNote MCP Server v0.2.1 listening { wsPort: 3002, httpPort: 3001 }
 3. **Check project path matches:**
    - Configuration must be under correct project path in `~/.claude.json`
    - Use home directory path for global configuration
-
 4. **Restart Claude Code completely:**
    - Quit Claude Code
    - Wait a few seconds
    - Restart
-
 5. **Use CLI to manage configuration:**
    ```bash
    # Remove old configuration
@@ -356,16 +348,13 @@ RemNote MCP Server v0.2.1 listening { wsPort: 3002, httpPort: 3001 }
    - Verify Rem ID is correct
    - Use `remnote_search` to find correct ID
    - Check note hasn't been deleted
-
 2. **"Invalid parameter"**
    - Check parameter types match requirements
    - See [Tools Reference](tools-reference.md) for correct usage
-
 3. **"RemNote plugin not connected"**
    - Check plugin status in RemNote
    - Verify WebSocket connection
    - See [Plugin Won't Connect](#plugin-wont-connect)
-
 4. **"Request timeout"**
    - Check RemNote app is responsive
    - Check server logs for errors
@@ -385,7 +374,6 @@ RemNote MCP Server v0.2.1 listening { wsPort: 3002, httpPort: 3001 }
 2. **Check RemNote search works:**
    - Manually search in RemNote app
    - Verify notes actually contain the search term
-
 3. **Verify plugin connection:**
    ```
    Use remnote_status to check connection
@@ -405,15 +393,12 @@ RemNote MCP Server v0.2.1 listening { wsPort: 3002, httpPort: 3001 }
    - Title is required
    - Content, parentId, tags are optional
    - See [Tools Reference](tools-reference.md)
-
 2. **Verify RemNote is responsive:**
    - Check RemNote app isn't frozen
    - Try creating note manually in RemNote
-
 3. **Check for special characters:**
    - Some characters may cause issues
    - Try simple title first
-
 4. **Check server logs:**
    ```bash
    remnote-mcp-server --verbose
@@ -430,7 +415,6 @@ RemNote MCP Server v0.2.1 listening { wsPort: 3002, httpPort: 3001 }
 1. **Verify you've set up remote access:**
    - See [Remote Access Guide](remote-access.md)
    - Server must be exposed via ngrok or similar
-
 2. **Check tunnel is running:**
    ```bash
    # For ngrok
@@ -440,7 +424,6 @@ RemNote MCP Server v0.2.1 listening { wsPort: 3002, httpPort: 3001 }
 3. **Verify HTTPS URL (not HTTP):**
    - Claude Cowork requires HTTPS
    - ngrok provides HTTPS by default
-
 4. **Test tunnel endpoint:**
    ```bash
    curl -X POST https://your-ngrok-url.app/mcp \
@@ -457,12 +440,10 @@ RemNote MCP Server v0.2.1 listening { wsPort: 3002, httpPort: 3001 }
 1. **For localhost connections (should always work):**
    - Verify using `localhost` or `127.0.0.1` (not `0.0.0.0`)
    - Check no VPN or security software blocking localhost
-
 2. **For network connections:**
    - Check firewall rules allow traffic on ports 3001 and 3002
    - On macOS: System Preferences → Security & Privacy → Firewall
    - On Linux: `sudo ufw status`
-
 3. **For remote connections:**
    - Use tunnel service (ngrok) instead of exposing directly
    - Firewall shouldn't block outbound tunnel connections
@@ -478,16 +459,13 @@ RemNote MCP Server v0.2.1 listening { wsPort: 3002, httpPort: 3001 }
 1. **Large note hierarchies:**
    - Reading deep hierarchies is slower
    - Use smaller `depth` parameter in `remnote_read_note`
-
 2. **Many search results:**
    - Reduce `limit` parameter in `remnote_search`
    - Use `includeContent: false` for faster searches
-
 3. **RemNote app performance:**
    - Check RemNote app isn't slow
    - Close other heavy applications
    - Restart RemNote
-
 4. **Network latency (remote access):**
    - ngrok adds latency
    - Test locally first to isolate issue
@@ -501,7 +479,6 @@ RemNote MCP Server v0.2.1 listening { wsPort: 3002, httpPort: 3001 }
 1. **Check for request loops:**
    - Verify MCP client isn't making rapid repeated requests
    - Check server logs for unusual activity
-
 2. **Update to latest version:**
    ```bash
    npm update -g remnote-mcp-server
@@ -572,9 +549,7 @@ tail -f ~/.claude/debug/mcp-*.log
 1. Open RemNote Developer Tools:
    - macOS: `Cmd+Option+I`
    - Windows/Linux: `Ctrl+Shift+I`
-
 2. Check Console tab for errors
-
 3. Check Network tab for WebSocket traffic
 
 ## Getting Help
@@ -619,7 +594,8 @@ Include in your bug report:
 
 ### Community Support
 
-- **GitHub Discussions:** [github.com/robert7/remnote-mcp-server/discussions](https://github.com/robert7/remnote-mcp-server/discussions)
+- **GitHub Discussions:**
+  [github.com/robert7/remnote-mcp-server/discussions](https://github.com/robert7/remnote-mcp-server/discussions)
 - **Discord:** (coming soon)
 
 ## Related Documentation

@@ -4,7 +4,8 @@ Complete reference for all RemNote MCP tools available through the server.
 
 ## Overview
 
-The RemNote MCP Server exposes 6 tools that allow AI agents to interact with your RemNote knowledge base. Tools are automatically available in any connected MCP client.
+The RemNote MCP Server exposes 6 tools that allow AI agents to interact with your RemNote knowledge base. Tools are
+automatically available in any connected MCP client.
 
 ## Tool Summary
 
@@ -377,7 +378,8 @@ Returns connection health and statistics:
 
 ## Conversational Usage
 
-AI agents automatically select the appropriate tool based on natural language commands. You don't need to specify tool names.
+AI agents automatically select the appropriate tool based on natural language commands. You don't need to specify tool
+names.
 
 ### Examples
 

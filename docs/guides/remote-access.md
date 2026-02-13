@@ -4,15 +4,19 @@ How to expose your local RemNote MCP Server to cloud-based services like Claude 
 
 ## Overview
 
-By default, the RemNote MCP Server binds to localhost (127.0.0.1) and is only accessible from your local machine. To enable cloud-based AI services like **Claude Cowork** to access your RemNote knowledge base, you need to expose the HTTP MCP endpoint remotely.
+By default, the RemNote MCP Server binds to localhost (127.0.0.1) and is only accessible from your local machine.
+To enable cloud-based AI services like **Claude Cowork** to access your RemNote knowledge base, you need to expose the
+HTTP MCP endpoint remotely.
 
-**Security Warning:** The methods described here provide **no authentication** and expose your RemNote access to anyone with the URL. Use only for:
+**Security Warning:** The methods described here provide **no authentication** and expose your RemNote access to anyone
+with the URL. Use only for:
 
 - Local development and testing
 - Short-term demonstrations
 - Integration testing with Claude Cowork
 
-**Note:** OAuth 2.1 authentication is planned for production deployments (see [CHANGELOG.md](../../CHANGELOG.md) Stage 2).
+**Note:** OAuth 2.1 authentication is planned for production deployments (see [CHANGELOG.md](../../CHANGELOG.md) Stage
+2).
 
 ## Architecture
 
@@ -26,7 +30,8 @@ Claude Cowork (Cloud) ↔ Tunnel (HTTPS) ↔ HTTP MCP Server :3001 (127.0.0.1)
                                           RemNote Plugin (Local)
 ```
 
-**Critical Security:** The WebSocket server ALWAYS binds to localhost (127.0.0.1) and cannot be overridden. Only the HTTP MCP endpoint is exposed via tunnel.
+**Critical Security:** The WebSocket server ALWAYS binds to localhost (127.0.0.1) and cannot be overridden. Only the
+HTTP MCP endpoint is exposed via tunnel.
 
 ## Quick Setup with ngrok
 
@@ -60,7 +65,8 @@ choco install ngrok
 ### Authentication
 
 1. Sign up at [ngrok.com](https://ngrok.com) (free tier is sufficient)
-2. Get your authtoken from [dashboard.ngrok.com/get-started/your-authtoken](https://dashboard.ngrok.com/get-started/your-authtoken)
+2. Get your authtoken from
+   [dashboard.ngrok.com/get-started/your-authtoken](https://dashboard.ngrok.com/get-started/your-authtoken)
 3. Configure ngrok:
 
 ```bash
@@ -82,7 +88,8 @@ Expected output:
 RemNote MCP Server v0.2.1 listening { wsPort: 3002, httpPort: 3001 }
 ```
 
-**Note:** ngrok tunnels to localhost, so the default 127.0.0.1 binding works perfectly. No special host configuration is needed.
+**Note:** ngrok tunnels to localhost, so the default 127.0.0.1 binding works perfectly. No special host configuration
+is needed.
 
 **Step 2: Start ngrok Tunnel**
 
@@ -167,34 +174,6 @@ Expected: JSON response with server capabilities and a `mcp-session-id` header.
 
 ## Alternative Solutions
 
-### localtunnel
-
-Open source alternative to ngrok.
-
-**Installation:**
-```bash
-npm install -g localtunnel
-```
-
-**Usage:**
-```bash
-# Start server
-remnote-mcp-server
-
-# In another terminal
-lt --port 3001
-```
-
-**Pros:**
-- Open source
-- No account required
-- Free
-
-**Cons:**
-- Less reliable than ngrok
-- No static domains (free)
-- Slower performance
-
 ### Tailscale
 
 Secure mesh VPN for accessing local services remotely.
@@ -208,11 +187,13 @@ Secure mesh VPN for accessing local services remotely.
 3. Access server via Tailscale IP (e.g., `http://100.x.x.x:3001/mcp`)
 
 **Pros:**
+
 - Secure (WireGuard VPN)
 - No public exposure
 - Works across networks
 
 **Cons:**
+
 - Requires Tailscale on both ends (not suitable for Claude Cowork)
 - More complex setup
 
@@ -220,7 +201,8 @@ Secure mesh VPN for accessing local services remotely.
 
 Free alternative with authentication options.
 
-**Installation:** See [developers.cloudflare.com/cloudflare-one/connections/connect-apps](https://developers.cloudflare.com/cloudflare-one/connections/connect-apps)
+**Installation:** See
+[developers.cloudflare.com/cloudflare-one/connections/connect-apps](https://developers.cloudflare.com/cloudflare-one/connections/connect-apps)
 
 **Usage:**
 
@@ -229,11 +211,13 @@ Free alternative with authentication options.
 3. Set up CloudFlare Access for authentication (optional)
 
 **Pros:**
+
 - Free
 - Optional authentication
 - Good performance
 
 **Cons:**
+
 - More complex setup
 - Requires CloudFlare account
 
@@ -273,7 +257,6 @@ remnote-mcp-server --http-host 0.0.0.0
 
 2. Verify tunnel is forwarding to port 3001:
    - Check ngrok output or web interface: `http://127.0.0.1:4040`
-
 3. Test locally first:
    ```bash
    curl -X POST http://localhost:3001/mcp \
@@ -293,6 +276,7 @@ remnote-mcp-server --http-host 0.0.0.0
 4. If `wsHost` is `0.0.0.0`, this is a bug - file an issue
 
 **Verify plugin settings in RemNote:**
+
 - WebSocket URL: `ws://127.0.0.1:3002`
 - Auto-reconnect: Enabled
 

@@ -14,8 +14,7 @@ remnote-mcp-server [options]
 
 Specify the HTTP MCP server port.
 
-**Default:** 3001
-**Environment variable:** `REMNOTE_HTTP_PORT`
+**Default:** 3001 **Environment variable:** `REMNOTE_HTTP_PORT`
 
 ```bash
 remnote-mcp-server --http-port 3003
@@ -31,8 +30,7 @@ remnote-mcp-server --http-port 3003
 
 Specify the HTTP server bind address.
 
-**Default:** 127.0.0.1 (localhost only)
-**Environment variable:** `REMNOTE_HTTP_HOST`
+**Default:** 127.0.0.1 (localhost only) **Environment variable:** `REMNOTE_HTTP_HOST`
 
 ```bash
 remnote-mcp-server --http-host 0.0.0.0
@@ -44,20 +42,21 @@ remnote-mcp-server --http-host 0.0.0.0
 - Accessing from other devices on your local network
 - Running in Docker containers
 
-**Security note:** Binding to 0.0.0.0 exposes the server to your network. For remote access, use [ngrok or other secure tunneling](remote-access.md) instead.
+**Security note:** Binding to 0.0.0.0 exposes the server to your network. For remote access, use [ngrok or other secure
+tunneling](remote-access.md) instead.
 
 ### --ws-port
 
 Specify the WebSocket server port (RemNote plugin connection).
 
-**Default:** 3002
-**Environment variable:** `REMNOTE_WS_PORT`
+**Default:** 3002 **Environment variable:** `REMNOTE_WS_PORT`
 
 ```bash
 remnote-mcp-server --ws-port 3004
 ```
 
-**Important:** If you change the WebSocket port, you must also update the WebSocket URL in the RemNote MCP Bridge plugin settings.
+**Important:** If you change the WebSocket port, you must also update the WebSocket URL in the RemNote MCP Bridge plugin
+settings.
 
 **Use when:**
 
@@ -70,8 +69,7 @@ remnote-mcp-server --ws-port 3004
 
 Set the console log level.
 
-**Valid values:** `debug`, `info`, `warn`, `error`
-**Default:** `info`
+**Valid values:** `debug`, `info`, `warn`, `error` **Default:** `info`
 
 ```bash
 remnote-mcp-server --log-level debug
@@ -88,8 +86,7 @@ remnote-mcp-server --log-level debug
 
 Set the file log level (when using --log-file).
 
-**Valid values:** `debug`, `info`, `warn`, `error`
-**Default:** Same as `--log-level`
+**Valid values:** `debug`, `info`, `warn`, `error` **Default:** Same as `--log-level`
 
 ```bash
 remnote-mcp-server --log-file /tmp/remnote.log --log-level-file debug

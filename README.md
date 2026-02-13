@@ -12,14 +12,18 @@ plugin](https://github.com/robert7/remnote-mcp-bridge).
 
 ## What is This?
 
-The RemNote MCP Server enables AI assistants like Claude Code to interact directly with your RemNote knowledge base through the Model Context Protocol (MCP). Create notes, search your knowledge base, update existing notes, and maintain your daily journal—all through conversational commands.
+The RemNote MCP Server enables AI assistants like Claude Code to interact directly with your RemNote knowledge base
+through the Model Context Protocol (MCP). Create notes, search your knowledge base, update existing notes, and maintain
+your daily journal—all through conversational commands.
 
 ### Two-Component Architecture
 
 This system consists of **two separate components** that work together:
 
-1. **[RemNote MCP Bridge](https://github.com/robert7/remnote-mcp-bridge)** - A RemNote plugin that runs in your browser or RemNote desktop app and exposes RemNote API functionality via WebSocket
-2. **RemNote MCP Server** (this project) - A standalone server that connects your AI assistant to the bridge using MCP protocol
+1. **[RemNote MCP Bridge](https://github.com/robert7/remnote-mcp-bridge)** - A RemNote plugin that runs in your browser
+   or RemNote desktop app and exposes RemNote API functionality via WebSocket
+2. **RemNote MCP Server** (this project) - A standalone server that connects your AI assistant to the bridge using MCP
+   protocol
 
 **Both components are required** for AI integration with RemNote.
 
@@ -36,9 +40,12 @@ The server acts as a bridge:
 - WebSocket server (port 3002) connects to the RemNote browser plugin
 - Translates MCP tool calls into RemNote API actions
 
-**Multi-Agent Support:** Multiple AI agents can connect simultaneously to the same RemNote knowledge base. Each agent gets its own MCP session while sharing the WebSocket bridge.
+**Multi-Agent Support:** Multiple AI agents can connect simultaneously to the same RemNote knowledge base. Each agent
+gets its own MCP session while sharing the WebSocket bridge.
 
-**Remote Access:** By default, the server binds to localhost (127.0.0.1) for local AI agents. Cloud-based services like Claude Cowork require remote access—use tunneling tools like ngrok to expose the HTTP endpoint securely. The WebSocket connection always stays local for security. See [Remote Access Guide](docs/guides/remote-access.md) for setup.
+**Remote Access:** By default, the server binds to localhost (127.0.0.1) for local AI agents. Cloud-based services like
+Claude Cowork require remote access—use tunneling tools like ngrok to expose the HTTP endpoint securely. The WebSocket
+connection always stays local for security. See [Remote Access Guide](docs/guides/remote-access.md) for setup.
 
 ## Features
 
@@ -59,7 +66,9 @@ npm install -g remnote-mcp-server
 
 ### 2. Install the RemNote Plugin
 
-Install the [RemNote MCP Bridge plugin](https://github.com/robert7/remnote-mcp-bridge) in your RemNote app. Configure the plugin to connect to `ws://127.0.0.1:3002`.
+Install the [RemNote MCP Bridge plugin](https://github.com/robert7/remnote-mcp-bridge) in your RemNote app. Currently
+available from GitHub; registration in the RemNote marketplace is pending approval. Configure the plugin to connect
+to `ws://127.0.0.1:3002`.
 
 ### 3. Start the Server
 
@@ -143,7 +152,8 @@ See the [Tools Reference](docs/guides/tools-reference.md) for detailed usage and
 ## Supported AI Clients
 
 - **[Claude Code CLI](https://claude.com/claude-code)** - Local terminal-based agent
-- **[Claude Cowork](https://claude.com/claude-cowork)** - Cloud-based workspace (requires [remote access](docs/guides/remote-access.md))
+- **[Claude Cowork](https://claude.com/claude-cowork)** - Cloud-based workspace (requires [remote
+  access](docs/guides/remote-access.md))
 - **[Accomplish](https://github.com/accomplish-ai/accomplish)** - Task-based MCP client (formerly Openwork)
 - **Any MCP client** supporting Streamable HTTP transport
 
