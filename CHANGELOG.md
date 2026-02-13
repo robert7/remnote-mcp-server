@@ -28,7 +28,7 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Documentation
 
-- Major restructuring: streamlined README.md, created `docs/guides/` with 7 focused guides
+- Streamlined README.md, created `docs/guides/` with focused guides
 - Created dedicated configuration guides for each AI client (Claude Code, Accomplish, Claude Cowork)
 - Fixed curl examples to include required `Accept: application/json, text/event-stream` header
 - Corrected ngrok documentation: clarified 0.0.0.0 is for Docker/VPS, not needed for ngrok
@@ -38,13 +38,6 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Fixed intermittent test failures on GitHub Actions caused by race condition between HTTP server start and connection
   readiness
-  - Added `waitForHttpServer()` test helper with exponential backoff retry logic to ensure server is ready before tests
-    attempt connections
-  - Fixed socket resource leak in error handler that caused file descriptor exhaustion on CI with coverage enabled
-  - Uses lightweight TCP connection probes (1-2ms overhead locally, up to ~5s worst case on slow CI)
-  - Updated all 21 HTTP server test cases to use the helper after `start()` calls
-  - Increased retry parameters for slow CI: 15 max attempts (was 10), 10ms initial delay (was 1ms)
-  - Total wait time increased from ~511ms to ~5 seconds to accommodate heavily loaded CI runners
 
 ## [0.3.1] - 2026-02-12
 
