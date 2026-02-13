@@ -1,10 +1,13 @@
 # Claude Cowork Configuration
 
-How to configure [Claude Cowork](https://claude.com/blog/cowork-research-preview) (cloud-based) to connect to the RemNote MCP Server.
+How to configure [Claude Cowork](https://claude.com/blog/cowork-research-preview) (cloud-based) to connect to the
+RemNote MCP Server.
 
 ## Overview
 
-Claude Cowork is a cloud-based AI workspace that runs in the browser. Since the RemNote MCP Server runs locally on your machine, you need to expose it to the internet for Claude Cowork to connect.
+Claude Cowork is Anthropic's research preview feature in the Claude Desktop app that extends the agentic architecture
+of Claude Code to non-coding knowledge work, enabling the AI to autonomously execute complex, multi-step tasks such
+as file organization, document formatting, research synthesis, and web-based operations within a specified folder.
 
 **Prerequisites:**
 
@@ -24,7 +27,8 @@ Claude Cowork (Cloud) ↔ Tunnel (HTTPS) ↔ HTTP MCP Server :3001 (127.0.0.1)
                                           RemNote Plugin (Local)
 ```
 
-**Critical Security:** The WebSocket server ALWAYS binds to localhost (127.0.0.1) and cannot be overridden. Only the HTTP MCP endpoint is exposed via tunnel.
+**Critical Security:** The WebSocket server ALWAYS binds to localhost (127.0.0.1) and cannot be overridden. Only the
+HTTP MCP endpoint is exposed via tunnel.
 
 ## Quick Setup with ngrok
 
@@ -48,7 +52,8 @@ Expected output:
 RemNote MCP Server v0.2.1 listening { wsPort: 3002, httpPort: 3001 }
 ```
 
-**Note:** ngrok tunnels to localhost, so the default 127.0.0.1 binding works perfectly. No special host configuration is needed.
+**Note:** ngrok tunnels to localhost, so the default 127.0.0.1 binding works perfectly. No special host configuration
+is needed.
 
 ### Step 2: Start ngrok Tunnel
 
@@ -87,7 +92,9 @@ You should see connection details and plugin information.
 
 ## Testing
 
-To test the exposed endpoint, use the curl command from the [Troubleshooting Guide](troubleshooting.md#testing-the-mcp-http-endpoint), replacing `http://localhost:3001` with your ngrok HTTPS URL (e.g., `https://abc123.ngrok-free.app`).
+To test the exposed endpoint, use the curl command from the [Troubleshooting
+Guide](troubleshooting.md#testing-the-mcp-http-endpoint), replacing `http://localhost:3001` with your ngrok HTTPS URL
+(e.g., `https://abc123.ngrok-free.app`).
 
 **Expected response:** JSON with server capabilities and `mcp-session-id` header.
 
@@ -116,7 +123,8 @@ To test the exposed endpoint, use the curl command from the [Troubleshooting Gui
 
 ## Security Considerations
 
-**⚠️ Warning:** The methods described here provide **no authentication** and expose your RemNote access to anyone with the URL.
+**⚠️ Warning:** The methods described here provide **no authentication** and expose your RemNote access to anyone with
+the URL.
 
 ### For Testing Only
 
@@ -157,7 +165,8 @@ See [Production Deployment Guide](../production-deployment.md) (coming soon) for
 
 Free alternative with authentication options.
 
-**Installation:** See [CloudFlare Tunnel documentation](https://developers.cloudflare.com/cloudflare-one/connections/connect-apps)
+**Installation:** See [CloudFlare Tunnel
+documentation](https://developers.cloudflare.com/cloudflare-one/connections/connect-apps)
 
 **Pros:**
 
@@ -217,7 +226,8 @@ remnote-mcp-server --http-host 0.0.0.0
 
 1. Verify server is running: `lsof -i :3001`
 2. Verify tunnel is forwarding to port 3001: Check ngrok web interface at `http://127.0.0.1:4040`
-3. Test locally first (see [Troubleshooting: Testing the MCP HTTP Endpoint](troubleshooting.md#testing-the-mcp-http-endpoint))
+3. Test locally first (see [Troubleshooting: Testing the MCP HTTP
+   Endpoint](troubleshooting.md#testing-the-mcp-http-endpoint))
 
 ### RemNote Plugin Not Connecting
 

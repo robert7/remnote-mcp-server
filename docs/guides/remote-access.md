@@ -97,13 +97,8 @@ ngrok http 3001
 
 ngrok will output:
 ```
-Session Status                online
-Account                       your-account (Plan: Free)
-Version                       3.x.x
-Region                        United States (us)
-Latency                       -
-Web Interface                 http://127.0.0.1:4040
-Forwarding                    https://abc123.ngrok-free.app -> http://localhost:3001
+Session Status online Account your-account (Plan: Free) Version 3.x.x Region United States (us) Latency - Web Interface
+http://127.0.0.1:4040 Forwarding https://abc123.ngrok-free.app -> http://localhost:3001
 ```
 
 Copy the HTTPS forwarding URL (e.g., `https://abc123.ngrok-free.app`).
@@ -230,8 +225,7 @@ remnote-mcp-server --http-host 0.0.0.0
 
 1. Verify server is running:
    ```bash
-   ps aux | grep remnote-mcp-server
-   lsof -i :3001
+ps aux | grep remnote-mcp-server lsof -i :3001
    ```
 
 2. Verify tunnel is forwarding to port 3001:

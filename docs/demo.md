@@ -6,7 +6,8 @@ Visual demonstrations of the RemNote MCP Server with different AI clients.
 
 Cloud-based integration through web interface.
 
-**Setup:** [Claude Cowork Configuration Guide](guides/configuration-claude-cowork.md) | [Remote Access Guide](guides/remote-access.md)
+**Setup:** [Claude Cowork Configuration Guide](guides/configuration-claude-cowork.md) | [Remote Access
+Guide](guides/remote-access.md)
 
 ### Connection Status Check
 
@@ -24,7 +25,8 @@ side) shows connection statistics and recent actions.
 
 ## Accomplish with GPT 5.2 (Local)
 
-Task-based interface using [Accomplish (formerly Openwork)](https://github.com/accomplish-ai/accomplish) with [OpenAI's GPT 5.2 model](https://openai.com/).
+Task-based interface using [Accomplish (formerly Openwork)](https://github.com/accomplish-ai/accomplish) with [OpenAI's
+GPT 5.2 model](https://openai.com/).
 
 **Setup:** [Accomplish Configuration Guide](guides/configuration-accomplish.md)
 

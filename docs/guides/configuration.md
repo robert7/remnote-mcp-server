@@ -84,7 +84,8 @@ ngrok http 3001
 
 **📖 [Full Claude Cowork Configuration Guide →](configuration-claude-cowork.md)**
 
-**⚠️ Security Note:** Remote access exposes your RemNote to anyone with the URL. Use only for development/testing. See the [Remote Access Guide](remote-access.md) for details.
+**⚠️ Security Note:** Remote access exposes your RemNote to anyone with the URL. Use only for development/testing. See
+the [Remote Access Guide](remote-access.md) for details.
 
 ## Other MCP Clients
 
@@ -105,7 +106,8 @@ Any MCP client that supports Streamable HTTP transport can connect to the RemNot
 3. Client includes session ID in subsequent requests
 4. Server uses SSE for notifications and streaming responses
 
-For technical details, see the [MCP Specification](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports#http-with-sse).
+For technical details, see the [MCP
+Specification](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports#http-with-sse).
 
 ## Environment Variables
 

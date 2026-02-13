@@ -4,7 +4,9 @@ How to configure [Claude Code CLI](https://claude.com/claude-code) to connect to
 
 ## Overview
 
-Claude Code is a local terminal-based AI agent that runs on your machine. It connects to the RemNote MCP Server via HTTP on localhost.
+Claude Code CLI is Anthropic's command-line interface tool that integrates with their Claude AI models to enable agentic
+coding, allowing developers to automate tasks such as reading codebases, editing files, running commands, and handling
+git workflows directly from the terminal.
 
 **Prerequisites:**
 
@@ -96,7 +98,8 @@ Example output:
 
 ## Manual Configuration
 
-If you prefer to manually configure the MCP server instead of using `claude mcp add`, you can directly edit your `~/.claude.json` file.
+If you prefer to manually configure the MCP server instead of using `claude mcp add`, you can directly edit your
+`~/.claude.json` file.
 
 ### Configuration Structure
 

@@ -1,10 +1,12 @@
 # Accomplish Configuration
 
-How to configure [Accomplish](https://github.com/accomplish-ai/accomplish) (formerly Openwork) to connect to the RemNote MCP Server.
+How to configure [Accomplish](https://github.com/accomplish-ai/accomplish) (formerly Openwork) to connect to the RemNote
+MCP Server.
 
 ## Overview
 
-Accomplish is a task-based MCP client that can connect to local MCP servers via HTTP.
+Accomplish is an open source AI desktop agent that automates file management, document creation, and browser tasks
+locally on your machine. Bring your own API keys (OpenAI, Anthropic, Google, xAI) or run local models via Ollama.
 
 **Prerequisites:**
 

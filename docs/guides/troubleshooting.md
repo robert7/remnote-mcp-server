@@ -283,7 +283,6 @@ RemNote MCP Server v0.2.1 listening { wsPort: 3002, httpPort: 3001 }
 **Solutions:**
 
 1. **Verify server is running and responding** (see [Testing the MCP HTTP Endpoint](#testing-the-mcp-http-endpoint))
-
 2. **Check for firewall blocking localhost** (rare but possible)
 3. **Verify port number matches configuration:**
    ```bash
@@ -419,7 +418,8 @@ RemNote MCP Server v0.2.1 listening { wsPort: 3002, httpPort: 3001 }
 3. **Verify HTTPS URL (not HTTP):**
    - Claude Cowork requires HTTPS
    - ngrok provides HTTPS by default
-4. **Test tunnel endpoint** (see [Testing the MCP HTTP Endpoint](#testing-the-mcp-http-endpoint) and replace URL with your ngrok URL)
+4. **Test tunnel endpoint** (see [Testing the MCP HTTP Endpoint](#testing-the-mcp-http-endpoint) and replace URL with
+   your ngrok URL)
 
 ### Firewall Blocking Connections
 
@@ -534,6 +534,7 @@ curl -X POST http://localhost:3001/mcp \
 ```
 
 **Expected response:**
+
 - JSON response with server capabilities
 - `mcp-session-id` header in the response
 
