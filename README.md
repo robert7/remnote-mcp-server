@@ -4,10 +4,10 @@
 ![CI](https://github.com/robert7/remnote-mcp-server/actions/workflows/ci.yml/badge.svg)
 [![codecov](https://codecov.io/gh/robert7/remnote-mcp-server/branch/main/graph/badge.svg)](https://codecov.io/gh/robert7/remnote-mcp-server)
 
-> **Note:** This is a working proof-of-concept and should be considered experimental. It "works on my machine" — you're invited to test it and [report any bugs or issues](https://github.com/robert7/remnote-mcp-server/issues).
-
 MCP server that bridges AI agents (e.g. Claude Code) to [RemNote](https://remnote.com/) via the [RemNote MCP Bridge
 plugin](https://github.com/robert7/remnote-mcp-bridge).
+
+> **Note:** This is a working proof-of-concept/experimental solution. It "works on my machine" — you're invited to test it and [report any bugs or issues](https://github.com/robert7/remnote-mcp-server/issues).
 
 ## Demo
 
