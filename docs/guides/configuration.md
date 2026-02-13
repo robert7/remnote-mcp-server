@@ -211,7 +211,7 @@ Multiple MCP clients can connect to the same RemNote MCP Server simultaneously.
 - All sessions share the same WebSocket bridge to RemNote
 - Concurrent requests are handled via UUID-based correlation
 
-### Example: Claude Code + Accomplish
+### Example: Claude Code CLI + Accomplish
 
 **Terminal 1: Start server**
 ```bash

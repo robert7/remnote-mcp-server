@@ -68,7 +68,7 @@ The following manual workflow is documented for reference and advanced use cases
 5. **Manual verification**
    - Start server: `npm start`
    - Verify WebSocket port listening: `lsof -i :3002`
-   - Test MCP tools in Claude Code (e.g., `remnote_status`)
+   - Test MCP tools in Claude Code CLI (e.g., `remnote_status`)
 
 ## Publishing Workflow
 

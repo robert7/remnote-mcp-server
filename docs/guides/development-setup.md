@@ -185,7 +185,7 @@ describe('Component Name', () => {
 
 1. Server running (`npm run dev` or `npm start`)
 2. RemNote app running with MCP Bridge plugin connected
-3. MCP client configured (e.g., Claude Code)
+3. MCP client configured (e.g.,  CLI)
 
 **Test steps:**
 

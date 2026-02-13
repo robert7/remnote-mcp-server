@@ -2,7 +2,7 @@
 
 Visual demonstrations of the RemNote MCP Server with different AI clients.
 
-## Claude Cowork (Cloud-based via ngrok)
+## Claude Cowork
 
 Cloud-based integration through web interface.
 
@@ -23,7 +23,7 @@ read, update, journal append).
 Searching RemNote knowledge base for "blue light & sleep" with AI-generated summary. The MCP Bridge plugin panel (right
 side) shows connection statistics and recent actions.
 
-## Accomplish with GPT 5.2 (Local)
+## Accomplish
 
 Task-based interface using [Accomplish (formerly Openwork)](https://github.com/accomplish-ai/accomplish) with [OpenAI's
 GPT 5.2 model](https://openai.com/).
@@ -36,13 +36,13 @@ The screenshot shows Accomplish querying RemNote about "diffusion of innovations
 interface displays multiple MCP tool calls (`remnote_search` and `remnote_read_note`) with an AI-synthesized summary
 of findings from the knowledge base.
 
-## Claude Code (Local)
+## Claude Code CLI 
 
 Local CLI-based integration showing search and connection logs.
 
-**Setup:** [Claude Code Configuration Guide](guides/configuration-claude-code-CLI.md)
+**Setup:** [Claude Code CLI Configuration Guide](guides/configuration-claude-code-CLI.md)
 
 ![RemNote MCP Server Demo (Claude Code CLI)](images/remnote-mcp-server-demo-claude-code-CLI.jpg)
 
-The screenshot shows Claude Code searching RemNote for "AI assisted coding" through the terminal, with MCP Bridge
+The screenshot shows Claude Code CLI searching RemNote for "AI assisted coding" through the terminal, with MCP Bridge
 connection logs visible in the background.

@@ -135,7 +135,7 @@ Open RemNote with the MCP Bridge plugin installed. The plugin control panel shou
 
 Once you've configured an MCP client (see [Configuration Guide](configuration.md)), test the connection:
 
-**In Claude Code:**
+**In Claude Code CLI:**
 ```
 Use remnote_status to check the connection
 ```
@@ -220,7 +220,7 @@ export PATH="$(npm config get prefix)/bin:$PATH"
 
 ## Next Steps
 
-- [Configure your AI client](configuration.md) - Set up Claude Code, Accomplish, or Claude Cowork
+- [Configure your AI client](configuration.md) - Set up  CLI, Accomplish, or Claude Cowork
 - [Learn the MCP tools](tools-reference.md) - Explore available RemNote operations
 - [View demos](../demo.md) - See the server in action with different clients
 

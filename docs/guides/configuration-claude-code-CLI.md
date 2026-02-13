@@ -1,4 +1,4 @@
-# Claude Code Configuration
+# Claude Code CLI Configuration
 
 How to configure [Claude Code CLI](https://claude.com/claude-code) to connect to the RemNote MCP Server.
 
@@ -55,7 +55,7 @@ Claude will automatically use `remnote_search` and other RemNote tools as needed
 
 ## Using the CLI Tool (Recommended)
 
-Claude Code provides CLI commands to manage MCP servers.
+Claude Code CLI provides commands to manage MCP servers.
 
 ### Add Server
 
@@ -151,7 +151,7 @@ After manually editing the configuration, restart Claude Code completely to load
 
 ### Using remnote_status Tool
 
-In any Claude Code session:
+In any Claude Code CLI session:
 
 ```
 Use remnote_status to check the connection
@@ -273,7 +273,7 @@ If you have old configuration, migrate to the new format using `claude mcp add`.
 
 ## Example Usage
 
-Once configured, Claude Code can use RemNote tools automatically:
+Once configured, Claude Code CLI can use RemNote tools automatically:
 
 **Search:**
 ```

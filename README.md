@@ -91,7 +91,7 @@ Keep this terminal running.
 ### 4. Configure Your AI Client
 
 - [Configuration Guide](docs/guides/configuration.md) - Overview and generic setup
-  - [Claude Code](docs/guides/configuration-claude-code-CLI.md) - Detailed Claude Code CLI configuration
+  - [Claude Code CLI](docs/guides/configuration-claude-code-CLI.md) - Detailed Claude Code CLI configuration
   - [Accomplish](docs/guides/configuration-accomplish.md) - Accomplish (Openwork) configuration
   - [Claude Cowork](docs/guides/configuration-claude-cowork.md) - Cloud-based (requires remote access setup)
 
@@ -100,7 +100,7 @@ Keep this terminal running.
 ### Getting Started
 
 - 📦 **[Installation Guide](docs/guides/installation.md)** - Complete installation instructions
-- ⚙️ **[Configuration Guide](docs/guides/configuration.md)** - Configure Claude Code, Accomplish, and other clients
+- ⚙️ **[Configuration Guide](docs/guides/configuration.md)** - Configure Claude Code CLI, Accomplish, and other clients
 - 🎬 **[Demo & Screenshots](docs/demo.md)** - See the server in action with different AI clients
 
 ### Usage

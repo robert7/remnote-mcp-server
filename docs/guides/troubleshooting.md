@@ -224,7 +224,7 @@ RemNote MCP Server v0.2.1 listening { wsPort: 3002, httpPort: 3001 }
 
 ### Tools Not Appearing in Claude Code
 
-**Symptom:** RemNote tools don't show up in Claude Code
+**Symptom:** RemNote tools don't show up in Claude Code CLI
 
 **Solutions:**
 
@@ -264,7 +264,7 @@ RemNote MCP Server v0.2.1 listening { wsPort: 3002, httpPort: 3001 }
    }
    ```
 
-4. **Restart Claude Code completely** (not just reload)
+4. **Restart Claude Code CLI completely** (not just reload)
 5. **Check MCP client logs:**
    ```bash
    tail -f ~/.claude/debug/mcp-*.log
@@ -317,8 +317,8 @@ RemNote MCP Server v0.2.1 listening { wsPort: 3002, httpPort: 3001 }
 3. **Check project path matches:**
    - Configuration must be under correct project path in `~/.claude.json`
    - Use home directory path for global configuration
-4. **Restart Claude Code completely:**
-   - Quit Claude Code
+4. **Restart Claude Code CLI completely:**
+   - Quit Claude Code CLI
    - Wait a few seconds
    - Restart
 5. **Use CLI to manage configuration:**
@@ -552,7 +552,7 @@ See also: [Remote Access Guide](remote-access.md) for ngrok setup.
 
 ### Check MCP Client Logs
 
-**Claude Code:**
+**Claude Code CLI:**
 ```bash
 tail -f ~/.claude/debug/mcp-*.log
 ```
