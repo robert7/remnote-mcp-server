@@ -1,6 +1,6 @@
 # Claude Cowork Configuration
 
-How to configure [Claude Cowork](https://claude.com/claude-cowork) (cloud-based) to connect to the RemNote MCP Server.
+How to configure [Claude Cowork](https://claude.com/blog/cowork-research-preview) (cloud-based) to connect to the RemNote MCP Server.
 
 ## Overview
 

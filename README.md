@@ -107,9 +107,9 @@ claude mcp list
 **For other clients:**
 
 - [Configuration Guide](docs/guides/configuration.md) - Overview and generic setup
-- [Claude Code](docs/guides/configuration-claude-code-CLI.md) - Detailed Claude Code CLI configuration
-- [Accomplish](docs/guides/configuration-accomplish.md) - Accomplish configuration
-- [Claude Cowork](docs/guides/configuration-claude-cowork.md) - Cloud-based workspace (requires ngrok)
+  - [Claude Code](docs/guides/configuration-claude-code-CLI.md) - Detailed Claude Code CLI configuration
+  - [Accomplish](docs/guides/configuration-accomplish.md) - Accomplish (Openwork) configuration
+  - [Claude Cowork](docs/guides/configuration-claude-cowork.md) - Cloud-based (requires remote access setup)
 
 ### 5. Start Using RemNote
 
@@ -161,7 +161,7 @@ See the [Tools Reference](docs/guides/tools-reference.md) for detailed usage and
 ## Supported AI Clients
 
 - **[Claude Code CLI](https://claude.com/claude-code)** - Local terminal-based agent
-- **[Claude Cowork](https://claude.com/claude-cowork)** - Cloud-based workspace (requires [remote
+- **[Claude Cowork](https://claude.com/blog/cowork-research-preview)** - Cloud-based workspace (requires [remote
   access](docs/guides/remote-access.md))
 - **[Accomplish](https://github.com/accomplish-ai/accomplish)** - Task-based MCP client (formerly Openwork)
 - **Any MCP client** supporting Streamable HTTP transport
