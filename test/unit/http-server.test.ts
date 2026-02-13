@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { HttpMcpServer } from '../../src/http-server.js';
 import { WebSocketServer } from '../../src/websocket-server.js';
 import { createMockLogger } from '../setup.js';
+import { waitForHttpServer } from '../helpers/test-server.js';
 
 // Mock WebSocketServer
 vi.mock('../../src/websocket-server.js', () => ({
@@ -45,6 +46,7 @@ describe('HttpMcpServer', () => {
   describe('Server Lifecycle', () => {
     it('should start and bind to specified port', async () => {
       await httpServer.start();
+      await waitForHttpServer(port);
 
       // Verify server is listening by making a request
       const response = await fetch(`http://127.0.0.1:${port}/mcp`, {
@@ -89,6 +91,7 @@ describe('HttpMcpServer', () => {
   describe('Session Initialization', () => {
     it('should initialize new session and return session ID', async () => {
       await httpServer.start();
+      await waitForHttpServer(port);
 
       const response = await fetch(`http://127.0.0.1:${port}/mcp`, {
         method: 'POST',
@@ -121,6 +124,7 @@ describe('HttpMcpServer', () => {
 
     it('should handle multiple concurrent session initializations', async () => {
       await httpServer.start();
+      await waitForHttpServer(port);
 
       const initRequest = {
         jsonrpc: '2.0',
@@ -177,6 +181,7 @@ describe('HttpMcpServer', () => {
   describe('Session Requests', () => {
     it('should handle requests with valid session ID', async () => {
       await httpServer.start();
+      await waitForHttpServer(port);
 
       // Initialize session
       const initResponse = await fetch(`http://127.0.0.1:${port}/mcp`, {
@@ -220,6 +225,7 @@ describe('HttpMcpServer', () => {
 
     it('should reject request with invalid session ID', async () => {
       await httpServer.start();
+      await waitForHttpServer(port);
 
       const response = await fetch(`http://127.0.0.1:${port}/mcp`, {
         method: 'POST',
@@ -242,6 +248,7 @@ describe('HttpMcpServer', () => {
 
     it('should reject non-initialize request without session ID', async () => {
       await httpServer.start();
+      await waitForHttpServer(port);
 
       const response = await fetch(`http://127.0.0.1:${port}/mcp`, {
         method: 'POST',
@@ -266,6 +273,7 @@ describe('HttpMcpServer', () => {
   describe('Session Termination', () => {
     it('should terminate session via DELETE request', async () => {
       await httpServer.start();
+      await waitForHttpServer(port);
 
       // Initialize session
       const initResponse = await fetch(`http://127.0.0.1:${port}/mcp`, {
@@ -305,6 +313,7 @@ describe('HttpMcpServer', () => {
 
     it('should return 404 when terminating non-existent session', async () => {
       await httpServer.start();
+      await waitForHttpServer(port);
 
       const response = await fetch(`http://127.0.0.1:${port}/mcp`, {
         method: 'DELETE',
@@ -321,6 +330,7 @@ describe('HttpMcpServer', () => {
 
     it('should return 400 when DELETE missing session ID', async () => {
       await httpServer.start();
+      await waitForHttpServer(port);
 
       const response = await fetch(`http://127.0.0.1:${port}/mcp`, {
         method: 'DELETE',
@@ -338,6 +348,7 @@ describe('HttpMcpServer', () => {
   describe('SSE Stream (GET)', () => {
     it('should return SSE stream with valid session ID', async () => {
       await httpServer.start();
+      await waitForHttpServer(port);
 
       // Initialize session
       const initResponse = await fetch(`http://127.0.0.1:${port}/mcp`, {
@@ -377,6 +388,7 @@ describe('HttpMcpServer', () => {
 
     it('should return 404 for GET with invalid session ID', async () => {
       await httpServer.start();
+      await waitForHttpServer(port);
 
       const response = await fetch(`http://127.0.0.1:${port}/mcp`, {
         method: 'GET',
@@ -393,6 +405,7 @@ describe('HttpMcpServer', () => {
 
     it('should return 400 for GET without session ID', async () => {
       await httpServer.start();
+      await waitForHttpServer(port);
 
       const response = await fetch(`http://127.0.0.1:${port}/mcp`, {
         method: 'GET',
@@ -410,6 +423,7 @@ describe('HttpMcpServer', () => {
   describe('Session Management', () => {
     it('should track active session count', async () => {
       await httpServer.start();
+      await waitForHttpServer(port);
 
       expect(httpServer.getActiveSessionCount()).toBe(0);
 
@@ -458,6 +472,7 @@ describe('HttpMcpServer', () => {
 
     it('should close all sessions on server stop', async () => {
       await httpServer.start();
+      await waitForHttpServer(port);
 
       // Initialize 2 sessions
       await fetch(`http://127.0.0.1:${port}/mcp`, {
@@ -508,6 +523,7 @@ describe('HttpMcpServer', () => {
   describe('Logging', () => {
     it('should log server start', async () => {
       await httpServer.start();
+      await waitForHttpServer(port);
       expect(mockLogger.child).toHaveBeenCalledWith({ context: 'http-server' });
       expect(mockLogger.info).toHaveBeenCalledWith({ port }, 'HTTP server started');
       await httpServer.stop();
@@ -522,6 +538,7 @@ describe('HttpMcpServer', () => {
 
     it('should log new session initialization', async () => {
       await httpServer.start();
+      await waitForHttpServer(port);
       mockLogger.info = vi.fn(); // Reset
 
       await fetch(`http://127.0.0.1:${port}/mcp`, {
@@ -551,6 +568,7 @@ describe('HttpMcpServer', () => {
 
     it('should log session close', async () => {
       await httpServer.start();
+      await waitForHttpServer(port);
 
       const initResponse = await fetch(`http://127.0.0.1:${port}/mcp`, {
         method: 'POST',
@@ -591,6 +609,7 @@ describe('HttpMcpServer', () => {
 
     it('should log errors on malformed requests', async () => {
       await httpServer.start();
+      await waitForHttpServer(port);
       mockLogger.error = vi.fn(); // Reset
 
       // Send malformed JSON to trigger error logging
@@ -616,6 +635,7 @@ describe('HttpMcpServer', () => {
 
     it('should log debug messages for requests', async () => {
       await httpServer.start();
+      await waitForHttpServer(port);
       mockLogger.debug = vi.fn(); // Reset
 
       await fetch(`http://127.0.0.1:${port}/mcp`, {
