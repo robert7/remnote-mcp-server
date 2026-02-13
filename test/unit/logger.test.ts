@@ -3,18 +3,10 @@ import { createLogger, createRequestResponseLogger, ensureLogDirectory } from '.
 import { mkdir, rm } from 'fs/promises';
 import { existsSync } from 'fs';
 import { join } from 'path';
-import type pino from 'pino';
 
 const TEST_LOG_DIR = join(process.cwd(), 'test-logs');
 
-// Type for pino destination with flush capability
-interface FlushableDestination {
-  flush?: (cb: () => void) => void;
-}
-
 describe('Logger', () => {
-  let testLogger: pino.Logger | null = null;
-
   beforeEach(async () => {
     // Clean up test logs directory
     if (existsSync(TEST_LOG_DIR)) {
@@ -23,33 +15,6 @@ describe('Logger', () => {
   });
 
   afterEach(async () => {
-    // Flush and close any open logger streams
-    if (testLogger) {
-      await new Promise<void>((resolve) => {
-        // Access the internal stream via pino symbols
-        // This is necessary to properly flush file streams before cleanup
-        const streamSymbol = Object.getOwnPropertySymbols(testLogger as object).find(
-          (s) => s.toString() === 'Symbol(pino.stream)'
-        );
-
-        const dest = streamSymbol
-          ? ((testLogger as unknown as Record<symbol, unknown>)[
-              streamSymbol
-            ] as FlushableDestination)
-          : null;
-
-        if (dest && typeof dest.flush === 'function') {
-          dest.flush(() => {
-            testLogger = null;
-            resolve();
-          });
-        } else {
-          testLogger = null;
-          resolve();
-        }
-      });
-    }
-
     // Clean up test logs directory
     if (existsSync(TEST_LOG_DIR)) {
       await rm(TEST_LOG_DIR, { recursive: true, force: true });
@@ -105,18 +70,18 @@ describe('Logger', () => {
     it('should create request/response logger', async () => {
       await mkdir(TEST_LOG_DIR, { recursive: true });
       const filePath = join(TEST_LOG_DIR, 'request.jsonl');
-      testLogger = createRequestResponseLogger(filePath);
+      const logger = createRequestResponseLogger(filePath);
 
-      expect(testLogger).toBeDefined();
-      expect(testLogger.info).toBeDefined();
+      expect(logger).toBeDefined();
+      expect(logger.info).toBeDefined();
     });
 
     it('should log in JSON Lines format', async () => {
       await mkdir(TEST_LOG_DIR, { recursive: true });
       const filePath = join(TEST_LOG_DIR, 'request.jsonl');
-      testLogger = createRequestResponseLogger(filePath);
+      const logger = createRequestResponseLogger(filePath);
 
-      testLogger.info({ type: 'request', id: 'test-123', action: 'search' });
+      logger.info({ type: 'request', id: 'test-123', action: 'search' });
 
       // Wait for write to complete
       await new Promise((resolve) => setTimeout(resolve, 100));

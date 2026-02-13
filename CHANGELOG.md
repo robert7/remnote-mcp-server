@@ -46,13 +46,10 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - Fixed intermittent test failures on GitHub Actions caused by race condition between HTTP server start and connection readiness
   - Added `waitForHttpServer()` test helper with exponential backoff retry logic to ensure server is ready before tests attempt connections
   - Fixed socket resource leak in error handler that caused file descriptor exhaustion on CI with coverage enabled
-  - Uses lightweight TCP connection probes (1-2ms overhead locally, up to ~127ms worst case on slow CI)
+  - Uses lightweight TCP connection probes (1-2ms overhead locally, up to ~5s worst case on slow CI)
   - Updated all 21 HTTP server test cases to use the helper after `start()` calls
-- Further improved GitHub Actions test reliability by addressing remaining timing-sensitive failures
-  - Increased `waitForHttpServer()` retry parameters: 15 max attempts (was 10), 10ms initial delay (was 1ms)
-  - Total wait time increased from ~511ms to ~5 seconds to accommodate slow CI runners
-  - Fixed file handle leak in logger tests by properly flushing pino destination streams before cleanup
-  - Prevents `ENOTEMPTY` errors during test directory cleanup on slow systems
+  - Increased retry parameters for slow CI: 15 max attempts (was 10), 10ms initial delay (was 1ms)
+  - Total wait time increased from ~511ms to ~5 seconds to accommodate heavily loaded CI runners
 
 ## [0.3.1] - 2026-02-12
 
