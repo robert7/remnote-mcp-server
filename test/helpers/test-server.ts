@@ -68,6 +68,7 @@ export async function waitForHttpServer(
 
         socket.on('error', (err) => {
           lastError = err;
+          socket.destroy();
           reject(err);
         });
 
