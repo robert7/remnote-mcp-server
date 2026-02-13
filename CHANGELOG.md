@@ -7,6 +7,28 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- Host binding configuration for HTTP and WebSocket servers
+- `--http-host` CLI option to control HTTP server binding address
+- `REMNOTE_HTTP_HOST` environment variable for HTTP server binding
+- ngrok setup documentation for Claude Cowork integration (docs/ngrok-setup.md)
+- Support for binding HTTP server to `0.0.0.0` for remote access (e.g., ngrok, Claude Cowork)
+- Security enforcement: WebSocket server always binds to localhost (127.0.0.1)
+- Host validation in CLI with support for localhost, 127.0.0.1, 0.0.0.0, and valid IPv4 addresses
+
+### Changed
+
+- HTTP server can now bind to configurable host address (default: 127.0.0.1)
+- Improved logging to show bound host addresses on startup
+- Updated all tests to pass host parameters to server constructors
+
+### Security
+
+- WebSocket server host binding is now enforced to localhost (127.0.0.1) only
+- Cannot be overridden via environment variables or CLI options
+- Ensures RemNote plugin connection is never exposed remotely
+
 ### Internal
 
 - Fixed intermittent test failures on GitHub Actions caused by race condition between HTTP server start and connection readiness

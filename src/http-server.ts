@@ -15,13 +15,21 @@ export class HttpMcpServer {
   private app: Express;
   private server: ReturnType<Express['listen']> | null = null;
   private port: number;
+  private host: string;
   private wsServer: WebSocketServer;
   private serverInfo: ServerInfo;
   private logger: Logger;
   private transports = new Map<string, StreamableHTTPServerTransport>();
 
-  constructor(port: number, wsServer: WebSocketServer, serverInfo: ServerInfo, logger: Logger) {
+  constructor(
+    port: number,
+    host: string,
+    wsServer: WebSocketServer,
+    serverInfo: ServerInfo,
+    logger: Logger
+  ) {
     this.port = port;
+    this.host = host;
     this.wsServer = wsServer;
     this.serverInfo = serverInfo;
     this.logger = logger.child({ context: 'http-server' });
@@ -193,8 +201,8 @@ export class HttpMcpServer {
   async start(): Promise<void> {
     return new Promise((resolve, reject) => {
       try {
-        this.server = this.app.listen(this.port, () => {
-          this.logger.info({ port: this.port }, 'HTTP server started');
+        this.server = this.app.listen(this.port, this.host, () => {
+          this.logger.info({ port: this.port, host: this.host }, 'HTTP server started');
           resolve();
         });
 

@@ -108,6 +108,52 @@ describe('CLI Argument Parsing', () => {
     });
   });
 
+  describe('Host Arguments', () => {
+    it('should parse HTTP host', () => {
+      process.argv = ['node', 'remnote-mcp-server', '--http-host', '0.0.0.0'];
+      const options = parseCliArgs();
+      expect(options.httpHost).toBe('0.0.0.0');
+    });
+
+    it('should accept localhost', () => {
+      process.argv = ['node', 'remnote-mcp-server', '--http-host', 'localhost'];
+      const options = parseCliArgs();
+      expect(options.httpHost).toBe('localhost');
+    });
+
+    it('should accept 127.0.0.1', () => {
+      process.argv = ['node', 'remnote-mcp-server', '--http-host', '127.0.0.1'];
+      const options = parseCliArgs();
+      expect(options.httpHost).toBe('127.0.0.1');
+    });
+
+    it('should accept valid IPv4 addresses', () => {
+      process.argv = ['node', 'remnote-mcp-server', '--http-host', '192.168.1.1'];
+      const options = parseCliArgs();
+      expect(options.httpHost).toBe('192.168.1.1');
+    });
+
+    it('should reject invalid host format', () => {
+      process.argv = ['node', 'remnote-mcp-server', '--http-host', 'invalid-host'];
+      expect(() => parseCliArgs()).toThrow('Invalid host');
+    });
+
+    it('should reject IPv4 addresses with octets > 255', () => {
+      process.argv = ['node', 'remnote-mcp-server', '--http-host', '192.168.256.1'];
+      expect(() => parseCliArgs()).toThrow('Invalid host');
+    });
+
+    it('should reject IPv4 addresses with octets < 0', () => {
+      process.argv = ['node', 'remnote-mcp-server', '--http-host', '192.168.-1.1'];
+      expect(() => parseCliArgs()).toThrow('Invalid host');
+    });
+
+    it('should reject malformed IPv4 addresses', () => {
+      process.argv = ['node', 'remnote-mcp-server', '--http-host', '192.168.1'];
+      expect(() => parseCliArgs()).toThrow('Invalid host');
+    });
+  });
+
   describe('File Logging Arguments', () => {
     it('should parse log file path', () => {
       process.argv = ['node', 'remnote-mcp-server', '--log-file', '/tmp/test.log'];

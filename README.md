@@ -162,6 +162,7 @@ npm run dev -- -h
 Server Configuration:
 - `--ws-port <number>` - WebSocket port (default: 3002, env: REMNOTE_WS_PORT)
 - `--http-port <number>` - HTTP MCP port (default: 3001, env: REMNOTE_HTTP_PORT)
+- `--http-host <host>` - HTTP server bind address (default: 127.0.0.1, env: REMNOTE_HTTP_HOST)
 
 Logging Configuration:
 - `--log-level <level>` - Console log level: debug, info, warn, error (default: info)
@@ -400,6 +401,7 @@ Check if RemNote is connected
 ### Environment Variables
 
 - `REMNOTE_HTTP_PORT` - HTTP MCP server port (default: 3001)
+- `REMNOTE_HTTP_HOST` - HTTP server bind address (default: 127.0.0.1)
 - `REMNOTE_WS_PORT` - WebSocket server port (default: 3002)
 
 **Example with custom ports:**
@@ -424,6 +426,31 @@ Configure in the plugin control panel:
 
 - **WebSocket URL:** `ws://127.0.0.1:3002` (or your custom port)
 - **Auto-reconnect:** Enabled (recommended)
+
+## Remote Access (ngrok/Claude Cowork)
+
+By default, the RemNote MCP server binds to localhost (127.0.0.1) and is only accessible from your local machine. To enable cloud-based AI services like **Claude Cowork** to access your RemNote knowledge base, you need to expose the HTTP MCP endpoint remotely.
+
+**Quick Setup with ngrok (Development/Testing):**
+
+```bash
+# 1. Start server on all interfaces
+REMNOTE_HTTP_HOST=0.0.0.0 remnote-mcp-server
+
+# 2. In another terminal, start ngrok
+ngrok http 3001
+
+# 3. Use the ngrok HTTPS URL in Claude Cowork
+# Example: https://abc123.ngrok-free.app/mcp
+```
+
+**Security Note:** The WebSocket server (RemNote plugin connection) ALWAYS stays on localhost (127.0.0.1) regardless of HTTP binding. This ensures your RemNote app connection is never exposed.
+
+For detailed setup instructions, security considerations, and troubleshooting, see:
+- **[ngrok Setup Guide](./docs/ngrok-setup.md)** - Development/testing with ngrok
+
+For production deployments with OAuth 2.1 authentication, see:
+- **[Production Deployment Guide](./docs/production-deployment.md)** - Coming soon
 
 ## Troubleshooting
 

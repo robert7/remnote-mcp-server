@@ -7,6 +7,7 @@ export class WebSocketServer {
   private wss: WSServer | null = null;
   private client: WebSocket | null = null;
   private port: number;
+  private host: string;
   private logger: Logger;
   private requestLogger: Logger | null = null;
   private responseLogger: Logger | null = null;
@@ -21,8 +22,15 @@ export class WebSocketServer {
   private connectCallbacks: Array<() => void> = [];
   private disconnectCallbacks: Array<() => void> = [];
 
-  constructor(port: number, logger: Logger, requestLogger?: Logger, responseLogger?: Logger) {
+  constructor(
+    port: number,
+    host: string,
+    logger: Logger,
+    requestLogger?: Logger,
+    responseLogger?: Logger
+  ) {
     this.port = port;
+    this.host = host;
     this.logger = logger.child({ context: 'websocket-server' });
     this.requestLogger = requestLogger || null;
     this.responseLogger = responseLogger || null;
@@ -30,8 +38,8 @@ export class WebSocketServer {
 
   async start(): Promise<void> {
     return new Promise((resolve, reject) => {
-      this.wss = new WSServer({ port: this.port }, () => {
-        this.logger.debug({ port: this.port }, 'WebSocket server started');
+      this.wss = new WSServer({ port: this.port, host: this.host }, () => {
+        this.logger.debug({ port: this.port, host: this.host }, 'WebSocket server started');
         resolve();
       });
 

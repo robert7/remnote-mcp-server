@@ -2,7 +2,9 @@ import type { CliOptions } from './cli.js';
 
 export interface ServerConfig {
   wsPort: number;
+  wsHost: string;
   httpPort: number;
+  httpHost: string;
   logLevel: string;
   logLevelFile?: string;
   logFile?: string;
@@ -37,6 +39,11 @@ export function getConfig(cliOptions: CliOptions): ServerConfig {
   const wsPort = cliOptions.wsPort || parseInt(process.env.REMNOTE_WS_PORT || '3002', 10);
   const httpPort = cliOptions.httpPort || parseInt(process.env.REMNOTE_HTTP_PORT || '3001', 10);
 
+  // Get hosts with CLI > env > default precedence
+  // SECURITY: WebSocket ALWAYS binds to localhost, regardless of env var or CLI option
+  const wsHost = '127.0.0.1';
+  const httpHost = cliOptions.httpHost || process.env.REMNOTE_HTTP_HOST || '127.0.0.1';
+
   // Validate port conflicts
   if (wsPort === httpPort) {
     throw new Error(`WebSocket port and HTTP port cannot be the same (both set to ${wsPort})`);
@@ -50,7 +57,9 @@ export function getConfig(cliOptions: CliOptions): ServerConfig {
 
   return {
     wsPort,
+    wsHost,
     httpPort,
+    httpHost,
     logLevel,
     logLevelFile,
     logFile: cliOptions.logFile,

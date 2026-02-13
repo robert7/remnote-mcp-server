@@ -20,7 +20,7 @@ describe('WebSocketServer - Lifecycle', () => {
   beforeEach(() => {
     port = getRandomPort();
     mockLogger = createMockLogger();
-    wsServer = new WebSocketServer(port, mockLogger);
+    wsServer = new WebSocketServer(port, '127.0.0.1', mockLogger);
   });
 
   afterEach(async () => {
@@ -53,7 +53,7 @@ describe('WebSocketServer - Lifecycle', () => {
   it('should reject when port is already in use', async () => {
     await wsServer.start();
 
-    const duplicateServer = new WebSocketServer(port, createMockLogger());
+    const duplicateServer = new WebSocketServer(port, '127.0.0.1', createMockLogger());
     await expect(duplicateServer.start()).rejects.toThrow();
     await duplicateServer.stop();
   });
@@ -68,7 +68,7 @@ describe('WebSocketServer - Connection State', () => {
   beforeEach(async () => {
     port = getRandomPort();
     mockLogger = createMockLogger();
-    wsServer = new WebSocketServer(port, mockLogger);
+    wsServer = new WebSocketServer(port, '127.0.0.1', mockLogger);
     await wsServer.start();
   });
 
@@ -148,7 +148,7 @@ describe('WebSocketServer - Single Client Model', () => {
   beforeEach(async () => {
     port = getRandomPort();
     mockLogger = createMockLogger();
-    wsServer = new WebSocketServer(port, mockLogger);
+    wsServer = new WebSocketServer(port, '127.0.0.1', mockLogger);
     await wsServer.start();
   });
 
@@ -208,7 +208,7 @@ describe('WebSocketServer - Request/Response', () => {
   beforeEach(async () => {
     port = getRandomPort();
     mockLogger = createMockLogger();
-    wsServer = new WebSocketServer(port, mockLogger);
+    wsServer = new WebSocketServer(port, '127.0.0.1', mockLogger);
     await wsServer.start();
 
     client = new WebSocket(`ws://localhost:${port}`);
@@ -335,7 +335,7 @@ describe('WebSocketServer - Heartbeat Protocol', () => {
   beforeEach(async () => {
     port = getRandomPort();
     mockLogger = createMockLogger();
-    wsServer = new WebSocketServer(port, mockLogger);
+    wsServer = new WebSocketServer(port, '127.0.0.1', mockLogger);
     await wsServer.start();
 
     client = new WebSocket(`ws://localhost:${port}`);
@@ -383,7 +383,7 @@ describe('WebSocketServer - Error Handling', () => {
   beforeEach(async () => {
     port = getRandomPort();
     mockLogger = createMockLogger();
-    wsServer = new WebSocketServer(port, mockLogger);
+    wsServer = new WebSocketServer(port, '127.0.0.1', mockLogger);
     await wsServer.start();
   });
 
@@ -440,7 +440,7 @@ describe('WebSocketServer - Logging', () => {
   beforeEach(async () => {
     port = getRandomPort();
     mockLogger = createMockLogger();
-    wsServer = new WebSocketServer(port, mockLogger);
+    wsServer = new WebSocketServer(port, '127.0.0.1', mockLogger);
     await wsServer.start();
   });
 
@@ -456,7 +456,10 @@ describe('WebSocketServer - Logging', () => {
   });
 
   it('should log server start', () => {
-    expect(mockLogger.debug).toHaveBeenCalledWith({ port }, 'WebSocket server started');
+    expect(mockLogger.debug).toHaveBeenCalledWith(
+      { port, host: '127.0.0.1' },
+      'WebSocket server started'
+    );
   });
 
   it('should log server stop', async () => {
@@ -565,7 +568,13 @@ describe('WebSocketServer - Request/Response Logging', () => {
     mockLogger = createMockLogger();
     mockRequestLogger = createMockLogger();
     mockResponseLogger = createMockLogger();
-    wsServer = new WebSocketServer(port, mockLogger, mockRequestLogger, mockResponseLogger);
+    wsServer = new WebSocketServer(
+      port,
+      '127.0.0.1',
+      mockLogger,
+      mockRequestLogger,
+      mockResponseLogger
+    );
     await wsServer.start();
   });
 

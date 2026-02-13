@@ -9,6 +9,7 @@ describe('Config', () => {
     process.env = { ...originalEnv };
     delete process.env.REMNOTE_WS_PORT;
     delete process.env.REMNOTE_HTTP_PORT;
+    delete process.env.REMNOTE_HTTP_HOST;
   });
 
   afterEach(() => {
@@ -125,6 +126,41 @@ describe('Config', () => {
     });
   });
 
+  describe('Host Configuration', () => {
+    it('should default to localhost for both servers', () => {
+      const config = getConfig({});
+      expect(config.wsHost).toBe('127.0.0.1');
+      expect(config.httpHost).toBe('127.0.0.1');
+    });
+
+    it('should use REMNOTE_HTTP_HOST environment variable for HTTP server', () => {
+      process.env.REMNOTE_HTTP_HOST = '0.0.0.0';
+
+      const config = getConfig({});
+      expect(config.httpHost).toBe('0.0.0.0');
+    });
+
+    it('should prefer CLI httpHost option over environment variable', () => {
+      process.env.REMNOTE_HTTP_HOST = '0.0.0.0';
+
+      const config = getConfig({ httpHost: '192.168.1.1' });
+      expect(config.httpHost).toBe('192.168.1.1');
+    });
+
+    it('should ALWAYS use localhost for WebSocket server regardless of environment variable', () => {
+      // This is a security feature - WebSocket server must never be exposed
+      process.env.REMNOTE_WS_HOST = '0.0.0.0';
+
+      const config = getConfig({});
+      expect(config.wsHost).toBe('127.0.0.1'); // Hardcoded, ignores env var
+    });
+
+    it('should allow 0.0.0.0 for HTTP server (ngrok mode)', () => {
+      const config = getConfig({ httpHost: '0.0.0.0' });
+      expect(config.httpHost).toBe('0.0.0.0');
+    });
+  });
+
   describe('Complete Configuration', () => {
     it('should merge all configuration options correctly', () => {
       process.env.REMNOTE_WS_PORT = '4002';
@@ -139,7 +175,9 @@ describe('Config', () => {
 
       expect(config).toMatchObject({
         wsPort: 4002, // from env
+        wsHost: '127.0.0.1', // always localhost
         httpPort: 4001, // from CLI
+        httpHost: '127.0.0.1', // default
         logLevel: 'debug',
         logLevelFile: 'debug', // derived from logLevel + logFile
         logFile: '/tmp/test.log',

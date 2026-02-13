@@ -7,6 +7,7 @@ const packageJson = require('../package.json');
 export interface CliOptions {
   wsPort?: number;
   httpPort?: number;
+  httpHost?: string;
   logLevel?: string;
   logLevelFile?: string;
   verbose?: boolean;
@@ -32,6 +33,11 @@ export function parseCliArgs(): CliOptions {
       '--http-port <number>',
       'HTTP MCP port (default: 3001, env: REMNOTE_HTTP_PORT)',
       parsePort
+    )
+    .option(
+      '--http-host <host>',
+      'HTTP server bind address (default: 127.0.0.1, env: REMNOTE_HTTP_HOST). Use 0.0.0.0 for ngrok/cloud access',
+      validateHost
     )
     .option(
       '--log-level <level>',
@@ -80,4 +86,30 @@ function validateLogLevel(value: string): string {
     throw new Error(`Invalid log level: ${value}. Valid levels: ${validLogLevels.join(', ')}`);
   }
   return value.toLowerCase();
+}
+
+/**
+ * Validate host string
+ */
+function validateHost(value: string): string {
+  // Allow localhost variations and 0.0.0.0
+  if (value === 'localhost' || value === '127.0.0.1' || value === '0.0.0.0') {
+    return value;
+  }
+
+  // Validate IPv4 format
+  const ipv4Pattern = /^(\d{1,3}\.){3}\d{1,3}$/;
+  if (!ipv4Pattern.test(value)) {
+    throw new Error(
+      `Invalid host: ${value}. Must be localhost, 127.0.0.1, 0.0.0.0, or a valid IPv4 address`
+    );
+  }
+
+  // Validate each octet is 0-255
+  const octets = value.split('.').map(Number);
+  if (octets.some((octet) => octet < 0 || octet > 255)) {
+    throw new Error(`Invalid host: ${value}. IPv4 octets must be between 0 and 255`);
+  }
+
+  return value;
 }

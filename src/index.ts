@@ -42,7 +42,13 @@ async function main() {
     : undefined;
 
   // Initialize WebSocket server for RemNote plugin
-  const wsServer = new WebSocketServer(config.wsPort, logger, requestLogger, responseLogger);
+  const wsServer = new WebSocketServer(
+    config.wsPort,
+    config.wsHost,
+    logger,
+    requestLogger,
+    responseLogger
+  );
 
   // Log connection status
   wsServer.onClientConnect(() => {
@@ -59,6 +65,7 @@ async function main() {
   // Initialize HTTP MCP server
   const httpServer = new HttpMcpServer(
     config.httpPort,
+    config.httpHost,
     wsServer,
     {
       name: 'remnote-mcp-server',
@@ -73,7 +80,9 @@ async function main() {
   logger.info(
     {
       wsPort: config.wsPort,
+      wsHost: config.wsHost,
       httpPort: config.httpPort,
+      httpHost: config.httpHost,
     },
     `RemNote MCP Server v${packageJson.version} listening`
   );

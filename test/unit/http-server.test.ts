@@ -25,11 +25,12 @@ describe('HttpMcpServer', () => {
   beforeEach(() => {
     // Use random port to avoid conflicts
     port = 30000 + Math.floor(Math.random() * 10000);
-    mockWsServer = new WebSocketServer(3002, createMockLogger());
+    mockWsServer = new WebSocketServer(3002, '127.0.0.1', createMockLogger());
     mockLogger = createMockLogger();
 
     httpServer = new HttpMcpServer(
       port,
+      '127.0.0.1',
       mockWsServer,
       {
         name: 'test-server',
@@ -525,7 +526,10 @@ describe('HttpMcpServer', () => {
       await httpServer.start();
       await waitForHttpServer(port);
       expect(mockLogger.child).toHaveBeenCalledWith({ context: 'http-server' });
-      expect(mockLogger.info).toHaveBeenCalledWith({ port }, 'HTTP server started');
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        { port, host: '127.0.0.1' },
+        'HTTP server started'
+      );
       await httpServer.stop();
     });
 
