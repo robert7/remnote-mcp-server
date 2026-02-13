@@ -243,7 +243,6 @@ remnote-mcp-server/
 │   └── unit/                  # Test suite (95+ tests)
 ├── dist/                      # Compiled output (gitignored)
 ├── docs/                      # User documentation
-├── .agents/                   # Developer guidelines
 ├── package.json               # Dependencies and scripts
 ├── tsconfig.json             # TypeScript configuration
 └── vitest.config.ts          # Test configuration
@@ -355,7 +354,7 @@ Before submitting a pull request:
 2. **Write/update tests** for code changes
 3. **Update documentation**:
    - Code docstrings
-   - Developer docs (.agents/, docs/)
+   - Developer docs (docs/)
    - User guides (docs/guides/)
 4. **Update CHANGELOG.md** with your changes
 5. **Verify manual testing** works end-to-end
