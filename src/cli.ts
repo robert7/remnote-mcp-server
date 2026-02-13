@@ -36,7 +36,7 @@ export function parseCliArgs(): CliOptions {
     )
     .option(
       '--http-host <host>',
-      'HTTP server bind address (default: 127.0.0.1, env: REMNOTE_HTTP_HOST). Use 0.0.0.0 for ngrok/cloud access',
+      'HTTP server bind address (default: 127.0.0.1, env: REMNOTE_HTTP_HOST). Use 0.0.0.0 for Docker/VPS deployments',
       validateHost
     )
     .option(

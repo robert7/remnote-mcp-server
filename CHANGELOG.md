@@ -13,9 +13,10 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - `--http-host` CLI option to control HTTP server binding address
 - `REMNOTE_HTTP_HOST` environment variable for HTTP server binding
 - ngrok setup documentation for Claude Cowork integration (docs/ngrok-setup.md)
-- Support for binding HTTP server to `0.0.0.0` for remote access (e.g., ngrok, Claude Cowork)
+- Support for binding HTTP server to `0.0.0.0` for remote access (e.g., Docker, VPS deployments)
 - Security enforcement: WebSocket server always binds to localhost (127.0.0.1)
 - Host validation in CLI with support for localhost, 127.0.0.1, 0.0.0.0, and valid IPv4 addresses
+- Note: ngrok/Claude Cowork work with default localhost binding (no 0.0.0.0 needed)
 
 ### Changed
 
@@ -28,6 +29,17 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - WebSocket server host binding is now enforced to localhost (127.0.0.1) only
 - Cannot be overridden via environment variables or CLI options
 - Ensures RemNote plugin connection is never exposed remotely
+
+### Documentation
+
+- Corrected ngrok setup documentation to remove incorrect 0.0.0.0 binding requirement
+  - Updated architecture diagram in docs/ngrok-setup.md (shows 127.0.0.1 instead of 0.0.0.0)
+  - Simplified Step 1 instructions to use default localhost binding
+  - Added "When Do I Need 0.0.0.0?" section explaining actual use cases (Docker, VPS, not ngrok)
+  - Updated README.md Remote Access section to show correct ngrok usage
+  - Updated CLI help text (--http-host) to clarify 0.0.0.0 is for Docker/VPS, not ngrok
+  - Updated .agents/oauth-implementation-plan.md with correct environment variable examples
+- Stage 2 roadmap includes JWT token validation, PKCE flow, and production deployment guide
 
 ### Internal
 

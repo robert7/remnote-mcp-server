@@ -434,8 +434,8 @@ By default, the RemNote MCP server binds to localhost (127.0.0.1) and is only ac
 **Quick Setup with ngrok (Development/Testing):**
 
 ```bash
-# 1. Start server on all interfaces
-REMNOTE_HTTP_HOST=0.0.0.0 remnote-mcp-server
+# 1. Start server normally - localhost binding is fine
+remnote-mcp-server
 
 # 2. In another terminal, start ngrok
 ngrok http 3001
@@ -443,6 +443,8 @@ ngrok http 3001
 # 3. Use the ngrok HTTPS URL in Claude Cowork
 # Example: https://abc123.ngrok-free.app/mcp
 ```
+
+**Note:** ngrok tunnels to localhost, so no special host binding is needed. The default 127.0.0.1 binding works perfectly.
 
 **Security Note:** The WebSocket server (RemNote plugin connection) ALWAYS stays on localhost (127.0.0.1) regardless of HTTP binding. This ensures your RemNote app connection is never exposed.
 

@@ -19,7 +19,7 @@ TODO: For production deployments, see [TODO: Production Deployment Guide](./prod
 When using ngrok, the architecture becomes:
 
 ```
-Claude Cowork (Cloud) ↔ ngrok HTTPS ↔ HTTP MCP Server :3001 (0.0.0.0)
+Claude Cowork (Cloud) ↔ ngrok HTTPS ↔ HTTP MCP Server :3001 (127.0.0.1)
                                       ↕
                                       WebSocket Server :3002 (127.0.0.1)
                                       ↕
@@ -70,26 +70,20 @@ ngrok config add-authtoken YOUR_TOKEN_HERE
 
 ### Step 1: Start the RemNote MCP Server
 
-Start the server with HTTP binding on all interfaces (0.0.0.0):
+Start the server normally (default localhost binding):
 
 ```bash
-REMNOTE_HTTP_HOST=0.0.0.0 remnote-mcp-server
-```
-
-Or use the CLI option:
-
-```bash
-remnote-mcp-server --http-host 0.0.0.0
+remnote-mcp-server
 ```
 
 Expected output:
 ```json
 {"level":"info","time":1234567890,"context":"websocket-server","port":3002,"host":"127.0.0.1","msg":"WebSocket server started"}
-{"level":"info","time":1234567890,"context":"http-server","port":3001,"host":"0.0.0.0","msg":"HTTP server started"}
-{"level":"info","time":1234567890,"wsPort":3002,"wsHost":"127.0.0.1","httpPort":3001,"httpHost":"0.0.0.0","msg":"RemNote MCP Server v0.3.1 listening"}
+{"level":"info","time":1234567890,"context":"http-server","port":3001,"host":"127.0.0.1","msg":"HTTP server started"}
+{"level":"info","time":1234567890,"wsPort":3002,"wsHost":"127.0.0.1","httpPort":3001,"httpHost":"127.0.0.1","msg":"RemNote MCP Server v0.3.1 listening"}
 ```
 
-**Verify WebSocket is localhost-only:** The `wsHost` should ALWAYS show `127.0.0.1`, never `0.0.0.0`.
+**Note:** ngrok tunnels to localhost, so the default 127.0.0.1 binding works perfectly. No special host configuration is needed.
 
 ### Step 2: Start ngrok Tunnel
 
@@ -179,7 +173,6 @@ Expected: JSON response with server capabilities and a `mcp-session-id` header.
 
 **Solution:**
 - Verify server is running: `ps aux | grep remnote-mcp-server`
-- Check HTTP server is on 0.0.0.0: Look for `"httpHost":"0.0.0.0"` in logs
 - Verify ngrok is forwarding to port 3001: Check ngrok output
 
 ### RemNote Plugin Not Connecting
@@ -205,6 +198,18 @@ ngrok free tier has request rate limits. If you hit limits:
 - Reduce polling frequency in your application
 - Upgrade to ngrok paid plan
 - Use request batching where possible
+
+## When Do I Need 0.0.0.0?
+
+You do NOT need to bind to 0.0.0.0 for ngrok usage. ngrok tunnels to localhost.
+
+**Bind to 0.0.0.0 only when:**
+- Deploying on a VPS/cloud server and accessing from outside that machine
+- Running in Docker containers (container networking requires it)
+- Accessing the server from other devices on your local network
+- Using a different reverse proxy that requires network-wide binding
+
+**For ngrok specifically:** The server stays on 127.0.0.1, and ngrok creates a tunnel to localhost:3001.
 
 ## Alternative Solutions
 
