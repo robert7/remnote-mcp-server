@@ -7,11 +7,12 @@
 MCP server that bridges AI agents (e.g. Claude Code) to [RemNote](https://remnote.com/) via the [RemNote MCP Bridge
 plugin](https://github.com/robert7/remnote-mcp-bridge).
 
-> **Note:** This is a working proof-of-concept/experimental solution. It "works on my machine" — you're invited to test it and [report any bugs or issues](https://github.com/robert7/remnote-mcp-server/issues).
+> This is a working **proof-of-concept/experimental solution**. It "works on my machine" — you're invited to test
+> it and [report any bugs or issues](https://github.com/robert7/remnote-mcp-server/issues).
 
 ## Demo
 
-See Claude Code in action with RemNote: **[View Demo →](docs/demo.md)**
+See AI agent examples in action with RemNote: **[View Demo →](docs/demo.md)**
 
 ## Two-Component Architecture
 
@@ -162,11 +163,13 @@ npm run dev -- -h
 **CLI Options:**
 
 Server Configuration:
+
 - `--ws-port <number>` - WebSocket port (default: 3002, env: REMNOTE_WS_PORT)
 - `--http-port <number>` - HTTP MCP port (default: 3001, env: REMNOTE_HTTP_PORT)
 - `--http-host <host>` - HTTP server bind address (default: 127.0.0.1, env: REMNOTE_HTTP_HOST)
 
 Logging Configuration:
+
 - `--log-level <level>` - Console log level: debug, info, warn, error (default: info)
 - `--log-level-file <level>` - File log level (default: same as --log-level)
 - `--verbose` - Shorthand for --log-level debug
@@ -175,6 +178,7 @@ Logging Configuration:
 - `--response-log <path>` - Log all WebSocket responses to file (JSON Lines)
 
 Information:
+
 - `-h, --help` - Display help message
 - `-v, --version` - Display version number
 
@@ -184,6 +188,7 @@ RemNote MCP Server v0.2.1 listening { wsPort: 3002, httpPort: 3001 }
 ```
 
 **Note on Logging:**
+
 - Development environment (with `npm install`): Pretty-formatted colored logs
 - Global installation (via `npm link`): JSON logs to stderr (pino-pretty not included)
 - Both modes are fully functional - formatting is the only difference
@@ -431,7 +436,9 @@ Configure in the plugin control panel:
 
 ## Remote Access (ngrok/Claude Cowork)
 
-By default, the RemNote MCP server binds to localhost (127.0.0.1) and is only accessible from your local machine. To enable cloud-based AI services like **Claude Cowork** to access your RemNote knowledge base, you need to expose the HTTP MCP endpoint remotely.
+By default, the RemNote MCP server binds to localhost (127.0.0.1) and is only accessible from your local machine.
+To enable cloud-based AI services like **Claude Cowork** to access your RemNote knowledge base, you need to expose the
+HTTP MCP endpoint remotely.
 
 **Quick Setup with ngrok (Development/Testing):**
 
@@ -446,14 +453,18 @@ ngrok http 3001
 # Example: https://abc123.ngrok-free.app/mcp
 ```
 
-**Note:** ngrok tunnels to localhost, so no special host binding is needed. The default 127.0.0.1 binding works perfectly.
+**Note:** ngrok tunnels to localhost, so no special host binding is needed. The default 127.0.0.1 binding works
+perfectly.
 
-**Security Note:** The WebSocket server (RemNote plugin connection) ALWAYS stays on localhost (127.0.0.1) regardless of HTTP binding. This ensures your RemNote app connection is never exposed.
+**Security Note:** The WebSocket server (RemNote plugin connection) ALWAYS stays on localhost (127.0.0.1) regardless
+of HTTP binding. This ensures your RemNote app connection is never exposed.
 
 For detailed setup instructions, security considerations, and troubleshooting, see:
+
 - **[ngrok Setup Guide](./docs/ngrok-setup.md)** - Development/testing with ngrok
 
 For production deployments with OAuth 2.1 authentication, see:
+
 - **[Production Deployment Guide](./docs/production-deployment.md)** - Coming soon
 
 ## Troubleshooting

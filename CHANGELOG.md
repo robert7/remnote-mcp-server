@@ -47,8 +47,10 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Internal
 
-- Fixed intermittent test failures on GitHub Actions caused by race condition between HTTP server start and connection readiness
-  - Added `waitForHttpServer()` test helper with exponential backoff retry logic to ensure server is ready before tests attempt connections
+- Fixed intermittent test failures on GitHub Actions caused by race condition between HTTP server start and connection
+  readiness
+  - Added `waitForHttpServer()` test helper with exponential backoff retry logic to ensure server is ready before tests
+    attempt connections
   - Fixed socket resource leak in error handler that caused file descriptor exhaustion on CI with coverage enabled
   - Uses lightweight TCP connection probes (1-2ms overhead locally, up to ~5s worst case on slow CI)
   - Updated all 21 HTTP server test cases to use the helper after `start()` calls
