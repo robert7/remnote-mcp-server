@@ -138,13 +138,6 @@ npm run test:watch
 npm run test:coverage
 ```
 
-Coverage thresholds (enforced in CI):
-
-- Lines: 80%
-- Functions: 80%
-- Branches: 75%
-- Statements: 80%
-
 **View detailed coverage:**
 ```bash
 open coverage/index.html
