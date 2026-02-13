@@ -40,6 +40,9 @@ Versioning](https://semver.org/spec/v2.0.0.html).
   - Updated README.md Remote Access section to show correct ngrok usage
   - Updated CLI help text (--http-host) to clarify 0.0.0.0 is for Docker/VPS, not ngrok
   - Updated .agents/oauth-implementation-plan.md with correct environment variable examples
+- Enhanced demo documentation with Claude Cowork examples (docs/demo.md)
+  - Added screenshots showing cloud-based AI integration via ngrok
+  - Restructured to show both local (Claude Code) and remote (Claude Cowork) usage patterns
 - Stage 2 roadmap includes JWT token validation, PKCE flow, and production deployment guide
 
 ### Internal
