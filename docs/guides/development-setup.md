@@ -363,7 +363,7 @@ Before submitting a pull request:
 ## Resources
 
 - [Architecture Documentation](../architecture.md) - Design rationale and system architecture
-- [CLAUDE.md](../../CLAUDE.md) - AI agent guidelines (useful for understanding project conventions)
+- [AGENTS.md](../../AGENTS.md) - AI agent guidelines (useful for understanding project conventions)
 - [CHANGELOG.md](../../CHANGELOG.md) - Version history and roadmap
 - [MCP Specification](https://modelcontextprotocol.io/) - Protocol specification
 

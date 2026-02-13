@@ -182,7 +182,6 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - Files field in package.json to explicitly control published files
 - prepublishOnly script to ensure build before publishing
 - Additional keywords for improved npm discoverability
-- Coauthorship policy documented in CLAUDE.md
 - Publishing documentation in docs/publishing.md for maintainers
 
 ### Fixed
