@@ -7,6 +7,25 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Documentation
+
+- **Major documentation restructuring** for better navigation and discoverability
+  - Streamlined README.md from 17.2 KB to ~6 KB with quick-start focus
+  - Created `docs/guides/` directory with 7 focused guides:
+    - `installation.md` - Complete installation guide for users
+    - `development-setup.md` - Developer setup and contributing guide
+    - `configuration.md` - MCP client configuration (Claude Code, Accomplish, Claude Cowork)
+    - `cli-options.md` - Command-line options reference
+    - `tools-reference.md` - Detailed MCP tools documentation
+    - `remote-access.md` - Remote access setup (replaces `ngrok-setup.md`)
+    - `troubleshooting.md` - Comprehensive troubleshooting guide
+  - Created `docs/images/` directory for demo screenshots
+  - Deleted `docs/ngrok-setup.md` (content moved to `docs/guides/remote-access.md`)
+  - Updated `docs/demo.md` image paths to use `images/` subdirectory
+  - README.md now serves as clear entry point with navigation to all guides
+  - No information lost - all content preserved and reorganized
+  - Improved searchability and user experience for new and experienced users
+
 ### Added
 
 - Host binding configuration for HTTP and WebSocket servers
