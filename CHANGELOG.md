@@ -9,6 +9,12 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Documentation
 
+- **Fixed curl examples in documentation** to include required Accept headers
+  - Created canonical MCP endpoint testing example in `docs/guides/troubleshooting.md#testing-the-mcp-http-endpoint`
+  - Added required `Accept: application/json, text/event-stream` header for MCP HTTP/SSE transport
+  - Replaced all duplicate curl examples throughout documentation with references to canonical example
+  - Updated `docs/guides/remote-access.md` and `docs/guides/troubleshooting.md`
+  - Fixed error: "Not Acceptable: Client must accept both application/json and text/event-stream"
 - **Major documentation restructuring** for better navigation and discoverability
   - Streamlined README.md from 17.2 KB to ~6 KB with quick-start focus
   - Created `docs/guides/` directory with 7 focused guides:

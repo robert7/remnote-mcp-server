@@ -118,28 +118,11 @@ Add the MCP server to Claude Cowork configuration using the ngrok URL:
 
 ### Testing
 
-Test the exposed endpoint:
+To test the exposed endpoint, use the curl command from the [Troubleshooting Guide](troubleshooting.md#testing-the-mcp-http-endpoint), replacing `http://localhost:3001` with your ngrok HTTPS URL (e.g., `https://abc123.ngrok-free.app`).
 
-```bash
-# Replace with your ngrok URL
-curl -X POST https://abc123.ngrok-free.app/mcp \
-  -H "Content-Type: application/json" \
-  -d '{
-    "jsonrpc": "2.0",
-    "id": 1,
-    "method": "initialize",
-    "params": {
-      "protocolVersion": "2024-11-05",
-      "capabilities": {},
-      "clientInfo": {
-        "name": "test-client",
-        "version": "1.0.0"
-      }
-    }
-  }'
-```
+**Expected response:** JSON with server capabilities and `mcp-session-id` header.
 
-Expected: JSON response with server capabilities and a `mcp-session-id` header.
+**Important:** Don't forget the required `Accept` header - see the troubleshooting guide for the complete example.
 
 ### ngrok Limitations
 
@@ -253,12 +236,7 @@ remnote-mcp-server --http-host 0.0.0.0
 
 2. Verify tunnel is forwarding to port 3001:
    - Check ngrok output or web interface: `http://127.0.0.1:4040`
-3. Test locally first:
-   ```bash
-   curl -X POST http://localhost:3001/mcp \
-     -H "Content-Type: application/json" \
-     -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"test","version":"1.0.0"}}}'
-   ```
+3. Test locally first (see [Troubleshooting: Testing the MCP HTTP Endpoint](troubleshooting.md#testing-the-mcp-http-endpoint))
 
 ### RemNote Plugin Not Connecting
 

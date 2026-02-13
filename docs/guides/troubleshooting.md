@@ -282,12 +282,7 @@ RemNote MCP Server v0.2.1 listening { wsPort: 3002, httpPort: 3001 }
 
 **Solutions:**
 
-1. **Verify server is running and responding:**
-   ```bash
-   curl -X POST http://localhost:3001/mcp \
-     -H "Content-Type: application/json" \
-     -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"test","version":"1.0.0"}}}'
-   ```
+1. **Verify server is running and responding** (see [Testing the MCP HTTP Endpoint](#testing-the-mcp-http-endpoint))
 
 2. **Check for firewall blocking localhost** (rare but possible)
 3. **Verify port number matches configuration:**
@@ -424,12 +419,7 @@ RemNote MCP Server v0.2.1 listening { wsPort: 3002, httpPort: 3001 }
 3. **Verify HTTPS URL (not HTTP):**
    - Claude Cowork requires HTTPS
    - ngrok provides HTTPS by default
-4. **Test tunnel endpoint:**
-   ```bash
-   curl -X POST https://your-ngrok-url.app/mcp \
-     -H "Content-Type: application/json" \
-     -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"test","version":"1.0.0"}}}'
-   ```
+4. **Test tunnel endpoint** (see [Testing the MCP HTTP Endpoint](#testing-the-mcp-http-endpoint) and replace URL with your ngrok URL)
 
 ### Firewall Blocking Connections
 
@@ -518,10 +508,16 @@ tail -f /tmp/responses.jsonl | jq
 
 ### Test Server Manually
 
+#### Testing the MCP HTTP Endpoint
+
+The MCP HTTP server uses Server-Sent Events (SSE) for streaming responses, which requires specific Accept headers.
+
+**Basic connection test:**
+
 ```bash
-# Test HTTP endpoint
 curl -X POST http://localhost:3001/mcp \
   -H "Content-Type: application/json" \
+  -H "Accept: application/json, text/event-stream" \
   -d '{
     "jsonrpc": "2.0",
     "id": 1,
@@ -536,6 +532,22 @@ curl -X POST http://localhost:3001/mcp \
     }
   }'
 ```
+
+**Expected response:**
+- JSON response with server capabilities
+- `mcp-session-id` header in the response
+
+**Common errors:**
+
+- Missing Accept header: `"Not Acceptable: Client must accept both application/json and text/event-stream"`
+- Server not running: `curl: (7) Failed to connect to localhost port 3001`
+- Wrong port: `curl: (7) Failed to connect`
+
+**For remote/ngrok testing:**
+
+Replace `http://localhost:3001` with your ngrok URL (e.g., `https://abc123.ngrok-free.app`).
+
+See also: [Remote Access Guide](remote-access.md) for ngrok setup.
 
 ### Check MCP Client Logs
 
