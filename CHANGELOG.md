@@ -7,6 +7,8 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-02-14
+
 ### Added
 
 - Host binding configuration for HTTP and WebSocket servers
