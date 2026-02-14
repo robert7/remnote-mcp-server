@@ -38,6 +38,8 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Fixed intermittent test failures on GitHub Actions caused by race condition between HTTP server start and connection
   readiness
+- Fixed intermittent logger test failures on GitHub Actions caused by missing directory creation before file logger
+  instantiation
 
 ## [0.3.1] - 2026-02-12
 

@@ -99,25 +99,25 @@ Keep this terminal running.
 
 ### Getting Started
 
-- 📦 **[Installation Guide](docs/guides/installation.md)** - Complete installation instructions
-- ⚙️ **[Configuration Guide](docs/guides/configuration.md)** - Configure Claude Code CLI, Accomplish, and other clients
-- 🎬 **[Demo & Screenshots](docs/demo.md)** - See the server in action with different AI clients
+- **[Installation Guide](docs/guides/installation.md)** - Complete installation instructions
+- **[Configuration Guide](docs/guides/configuration.md)** - Configure Claude Code CLI, Accomplish, and other clients
+- **[Demo & Screenshots](docs/demo.md)** - See the server in action with different AI clients
 
 ### Usage
 
-- 🛠️ **[CLI Options Reference](docs/guides/cli-options.md)** - Command-line options and environment variables
-- 📚 **[MCP Tools Reference](docs/guides/tools-reference.md)** - Detailed reference for all 6 RemNote tools
-- 🌐 **[Remote Access Setup](docs/guides/remote-access.md)** - Expose server for Claude Cowork (ngrok, etc.)
+- **[CLI Options Reference](docs/guides/cli-options.md)** - Command-line options and environment variables
+- **[MCP Tools Reference](docs/guides/tools-reference.md)** - Detailed reference for all 6 RemNote tools
+- **[Remote Access Setup](docs/guides/remote-access.md)** - Expose server for Claude Cowork (ngrok, etc.)
 
 ### Help & Advanced
 
-- 🔧 **[Troubleshooting](docs/guides/troubleshooting.md)** - Common issues and solutions
-- 🏗️ **[Architecture](docs/architecture.md)** - Design rationale and technical architecture
+- **[Troubleshooting](docs/guides/troubleshooting.md)** - Common issues and solutions
+- **[Architecture](docs/architecture.md)** - Design rationale and technical architecture
 
 ### Development
 
-- 💻 **[Development Setup](docs/guides/development-setup.md)** - Contributing guide for developers
-- 📦 **[Publishing Guide](docs/npm-publishing.md)** - npm publishing process (maintainers only)
+- **[Development Setup](docs/guides/development-setup.md)** - Contributing guide for developers
+- **[Publishing Guide](docs/npm-publishing.md)** - npm publishing process (maintainers only)
 
 ## Available MCP Tools
 

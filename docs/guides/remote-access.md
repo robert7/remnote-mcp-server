@@ -150,50 +150,17 @@ To test the exposed endpoint, use the curl command from the [Troubleshooting Gui
 
 ### Tailscale
 
-Secure mesh VPN for accessing local services remotely.
+Tailscale Funnel lets you route traffic from the broader internet to a local service running on a device in your Tailscale network (known as a tailnet). You can use it to share a local service, like a web app, for anyone to access—even if they don't use Tailscale.
 
-**Installation:** See [tailscale.com/download](https://tailscale.com/download)
-
-**Usage:**
-
-1. Install Tailscale on both client and server machines
-2. Start Tailscale on both
-3. Access server via Tailscale IP (e.g., `http://100.x.x.x:3001/mcp`)
-
-**Pros:**
-
-- Secure (WireGuard VPN)
-- No public exposure
-- Works across networks
-
-**Cons:**
-
-- Requires Tailscale on both ends (not suitable for Claude Cowork)
-- More complex setup
+See [Tailscale Funnel](https://tailscale.com/docs/features/tailscale-funnel).
+Free [personal plan available](https://tailscale.com/pricing?plan=personal).
 
 ### CloudFlare Tunnel
 
-Free alternative with authentication options.
+Cloudflare Tunnel provides you with a secure way to connect your resources to Cloudflare without a publicly routable IP address. With Tunnel, you do not send traffic to an external IP — instead, a lightweight daemon in your infrastructure (cloudflared) creates outbound-only connections to Cloudflare's global network. Cloudflare Tunnel can connect HTTP web servers, SSH servers, remote desktops, and other protocols safely to Cloudflare. This way, your origins can serve traffic through Cloudflare without being vulnerable to attacks that bypass Cloudflare.
 
-**Installation:** See
-[developers.cloudflare.com/cloudflare-one/connections/connect-apps](https://developers.cloudflare.com/cloudflare-one/connections/connect-apps)
-
-**Usage:**
-
-1. Install CloudFlare Tunnel client
-2. Configure tunnel to port 3001
-3. Set up CloudFlare Access for authentication (optional)
-
-**Pros:**
-
-- Free
-- Optional authentication
-- Good performance
-
-**Cons:**
-
-- More complex setup
-- Requires CloudFlare account
+See [CloudFlare Tunnel](https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/).
+[Free plan ~available](https://try.cloudflare.com/).
 
 ## When Do I Need 0.0.0.0?
 
@@ -223,11 +190,7 @@ remnote-mcp-server --http-host 0.0.0.0
 
 **Solution:**
 
-1. Verify server is running:
-   ```bash
-ps aux | grep remnote-mcp-server lsof -i :3001
-   ```
-
+1. Verify server is running: `ps aux | grep remnote-mcp-server lsof -i :3001`
 2. Verify tunnel is forwarding to port 3001:
    - Check ngrok output or web interface: `http://127.0.0.1:4040`
 3. Test locally first (see [Troubleshooting: Testing the MCP HTTP Endpoint](troubleshooting.md#testing-the-mcp-http-endpoint))

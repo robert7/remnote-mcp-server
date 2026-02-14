@@ -35,7 +35,8 @@ describe('Logger', () => {
       expect(logger.warn).toBeDefined();
     });
 
-    it('should create logger with file output', () => {
+    it('should create logger with file output', async () => {
+      await mkdir(TEST_LOG_DIR, { recursive: true });
       const logger = createLogger({
         consoleLevel: 'info',
         fileLevel: 'debug',
@@ -134,7 +135,8 @@ describe('Logger', () => {
   });
 
   describe('Log Level Filtering', () => {
-    it('should use minimum log level when file is more verbose', () => {
+    it('should use minimum log level when file is more verbose', async () => {
+      await mkdir(TEST_LOG_DIR, { recursive: true });
       const logger = createLogger({
         consoleLevel: 'info',
         fileLevel: 'debug',
@@ -146,7 +148,8 @@ describe('Logger', () => {
       expect(logger.level).toBe('debug');
     });
 
-    it('should use minimum log level when console is more verbose', () => {
+    it('should use minimum log level when console is more verbose', async () => {
+      await mkdir(TEST_LOG_DIR, { recursive: true });
       const logger = createLogger({
         consoleLevel: 'debug',
         fileLevel: 'warn',
