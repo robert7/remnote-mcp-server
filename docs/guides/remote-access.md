@@ -15,9 +15,6 @@ with the URL. Use only for:
 - Short-term demonstrations
 - Integration testing with Claude Cowork
 
-**Note:** OAuth 2.1 authentication is planned for production deployments (see [CHANGELOG.md](../../CHANGELOG.md) Stage
-2).
-
 ## Architecture
 
 When using remote access, the architecture becomes:
@@ -144,7 +141,6 @@ To test the exposed endpoint, use the curl command from the [Troubleshooting Gui
 1. Use ngrok static domains (easier to share)
 2. Rotate URLs frequently (free tier does this automatically)
 3. Monitor ngrok web interface: `http://127.0.0.1:4040`
-4. For production: OAuth 2.1 authentication (planned - see [CHANGELOG.md](../../CHANGELOG.md) Stage 2)
 
 ## Alternative Solutions
 
@@ -241,17 +237,6 @@ ngrok free tier has request rate limits. If you hit limits:
 2. **Monitor access** - Check ngrok dashboard at `http://127.0.0.1:4040`
 3. **Limit exposure time** - Stop tunnel when not in use
 4. **Don't share URLs publicly** - Keep URLs private
-
-### For Production
-
-**Don't use ngrok for production!** Instead:
-
-- Implement OAuth 2.1 authentication (planned - see [CHANGELOG.md](../../CHANGELOG.md))
-- Use proper authentication and authorization
-- Deploy on secure infrastructure
-- Use rate limiting and monitoring
-
-See [Production Deployment Guide](../production-deployment.md) (coming soon) for details.
 
 ## Related Documentation
 

@@ -148,17 +148,6 @@ Use remote access only for:
 4. Stop the tunnel when not in use
 5. Don't share URLs publicly
 
-### For Production
-
-**Don't use ngrok for production!** Instead:
-
-- Implement OAuth 2.1 authentication (planned - see [CHANGELOG.md](../../CHANGELOG.md) Stage 2)
-- Use proper authentication and authorization
-- Deploy on secure infrastructure
-- Use rate limiting and monitoring
-
-See [Production Deployment Guide](../production-deployment.md) (coming soon) for details.
-
 ## Alternative Solutions
 
 ### CloudFlare Tunnel
