@@ -33,7 +33,7 @@ function printBanner(): void {
   console.log(`
 ${BOLD}╔═══════════════════════════════════════════════╗
 ║  RemNote MCP Server — Integration Tests       ║
-║  ${YELLOW}WARNING: Creates real content in RemNote!${RESET}${BOLD}     ║
+║  ${YELLOW}WARNING: Creates real content in RemNote!${RESET}${BOLD}    ║
 ╚═══════════════════════════════════════════════╝${RESET}
 `);
 }

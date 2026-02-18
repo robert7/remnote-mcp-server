@@ -117,6 +117,7 @@ Keep this terminal running.
 ### Development
 
 - **[Development Setup](docs/guides/development-setup.md)** - Contributing guide for developers
+- **[Integration Testing](docs/guides/integration-testing.md)** - End-to-end validation against a live RemNote instance
 - **[Publishing Guide](docs/npm-publishing.md)** - npm publishing process (maintainers only)
 
 ## Available MCP Tools

@@ -13,6 +13,10 @@ Versioning](https://semver.org/spec/v2.0.0.html).
   - Added `maxRetries` and `retryDelay` to `rm()` calls in `beforeEach`/`afterEach`
   - Flush pino file destinations before directory cleanup
 
+### Changed
+
+- README: added link to Integration Testing guide in the Documentation section
+
 ### Added
 
 - Integration test suite for end-to-end validation against a live RemNote instance
