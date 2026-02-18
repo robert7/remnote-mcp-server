@@ -1,23 +1,39 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { createLogger, createRequestResponseLogger, ensureLogDirectory } from '../../src/logger.js';
+import type { Logger } from '../../src/logger.js';
 import { mkdir, rm } from 'fs/promises';
 import { existsSync } from 'fs';
 import { join } from 'path';
 
 const TEST_LOG_DIR = join(process.cwd(), 'test-logs');
+const RM_OPTS = { recursive: true, force: true, maxRetries: 3, retryDelay: 100 } as const;
 
 describe('Logger', () => {
+  // Track loggers with file destinations for proper cleanup
+  let activeLoggers: Logger[] = [];
+
   beforeEach(async () => {
-    // Clean up test logs directory
+    activeLoggers = [];
+    // Clean up test logs directory from prior runs
     if (existsSync(TEST_LOG_DIR)) {
-      await rm(TEST_LOG_DIR, { recursive: true, force: true });
+      await rm(TEST_LOG_DIR, RM_OPTS);
     }
   });
 
   afterEach(async () => {
-    // Clean up test logs directory
+    // Flush all pino file destinations before cleaning up directories
+    for (const logger of activeLoggers) {
+      logger.flush();
+    }
+    // Allow async writes to complete after flush
+    if (activeLoggers.length > 0) {
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    }
+    activeLoggers = [];
+
+    // Now safe to remove
     if (existsSync(TEST_LOG_DIR)) {
-      await rm(TEST_LOG_DIR, { recursive: true, force: true });
+      await rm(TEST_LOG_DIR, RM_OPTS);
     }
   });
 
@@ -72,6 +88,7 @@ describe('Logger', () => {
       await mkdir(TEST_LOG_DIR, { recursive: true });
       const filePath = join(TEST_LOG_DIR, 'request.jsonl');
       const logger = createRequestResponseLogger(filePath);
+      activeLoggers.push(logger);
 
       expect(logger).toBeDefined();
       expect(logger.info).toBeDefined();
@@ -81,10 +98,11 @@ describe('Logger', () => {
       await mkdir(TEST_LOG_DIR, { recursive: true });
       const filePath = join(TEST_LOG_DIR, 'request.jsonl');
       const logger = createRequestResponseLogger(filePath);
+      activeLoggers.push(logger);
 
       logger.info({ type: 'request', id: 'test-123', action: 'search' });
 
-      // Wait for write to complete
+      // Wait for async write to complete
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       // Verify file exists

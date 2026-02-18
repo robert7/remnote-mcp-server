@@ -7,6 +7,12 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- Logger test race condition in CI caused by pino's async file writer still active during `rm()` cleanup
+  - Added `maxRetries` and `retryDelay` to `rm()` calls in `beforeEach`/`afterEach`
+  - Flush pino file destinations before directory cleanup
+
 ### Added
 
 - Integration test suite for end-to-end validation against a live RemNote instance
