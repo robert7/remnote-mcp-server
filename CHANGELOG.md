@@ -20,6 +20,10 @@ Versioning](https://semver.org/spec/v2.0.0.html).
   and CLI-first automation
 - Integration testing guide now documents `./run-status-check.sh` for quick status-only verification
 - Refactored `run-status-check.sh` to a thin wrapper and moved MCP SDK logic to `scripts/run-status-check.mjs`
+- Demo page now includes a ChatGPT integration section before Claude Cowork with a link to a dedicated setup guide
+- Added `docs/guides/configuration-chatgpt.md` with six step-by-step screenshots for ChatGPT app setup and validation
+- README now links to `docs/guides/configuration-chatgpt.md` from both quick-start client configuration and documentation lists
+- ChatGPT configuration guide now documents Developer Mode and account eligibility prerequisites for private MCP servers
 
 ### Added
 

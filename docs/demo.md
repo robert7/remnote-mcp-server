@@ -2,6 +2,16 @@
 
 Visual demonstrations of the RemNote MCP Server with different AI clients.
 
+## ChatGPT
+
+Web-based integration using ChatGPT Apps with a custom MCP server.
+
+**Setup:** [ChatGPT Configuration Guide](guides/configuration-chatgpt.md)
+
+![RemNote Search (ChatGPT)](images/remnote-mcp-server-demo-chatgpt-6.jpg)
+
+ChatGPT calling `remnote_search` against RemNote and returning matching notes for "AI assisted coding".
+
 ## Claude Cowork
 
 Cloud-based integration through web interface.

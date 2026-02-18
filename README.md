@@ -94,9 +94,10 @@ Keep this terminal running.
 ### 4. Configure Your AI Client
 
 - [Configuration Guide](docs/guides/configuration.md) - Overview and generic setup
+  - [ChatGPT](docs/guides/configuration-chatgpt.md) - ChatGPT Apps configuration
+  - [Claude Cowork](docs/guides/configuration-claude-cowork.md) - Cloud-based (requires remote access setup)
   - [Claude Code CLI](docs/guides/configuration-claude-code-CLI.md) - Detailed Claude Code CLI configuration
   - [Accomplish](docs/guides/configuration-accomplish.md) - Accomplish (Openwork) configuration
-  - [Claude Cowork](docs/guides/configuration-claude-cowork.md) - Cloud-based (requires remote access setup)
 
 ## Documentation
 
@@ -104,6 +105,7 @@ Keep this terminal running.
 
 - **[Installation Guide](docs/guides/installation.md)** - Complete installation instructions
 - **[Configuration Guide](docs/guides/configuration.md)** - Configure Claude Code CLI, Accomplish, and other clients
+- **[ChatGPT Configuration Guide](docs/guides/configuration-chatgpt.md)** - Set up ChatGPT Apps with your MCP server
 - **[Demo & Screenshots](docs/demo.md)** - See the server in action with different AI clients
 
 ### Usage
