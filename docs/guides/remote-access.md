@@ -37,7 +37,7 @@ ngrok is the recommended solution for development and testing.
 ### Prerequisites
 
 - RemNote MCP server installed
-- RemNote app running with MCP Bridge plugin installed
+- RemNote app running with RemNote Bridge plugin installed
 - ngrok account (free tier works for testing)
 
 ### Installation

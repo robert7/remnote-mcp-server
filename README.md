@@ -4,8 +4,8 @@
 ![CI](https://github.com/robert7/remnote-mcp-server/actions/workflows/ci.yml/badge.svg)
 [![codecov](https://codecov.io/gh/robert7/remnote-mcp-server/branch/main/graph/badge.svg)](https://codecov.io/gh/robert7/remnote-mcp-server)
 
-MCP server that bridges AI agents (e.g. Claude Code) to [RemNote](https://remnote.com/) via the [RemNote MCP Bridge
-plugin](https://github.com/robert7/remnote-mcp-bridge).
+MCP server that bridges AI agents (e.g. Claude Code) to [RemNote](https://remnote.com/) via the [RemNote Bridge for MCP &
+OpenClaw plugin](https://github.com/robert7/remnote-mcp-bridge).
 
 > This is a working **proof-of-concept/experimental solution**. It "works on my machine" — you're invited to test
 > it and [report any bugs or issues](https://github.com/robert7/remnote-mcp-server/issues).
@@ -24,7 +24,7 @@ See AI agent examples in action with RemNote: **[View Demo →](docs/demo.md)**
 
 This system consists of **two separate components** that work together:
 
-1. **[RemNote MCP Bridge](https://github.com/robert7/remnote-mcp-bridge)** - A RemNote plugin that runs in your browser
+1. **[RemNote Bridge for MCP & OpenClaw](https://github.com/robert7/remnote-mcp-bridge)** - A RemNote plugin that runs in your browser
    or RemNote desktop app and exposes RemNote API functionality via WebSocket
 2. **RemNote MCP Server** (this project) - A standalone server that connects your AI assistant to the bridge using MCP
    protocol
@@ -70,7 +70,7 @@ npm install -g remnote-mcp-server
 
 ### 2. Install the RemNote Plugin
 
-Install the [RemNote MCP Bridge plugin](https://github.com/robert7/remnote-mcp-bridge) in your RemNote app. Currently
+Install the [RemNote Bridge plugin](https://github.com/robert7/remnote-mcp-bridge) in your RemNote app. Currently
 available from GitHub; registration in the RemNote marketplace is pending approval. Configure the plugin to connect
 to `ws://127.0.0.1:3002`.
 
@@ -231,7 +231,7 @@ See the [Development Setup Guide](docs/guides/development-setup.md) for complete
 
 ## Related Projects
 
-- [RemNote MCP Bridge Plugin](https://github.com/robert7/remnote-mcp-bridge) - Browser plugin for RemNote integration
+- [RemNote Bridge for MCP & OpenClaw](https://github.com/robert7/remnote-mcp-bridge) - Browser plugin for RemNote integration
 - [Model Context Protocol](https://modelcontextprotocol.io/) - Open protocol for AI-application integration
 
 ## License

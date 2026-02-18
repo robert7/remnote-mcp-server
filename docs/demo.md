@@ -13,14 +13,14 @@ Guide](guides/remote-access.md)
 
 ![RemNote MCP Server Status (Claude Cowork)](images/remnote-mcp-server-demo-claude-cowork1.jpg)
 
-Checking RemNote MCP bridge connection status, displaying plugin version (0.4.1) and available features (search, create,
+Checking RemNote Bridge connection status, displaying plugin version (0.4.1) and available features (search, create,
 read, update, journal append).
 
 ### Knowledge Base Search
 
 ![RemNote Search (Claude Cowork)](images/remnote-mcp-server-demo-claude-cowork2.jpg)
 
-Searching RemNote knowledge base for "blue light & sleep" with AI-generated summary. The MCP Bridge plugin panel (right
+Searching RemNote knowledge base for "blue light & sleep" with AI-generated summary. The RemNote Bridge plugin panel (right
 side) shows connection statistics and recent actions.
 
 ## Accomplish
@@ -44,5 +44,5 @@ Local CLI-based integration showing search and connection logs.
 
 ![RemNote MCP Server Demo (Claude Code CLI)](images/remnote-mcp-server-demo-claude-code-CLI.jpg)
 
-The screenshot shows Claude Code CLI searching RemNote for "AI assisted coding" through the terminal, with MCP Bridge
+The screenshot shows Claude Code CLI searching RemNote for "AI assisted coding" through the terminal, with RemNote Bridge
 connection logs visible in the background.

@@ -12,7 +12,7 @@ as file organization, document formatting, research synthesis, and web-based ope
 **Prerequisites:**
 
 - RemNote MCP Server installed and running locally
-- RemNote app running with MCP Bridge plugin installed and connected
+- RemNote app running with RemNote Bridge plugin installed and connected
 - Remote access tool (ngrok, CloudFlare Tunnel, etc.)
 
 ## Architecture

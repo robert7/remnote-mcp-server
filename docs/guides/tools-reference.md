@@ -327,7 +327,7 @@ Returns confirmation:
 
 ## remnote_status
 
-Check the connection status and statistics of the RemNote MCP bridge.
+Check the connection status and statistics of the RemNote Bridge.
 
 ### Parameters
 

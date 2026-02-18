@@ -6,7 +6,7 @@ Complete installation instructions for the RemNote MCP Server.
 
 - **Node.js** >= 18.0.0
 - **RemNote app** (desktop or web browser)
-- **RemNote MCP Bridge plugin** - Install from [GitHub](https://github.com/robert7/remnote-mcp-bridge) - registration in
+- **RemNote Bridge plugin** - Install from [GitHub](https://github.com/robert7/remnote-mcp-bridge) - registration in
   the RemNote marketplace is pending approval
 - **An MCP client** - Examples:
   - [Claude Code CLI](https://claude.com/claude-code)
@@ -53,14 +53,14 @@ npm run build
 npm link  # Make command globally available
 ```
 
-## RemNote MCP Bridge Plugin Setup
+## RemNote Bridge Plugin Setup
 
-The server requires the RemNote MCP Bridge plugin to communicate with RemNote.
+The server requires the RemNote Bridge plugin to communicate with RemNote.
 
 ### Installation
 
 1. Open your RemNote app
-2. Follow plugin installation instructions from the [RemNote MCP Bridge
+2. Follow plugin installation instructions from the [RemNote Bridge
    repository](https://github.com/robert7/remnote-mcp-bridge)
 
 ### Plugin Configuration
@@ -124,7 +124,7 @@ You should see the `node` process listening on both ports.
 
 ### 2. Check RemNote Plugin Connection
 
-Open RemNote with the MCP Bridge plugin installed. The plugin control panel should show:
+Open RemNote with the RemNote Bridge plugin installed. The plugin control panel should show:
 
 - **Status:** "Connected" (green indicator)
 - **Server:** ws://127.0.0.1:3002

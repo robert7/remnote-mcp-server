@@ -212,7 +212,7 @@ RemNote MCP Server v0.2.1 listening { wsPort: 3002, httpPort: 3001 }
 
 **Solution:**
 
-1. Update RemNote MCP Bridge plugin:
+1. Update RemNote Bridge plugin:
    - Visit [GitHub repository](https://github.com/robert7/remnote-mcp-bridge)
    - Follow update instructions
 2. Hard refresh RemNote (clear cache):
