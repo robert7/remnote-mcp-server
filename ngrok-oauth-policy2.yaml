@@ -1,0 +1,19 @@
+on_http_request:
+  - actions:
+      - type: oauth
+        config:
+          provider: github
+      - type: log
+        config:
+          metadata:
+            ngrok_id: "{{ actions.ngrok.oauth.identity.id }}"
+            email: "{{ actions.ngrok.oauth.identity.email }}"
+            name: "{{ actions.ngrok.oauth.identity.name }}"
+            provider_user_id: "{{ actions.ngrok.oauth.identity.provider_user_id }}"
+            session_id: "{{ actions.ngrok.oauth.identity.current_provider_session_id }}"
+  - expressions:
+      - "!(actions.ngrok.oauth.identity.provider_user_id in ['robert7'])"  # Test with 'robert7' first; adjust based on logs
+    actions:
+      - type: deny
+        config:
+          status_code: 403

@@ -7,6 +7,17 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- Integration test suite for end-to-end validation against a live RemNote instance
+  - Standalone runner via `npm run test:integration` (not part of regular test suite)
+  - Five sequential workflows: status check, create & search, read & update, journal, error cases
+  - Uses official MCP SDK Client for real protocol communication
+  - `--yes` flag for non-interactive execution
+  - Configurable via `REMNOTE_MCP_URL` and `MCP_TEST_DELAY` environment variables
+  - All test artifacts prefixed with `[MCP-TEST]` for easy manual cleanup
+- Integration testing guide at `docs/guides/integration-testing.md`
+
 ## [0.4.0] - 2026-02-14
 
 ### Added
