@@ -6,6 +6,8 @@ Set up ChatGPT Apps to connect to your RemNote MCP Server.
 > paid ChatGPT subscription.  See:
 > [OpenAI's Developer Mode guide](https://developers.openai.com/api/docs/guides/developer-mode/).
 
+> Prerequisite: You also need a publicly reachable HTTPS MCP URL for your local server. Use
+> [Remote Access Setup](remote-access.md) to configure ngrok/Cloudflare/Tailscale and security settings.
 
 ## Step 1: Open Apps settings
 

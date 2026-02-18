@@ -1,30 +1,32 @@
 # Remote Access Setup
 
-How to expose your local RemNote MCP Server to cloud-based services like Claude Cowork.
+How to expose your local RemNote MCP Server to cloud-based services like Claude Cowork and ChatGPT Apps.
 
 ## Overview
 
 By default, the RemNote MCP Server binds to localhost (127.0.0.1) and is only accessible from your local machine.
-To enable cloud-based AI services like **Claude Cowork** to access your RemNote knowledge base, you need to expose the
-HTTP MCP endpoint remotely.
+To enable cloud-based AI services to access your RemNote knowledge base, you need to expose the HTTP MCP endpoint
+remotely.
 
-**Security Warning:** The methods described here provide **no authentication** and expose your RemNote access to anyone
-with the URL. Use only for:
+**Security Warning:** The methods described here provide **no authentication** by default and expose your RemNote access to anyone with the URL. Of course,
+**you can configure authentication** and access controls with tools like ngrok, Cloudflare or Tailscale.
+
+Unless you configure authentication, use remote access only for:
 
 - Local development and testing
 - Short-term demonstrations
-- Integration testing with Claude Cowork
+- Integration testing with cloud-based agents (for example Claude Cowork or ChatGPT Apps)
 
 ## Architecture
 
 When using remote access, the architecture becomes:
 
 ```
-Claude Cowork (Cloud) ↔ Tunnel (HTTPS) ↔ HTTP MCP Server :3001 (127.0.0.1)
-                                          ↕
-                                          WebSocket Server :3002 (127.0.0.1)
-                                          ↕
-                                          RemNote Plugin (Local)
+Cloud Agent (Claude Cowork or ChatGPT) ↔ Tunnel (HTTPS) ↔ HTTP MCP Server :3001 (127.0.0.1)
+                                                          ↕
+                                                          WebSocket Server :3002 (127.0.0.1)
+                                                          ↕
+                                                          RemNote Plugin (Local)
 ```
 
 **Critical Security:** The WebSocket server ALWAYS binds to localhost (127.0.0.1) and cannot be overridden. Only the
@@ -48,7 +50,6 @@ brew install ngrok
 ```
 
 **Linux:** [ngrok on Linux](https://ngrok.com/docs/guides/device-gateway/linux)
-```
 
 **Windows:**
 ```bash
@@ -98,23 +99,27 @@ Session Status online Account your-account (Plan: Free) Version 3.x.x Region Uni
 http://127.0.0.1:4040 Forwarding https://abc123.ngrok-free.app -> http://localhost:3001
 ```
 
-Copy the HTTPS forwarding URL (e.g., `https://abc123.ngrok-free.app`).
+Copy the HTTPS forwarding URL (for example, `https://abc123.ngrok-free.app`).
 
-**Step 3: Configure Claude Cowork**
+**Step 3: Configure your cloud client**
 
-Add the MCP server to Claude Cowork configuration using the ngrok URL:
+Set the MCP server URL to:
 
-**Server URL:** `https://abc123.ngrok-free.app/mcp`
+```text
+https://abc123.ngrok-free.app/mcp
+```
 
-**Note:** The `/mcp` path is required - it's the endpoint path for the MCP protocol.
+**Note:** The `/mcp` path is required.
 
 ### Testing
 
-To test the exposed endpoint, use the curl command from the [Troubleshooting Guide](troubleshooting.md#testing-the-mcp-http-endpoint), replacing `http://localhost:3001` with your ngrok HTTPS URL (e.g., `https://abc123.ngrok-free.app`).
+To test the exposed endpoint, use the curl command from the
+[Troubleshooting Guide](troubleshooting.md#testing-the-mcp-http-endpoint), replacing `http://localhost:3001` with your
+ngrok HTTPS URL (for example, `https://abc123.ngrok-free.app`).
 
-**Expected response:** JSON with server capabilities and `mcp-session-id` header.
+Expected response: JSON with server capabilities and an `mcp-session-id` header.
 
-**Important:** Don't forget the required `Accept` header - see the troubleshooting guide for the complete example.
+Important: include the required `Accept: application/json, text/event-stream` header.
 
 ### ngrok Limitations
 
@@ -126,124 +131,121 @@ To test the exposed endpoint, use the curl command from the [Troubleshooting Gui
 
 **Solution:** Upgrade to ngrok paid plan for:
 
-- Static domains (e.g., `remnote-mcp.ngrok.app`)
+- Static domains (for example, `remnote-mcp.ngrok.app`)
 - Longer session durations
 - No browser warning screen
 
-**Security:**
+**Security and privacy considerations:**
 
-- **No authentication** - Anyone with the URL can access your RemNote
-- **HTTP only from your server** - HTTPS termination happens at ngrok
-- **Logs visible in ngrok dashboard** - All requests are logged
+- No authentication by default: anyone with the URL can access your RemNote endpoint
+- HTTPS terminates at ngrok
+- Requests are visible in the ngrok dashboard
 
-**Mitigation:**
+**Mitigation options:**
 
-1. Use ngrok static domains (easier to share)
-2. Rotate URLs frequently (free tier does this automatically)
-3. Monitor ngrok web interface: `http://127.0.0.1:4040`
+1. Use temporary URLs and rotate frequently
+2. Monitor ngrok dashboard at `http://127.0.0.1:4040`
+3. Stop the tunnel when not in use
+4. Do not share URLs publicly
+5. Optionally add ngrok traffic policy authentication
+6. For OAuth-based gating, review ngrok OAuth traffic policy actions:
+   [Traffic policy overview](https://ngrok.com/docs/traffic-policy/index#traffic-policy-overview),
+   [OAuth action](https://ngrok.com/docs/traffic-policy/actions/oauth)
 
 ## Alternative Solutions
 
+### Cloudflare Tunnel
+
+Cloudflare Tunnel is a free alternative with optional identity and access controls.
+
+- Docs: [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/)
+- Signup: [try.cloudflare.com](https://try.cloudflare.com/)
+- Optional: configure [Access policies](https://developers.cloudflare.com/cloudflare-one/access-controls/policies/policy-management/) for authentication and access control
+
 ### Tailscale
 
-Tailscale Funnel lets you route traffic from the broader internet to a local service running on a device in your Tailscale network (known as a tailnet). You can use it to share a local service, like a web app, for anyone to access—even if they don't use Tailscale.
+Tailscale Funnel can expose local services through your tailnet.
 
-See [Tailscale Funnel](https://tailscale.com/docs/features/tailscale-funnel).
-Free [personal plan available](https://tailscale.com/pricing?plan=personal).
-
-### CloudFlare Tunnel
-
-Cloudflare Tunnel provides you with a secure way to connect your resources to Cloudflare without a publicly routable IP address. With Tunnel, you do not send traffic to an external IP — instead, a lightweight daemon in your infrastructure (cloudflared) creates outbound-only connections to Cloudflare's global network. Cloudflare Tunnel can connect HTTP web servers, SSH servers, remote desktops, and other protocols safely to Cloudflare. This way, your origins can serve traffic through Cloudflare without being vulnerable to attacks that bypass Cloudflare.
-
-See [CloudFlare Tunnel](https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/).
-[Free plan ~available](https://try.cloudflare.com/).
+- Docs: [Tailscale Funnel](https://tailscale.com/docs/features/tailscale-funnel)
+- Pricing: [Tailscale Personal](https://tailscale.com/pricing?plan=personal)
+- Authentication using OAuth see [OAuth in the Tailscale API](https://tailscale.com/blog/oauth)
 
 ## When Do I Need 0.0.0.0?
 
 You do **NOT** need to bind to 0.0.0.0 for ngrok or tunnel usage. These tools tunnel to localhost.
 
-**Bind to 0.0.0.0 only when:**
+Bind to 0.0.0.0 only when:
 
 - Deploying on a VPS/cloud server and accessing from outside that machine
 - Running in Docker containers (container networking requires it)
 - Accessing the server from other devices on your local network
-- Using a different reverse proxy that requires network-wide binding
+- Using a reverse proxy that requires network-wide binding
 
-**For ngrok specifically:** The server stays on 127.0.0.1, and ngrok creates a tunnel to localhost:3001.
+For ngrok specifically, the server stays on 127.0.0.1 and ngrok tunnels to localhost:3001.
 
-**Example (binding to 0.0.0.0):**
+Example:
 ```bash
 remnote-mcp-server --http-host 0.0.0.0
 ```
 
-**Security warning:** This exposes the server to any device on your network. Use only in trusted environments.
+Security warning: this exposes the server to any device on your network.
 
 ## Troubleshooting
 
 ### Connection Refused
 
-**Symptom:** `curl` or Claude Cowork fails with "connection refused"
+**Symptom:** `curl` or your cloud client fails with "connection refused"
 
-**Solution:**
-
-1. Verify server is running: `ps aux | grep remnote-mcp-server lsof -i :3001`
-2. Verify tunnel is forwarding to port 3001:
-   - Check ngrok output or web interface: `http://127.0.0.1:4040`
-3. Test locally first (see [Troubleshooting: Testing the MCP HTTP Endpoint](troubleshooting.md#testing-the-mcp-http-endpoint))
+1. Verify server is running: `lsof -i :3001`
+2. Verify tunnel forwarding to port 3001 (for ngrok, check `http://127.0.0.1:4040`)
+3. Test local endpoint first (see [Troubleshooting: Testing the MCP HTTP Endpoint](troubleshooting.md#testing-the-mcp-http-endpoint))
 
 ### RemNote Plugin Not Connecting
 
 **Symptom:** Server starts but RemNote plugin won't connect
 
-**Solution:**
-
-1. WebSocket MUST be on localhost only
-2. Plugin connects to `ws://127.0.0.1:3002` (NOT via tunnel)
+1. WebSocket must stay on localhost
+2. Plugin must connect to `ws://127.0.0.1:3002` (never through tunnel)
 3. Verify server logs show `wsHost: "127.0.0.1"`
-4. If `wsHost` is `0.0.0.0`, this is a bug - file an issue
-
-**Verify plugin settings in RemNote:**
-
-- WebSocket URL: `ws://127.0.0.1:3002`
-- Auto-reconnect: Enabled
+4. Verify plugin WebSocket URL and auto-reconnect setting
 
 ### Tunnel URL Changes Every Restart
 
-**Expected behavior** on free tier. Solutions:
+Expected on free tier. Options:
 
-1. Use environment variable or script to update configuration automatically
+1. Use scripts/env vars to update client config
 2. Upgrade to ngrok paid plan for static domains
-3. Use ngrok labeled tunnels feature (requires configuration file)
-
-### Rate Limiting
-
-ngrok free tier has request rate limits. If you hit limits:
-
-- Reduce polling frequency in your application
-- Upgrade to ngrok paid plan
-- Use request batching where possible
+3. Use labeled tunnels with ngrok config
 
 ### HTTPS Required
 
-**Symptom:** Claude Cowork rejects HTTP URLs
+**Symptom:** Cloud client rejects HTTP URLs
 
-**Solution:** ngrok provides HTTPS by default. Use the `https://` URL from ngrok output, not `http://`.
+Use the `https://` tunnel URL, not `http://`.
+
+### Rate Limiting
+
+If ngrok free-tier limits are hit:
+
+- Reduce polling frequency
+- Upgrade ngrok plan
+- Batch requests where possible
 
 ## Security Best Practices
 
-### For Testing
-
-1. **Use temporary URLs** - ngrok free tier provides this automatically
-2. **Monitor access** - Check ngrok dashboard at `http://127.0.0.1:4040`
-3. **Limit exposure time** - Stop tunnel when not in use
-4. **Don't share URLs publicly** - Keep URLs private
+1. Use temporary URLs
+2. Monitor tunnel access logs
+3. Keep exposure windows short
+4. Keep URLs private
 
 ## Related Documentation
 
 - [Configuration Guide](configuration.md) - Configure MCP clients
+- [Claude Cowork Configuration](configuration-claude-cowork.md) - Cowork-specific setup steps
+- [ChatGPT Configuration](configuration-chatgpt.md) - ChatGPT Apps setup steps
 - [CLI Options Reference](cli-options.md) - Server configuration options
 - [Troubleshooting](troubleshooting.md) - Common issues
-- [Demo](../demo.md) - See remote access in action (Claude Cowork)
+- [Demo](../demo.md) - See remote access in action
 
 ## Need Help?
 

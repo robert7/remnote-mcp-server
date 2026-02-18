@@ -24,6 +24,9 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - Added `docs/guides/configuration-chatgpt.md` with six step-by-step screenshots for ChatGPT app setup and validation
 - README now links to `docs/guides/configuration-chatgpt.md` from both quick-start client configuration and documentation lists
 - ChatGPT configuration guide now documents Developer Mode and account eligibility prerequisites for private MCP servers
+- Reduced overlap between Claude Cowork and Remote Access docs by centralizing tunnel/security/troubleshooting details in `docs/guides/remote-access.md`
+- Simplified `docs/guides/configuration-claude-cowork.md` to Claude Cowork-specific steps with links to Remote Access
+- ChatGPT guide now links to Remote Access setup as a prerequisite for public HTTPS MCP endpoint configuration
 
 ### Added
 
