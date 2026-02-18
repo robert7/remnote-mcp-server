@@ -2,6 +2,24 @@
 
 This file provides guidance to AI agents when working with code in this repository.
 
+## CRITICAL: Companion Project Context
+
+When additional context is needed, agents SHOULD inspect companion projects from this repo root (`$(pwd)`), where
+companions are sibling directories at `$(pwd)/../...`.
+
+- `$(pwd)/../remnote-mcp-bridge` - RemNote plugin bridge layer; authoritative for WebSocket action names/payload
+  contracts and bridge-side behavior.
+- `$(pwd)/../remnote-cli` - CLI companion app using the same bridge; useful for daemon-based workflows and
+  contract-consistency checks.
+
+Agents should check companion repos every time it is useful for protocol, architecture, or integration context.
+
+Terminology aliases used across docs and discussions:
+
+- `remnote-mcp-server` = "MCP server" (this repository)
+- `remnote-mcp-bridge` = "MCP bridge" or "bridge plugin" (same project)
+- `remnote-cli` = "CLI companion app" (same project)
+
 ## Project Overview
 
 This is an MCP (Model Context Protocol) server that bridges AI agents to RemNote via a WebSocket connection. The server
