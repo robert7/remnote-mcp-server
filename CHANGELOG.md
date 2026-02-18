@@ -18,6 +18,8 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - README: added link to Integration Testing guide in the Documentation section
 - README: added a cross-link near `What is This?` to `remnote-cli` as an alternative path for some agentic workflows
   and CLI-first automation
+- Integration testing guide now documents `./run-status-check.sh` for quick status-only verification
+- Refactored `run-status-check.sh` to a thin wrapper and moved MCP SDK logic to `scripts/run-status-check.mjs`
 
 ### Added
 
@@ -29,6 +31,8 @@ Versioning](https://semver.org/spec/v2.0.0.html).
   - Configurable via `REMNOTE_MCP_URL` and `MCP_TEST_DELAY` environment variables
   - All test artifacts prefixed with `[MCP-TEST]` for easy manual cleanup
 - Integration testing guide at `docs/guides/integration-testing.md`
+- `run-status-check.sh` helper script to perform a standalone MCP `remnote_status` request against a local server
+- Unit test coverage for `run-status-check.sh` failure-path behavior and executable bit
 
 ## [0.4.0] - 2026-02-14
 

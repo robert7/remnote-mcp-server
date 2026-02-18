@@ -18,6 +18,9 @@ npm run test:integration
 
 # Non-interactive — skips confirmation
 npm run test:integration -- --yes
+
+# Fast connection check only (no test data creation)
+./run-status-check.sh
 ```
 
 ## Configuration
