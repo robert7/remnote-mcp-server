@@ -7,8 +7,7 @@
 MCP server that bridges AI agents (e.g. Claude Code) to [RemNote](https://remnote.com/) via the [RemNote Bridge for MCP &
 OpenClaw plugin](https://github.com/robert7/remnote-mcp-bridge).
 
-> This is a working **proof-of-concept/experimental solution**. It "works on my machine" — you're invited to test
-> it and [report any bugs or issues](https://github.com/robert7/remnote-mcp-server/issues).
+> This is a working solution, but still experimental. If you run into any issues, please [report them here](https://github.com/robert7/remnote-mcp-server/issues).
 
 ## What is This?
 
