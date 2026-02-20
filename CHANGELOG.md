@@ -15,6 +15,7 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- Search results no longer include `preview` field (removed upstream in bridge plugin)
 - README: added link to Integration Testing guide in the Documentation section
 - README: added a cross-link near `What is This?` to `remnote-cli` as an alternative path for some agentic workflows
   and CLI-first automation
