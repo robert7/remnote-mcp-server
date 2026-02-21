@@ -7,48 +7,25 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-### Fixed
-
-- Logger test race condition in CI caused by pino's async file writer still active during `rm()` cleanup
-  - Added `maxRetries` and `retryDelay` to `rm()` calls in `beforeEach`/`afterEach`
-  - Flush pino file destinations before directory cleanup
+## [0.5.0] - 2026-02-21
 
 ### Added
 
-- Added `outputSchema` to `remnote_search` and `remnote_read_note` tool definitions advertising response fields
-  (`detail`, `remType`, `cardDirection`) to AI consumers
-- Search results now include `detail` (back text for CDF/flashcard Rems), `remType` (document, dailyDocument, concept,
-  descriptor, portal, text), and `cardDirection` (forward, reverse, bidirectional) from bridge plugin
+- Added `outputSchema` metadata for `remnote_search` and `remnote_read_note`, including `detail`, `remType`, and
+  `cardDirection` response fields for AI clients.
+- Search responses now include `detail`, `remType`, and `cardDirection`.
+- Added end-to-end integration test tooling with `npm run test:integration` and a standalone
+  `./run-status-check.sh` helper.
+- Added ChatGPT setup documentation with screenshots and linked it from quick-start/docs navigation.
 
 ### Changed
 
-- Increased default search limit from 20 to 50 and maximum from 100 to 150
-- Search results no longer include `preview` field (removed upstream in bridge plugin)
-- README: added link to Integration Testing guide in the Documentation section
-- README: added a cross-link near `What is This?` to `remnote-cli` as an alternative path for some agentic workflows
-  and CLI-first automation
-- Integration testing guide now documents `./run-status-check.sh` for quick status-only verification
-- Refactored `run-status-check.sh` to a thin wrapper and moved MCP SDK logic to `scripts/run-status-check.mjs`
-- Demo page now includes a ChatGPT integration section before Claude Cowork with a link to a dedicated setup guide
-- Added `docs/guides/configuration-chatgpt.md` with six step-by-step screenshots for ChatGPT app setup and validation
-- README now links to `docs/guides/configuration-chatgpt.md` from both quick-start client configuration and documentation lists
-- ChatGPT configuration guide now documents Developer Mode and account eligibility prerequisites for private MCP servers
-- Reduced overlap between Claude Cowork and Remote Access docs by centralizing tunnel/security/troubleshooting details in `docs/guides/remote-access.md`
-- Simplified `docs/guides/configuration-claude-cowork.md` to Claude Cowork-specific steps with links to Remote Access
-- ChatGPT guide now links to Remote Access setup as a prerequisite for public HTTPS MCP endpoint configuration
+- Increased search default limit from 20 to 50 and maximum limit from 100 to 150.
+- Reorganized setup docs to reduce overlap and centralize remote-access guidance.
 
-### Added
+### Removed
 
-- Integration test suite for end-to-end validation against a live RemNote instance
-  - Standalone runner via `npm run test:integration` (not part of regular test suite)
-  - Five sequential workflows: status check, create & search, read & update, journal, error cases
-  - Uses official MCP SDK Client for real protocol communication
-  - `--yes` flag for non-interactive execution
-  - Configurable via `REMNOTE_MCP_URL` and `MCP_TEST_DELAY` environment variables
-  - All test artifacts prefixed with `[MCP-TEST]` for easy manual cleanup
-- Integration testing guide at `docs/guides/integration-testing.md`
-- `run-status-check.sh` helper script to perform a standalone MCP `remnote_status` request against a local server
-- Unit test coverage for `run-status-check.sh` failure-path behavior and executable bit
+- Removed `preview` from search responses to align with bridge plugin output.
 
 ## [0.4.0] - 2026-02-14
 
