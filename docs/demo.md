@@ -30,7 +30,7 @@ read, update, journal append).
 
 ![RemNote Search (Claude Cowork)](images/remnote-mcp-server-demo-claude-cowork2.jpg)
 
-Searching RemNote knowledge base for "blue light & sleep" with AI-generated summary. The RemNote Bridge plugin panel (right
+Searching RemNote knowledge base for "blue light & sleep" with AI-generated summary. The RemNote Automation Bridge plugin panel (right
 side) shows connection statistics and recent actions.
 
 ## Accomplish

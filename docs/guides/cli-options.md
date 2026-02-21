@@ -55,7 +55,7 @@ Specify the WebSocket server port (RemNote plugin connection).
 remnote-mcp-server --ws-port 3004
 ```
 
-**Important:** If you change the WebSocket port, you must also update the WebSocket URL in the RemNote Bridge plugin
+**Important:** If you change the WebSocket port, you must also update the WebSocket URL in the RemNote Automation Bridge plugin
 settings.
 
 **Use when:**

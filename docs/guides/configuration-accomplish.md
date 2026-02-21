@@ -12,7 +12,7 @@ locally on your machine. Bring your own API keys (OpenAI, Anthropic, Google, xAI
 
 - RemNote MCP Server installed and running
 - Accomplish installed
-- RemNote app running with RemNote Bridge plugin installed and connected
+- RemNote app running with RemNote Automation Bridge plugin installed and connected
 
 ## Quick Start
 

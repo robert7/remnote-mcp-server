@@ -9,8 +9,8 @@ export const CreateNoteSchema = z.object({
 
 export const SearchSchema = z.object({
   query: z.string().describe('Search query text'),
-  limit: z.number().int().min(1).max(100).default(20).describe('Maximum results'),
-  includeContent: z.boolean().default(false).describe('Include child content'),
+  limit: z.number().int().min(1).max(150).default(50).describe('Maximum results'),
+  includeContent: z.boolean().default(false).describe('Include child content in results'),
 });
 
 export const ReadNoteSchema = z.object({

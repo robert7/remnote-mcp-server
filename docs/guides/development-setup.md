@@ -6,7 +6,7 @@ Instructions for contributors who want to modify, test, or develop the RemNote M
 
 - **Node.js** >= 18.0.0 (preferably via nvm)
 - **git** - Version control
-- **RemNote app** with RemNote Bridge plugin (for testing)
+- **RemNote app** with RemNote Automation Bridge plugin (for testing)
 - **Claude Code CLI** or another MCP client (for integration testing)
 
 ## Initial Setup
@@ -177,7 +177,7 @@ describe('Component Name', () => {
 **Prerequisites:**
 
 1. Server running (`npm run dev` or `npm start`)
-2. RemNote app running with RemNote Bridge plugin connected
+2. RemNote app running with RemNote Automation Bridge plugin connected
 3. MCP client configured (e.g.,  CLI)
 
 **Test steps:**

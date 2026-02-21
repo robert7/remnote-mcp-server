@@ -95,7 +95,7 @@ If you changed the WebSocket port, update the plugin settings in RemNote:
 
 ## RemNote Plugin Configuration
 
-The RemNote Bridge plugin must be configured to match the server's WebSocket port.
+The RemNote Automation Bridge plugin must be configured to match the server's WebSocket port.
 
 ### Plugin Settings
 

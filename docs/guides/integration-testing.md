@@ -6,7 +6,7 @@ RemNote and verify the responses.
 
 ## Prerequisites
 
-1. RemNote running with the RemNote Bridge plugin installed and connected
+1. RemNote running with the RemNote Automation Bridge plugin installed and connected
 2. MCP server running (`npm run dev` or `npm start`)
 3. Plugin connected to the WebSocket server (check server logs for connection message)
 
