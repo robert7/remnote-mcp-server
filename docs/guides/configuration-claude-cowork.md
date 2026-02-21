@@ -11,7 +11,7 @@ of Claude Code to non-coding knowledge work.
 ## Prerequisites
 
 - RemNote MCP Server installed and running locally
-- RemNote app running with RemNote Bridge plugin installed and connected
+- RemNote app running with RemNote Automation Bridge plugin installed and connected
 - Remote HTTPS access to your local MCP endpoint (see [Remote Access Setup](remote-access.md))
 
 ## Configure Claude Cowork

@@ -12,7 +12,7 @@ git workflows directly from the terminal.
 
 - RemNote MCP Server installed and running
 - Claude Code CLI installed
-- RemNote app running with RemNote Bridge plugin installed and connected
+- RemNote app running with RemNote Automation Bridge plugin installed and connected
 
 ## Quick Start
 

@@ -78,7 +78,8 @@ export const SEARCH_TOOL = {
 
 export const READ_NOTE_TOOL = {
   name: 'remnote_read_note',
-  description: 'Read a specific note from RemNote by its Rem ID, including type classification and flashcard metadata',
+  description:
+    'Read a specific note from RemNote by its Rem ID, including type classification and flashcard metadata',
   inputSchema: {
     type: 'object' as const,
     properties: {

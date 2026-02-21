@@ -218,7 +218,7 @@ View detailed coverage: `open coverage/index.html`
 
 ### Manual Testing Prerequisites
 
-- RemNote app running with RemNote Bridge plugin installed and connected
+- RemNote app running with RemNote Automation Bridge plugin installed and connected
 - Server configured in `~/.claude.json` under project's `mcpServers` key
 
 ## Configuration
