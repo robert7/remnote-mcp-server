@@ -25,21 +25,60 @@ export const CREATE_NOTE_TOOL = {
 
 export const SEARCH_TOOL = {
   name: 'remnote_search',
-  description: 'Search the RemNote knowledge base for notes matching a query',
+  description:
+    'Search the RemNote knowledge base. Results are sorted by type: documents first, then concepts, descriptors, portals, and plain text.',
   inputSchema: {
     type: 'object' as const,
     properties: {
       query: { type: 'string', description: 'Search query text' },
-      limit: { type: 'number', description: 'Maximum results (1-100, default: 20)' },
-      includeContent: { type: 'boolean', description: 'Include child content (default: false)' },
+      limit: { type: 'number', description: 'Maximum results (1-150, default: 50)' },
+      includeContent: {
+        type: 'boolean',
+        description: 'Include first child bullets as content (default: false)',
+      },
     },
     required: ['query'],
+  },
+  outputSchema: {
+    type: 'object' as const,
+    properties: {
+      results: {
+        type: 'array',
+        description:
+          'Search results sorted by type (documents, concepts, descriptors, portals, text)',
+        items: {
+          type: 'object',
+          properties: {
+            remId: { type: 'string', description: 'Unique Rem ID' },
+            title: { type: 'string', description: 'Rendered title with markdown formatting' },
+            detail: {
+              type: 'string',
+              description: 'Back text for CDF/flashcard Rems (omitted if none)',
+            },
+            remType: {
+              type: 'string',
+              description:
+                'Rem classification: document, dailyDocument, concept, descriptor, portal, or text',
+            },
+            cardDirection: {
+              type: 'string',
+              description:
+                'Flashcard direction: forward, reverse, or bidirectional (omitted if not a flashcard)',
+            },
+            content: {
+              type: 'string',
+              description: 'Child content (only when includeContent=true)',
+            },
+          },
+        },
+      },
+    },
   },
 };
 
 export const READ_NOTE_TOOL = {
   name: 'remnote_read_note',
-  description: 'Read a specific note from RemNote by its Rem ID',
+  description: 'Read a specific note from RemNote by its Rem ID, including type classification and flashcard metadata',
   inputSchema: {
     type: 'object' as const,
     properties: {
@@ -47,6 +86,40 @@ export const READ_NOTE_TOOL = {
       depth: { type: 'number', description: 'Depth of children to include (0-10, default: 3)' },
     },
     required: ['remId'],
+  },
+  outputSchema: {
+    type: 'object' as const,
+    properties: {
+      remId: { type: 'string', description: 'Unique Rem ID' },
+      title: { type: 'string', description: 'Rendered title with markdown formatting' },
+      detail: {
+        type: 'string',
+        description: 'Back text for CDF/flashcard Rems (omitted if none)',
+      },
+      remType: {
+        type: 'string',
+        description:
+          'Rem classification: document, dailyDocument, concept, descriptor, portal, or text',
+      },
+      cardDirection: {
+        type: 'string',
+        description:
+          'Flashcard direction: forward, reverse, or bidirectional (omitted if not a flashcard)',
+      },
+      content: { type: 'string', description: 'Rendered title text (same as title)' },
+      children: {
+        type: 'array',
+        description: 'Child Rems up to requested depth',
+        items: {
+          type: 'object',
+          properties: {
+            remId: { type: 'string' },
+            text: { type: 'string' },
+            children: { type: 'array' },
+          },
+        },
+      },
+    },
   },
 };
 

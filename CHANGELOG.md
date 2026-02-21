@@ -13,8 +13,16 @@ Versioning](https://semver.org/spec/v2.0.0.html).
   - Added `maxRetries` and `retryDelay` to `rm()` calls in `beforeEach`/`afterEach`
   - Flush pino file destinations before directory cleanup
 
+### Added
+
+- Added `outputSchema` to `remnote_search` and `remnote_read_note` tool definitions advertising response fields
+  (`detail`, `remType`, `cardDirection`) to AI consumers
+- Search results now include `detail` (back text for CDF/flashcard Rems), `remType` (document, dailyDocument, concept,
+  descriptor, portal, text), and `cardDirection` (forward, reverse, bidirectional) from bridge plugin
+
 ### Changed
 
+- Increased default search limit from 20 to 50 and maximum from 100 to 150
 - Search results no longer include `preview` field (removed upstream in bridge plugin)
 - README: added link to Integration Testing guide in the Documentation section
 - README: added a cross-link near `What is This?` to `remnote-cli` as an alternative path for some agentic workflows

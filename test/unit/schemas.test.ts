@@ -49,13 +49,13 @@ describe('SearchSchema', () => {
   it('should validate with only required query field', () => {
     const result = SearchSchema.parse({ query: 'test' });
     expect(result.query).toBe('test');
-    expect(result.limit).toBe(20); // default
+    expect(result.limit).toBe(50); // default
     expect(result.includeContent).toBe(false); // default
   });
 
-  it('should apply default limit of 20', () => {
+  it('should apply default limit of 50', () => {
     const result = SearchSchema.parse({ query: 'test' });
-    expect(result.limit).toBe(20);
+    expect(result.limit).toBe(50);
   });
 
   it('should apply default includeContent of false', () => {
@@ -77,8 +77,8 @@ describe('SearchSchema', () => {
     expect(() => SearchSchema.parse({ query: 'test', limit: 0 })).toThrow();
   });
 
-  it('should reject limit greater than 100', () => {
-    expect(() => SearchSchema.parse({ query: 'test', limit: 101 })).toThrow();
+  it('should reject limit greater than 150', () => {
+    expect(() => SearchSchema.parse({ query: 'test', limit: 151 })).toThrow();
   });
 
   it('should reject non-integer limit', () => {

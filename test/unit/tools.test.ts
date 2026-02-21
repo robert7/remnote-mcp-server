@@ -222,7 +222,7 @@ describe('Tool Handlers - search', () => {
 
     expect(mockWsServer.sendRequest).toHaveBeenCalledWith('search', {
       query: 'test',
-      limit: 20, // default
+      limit: 50, // default
       includeContent: false, // default
     });
   });
