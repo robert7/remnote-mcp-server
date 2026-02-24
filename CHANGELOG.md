@@ -7,6 +7,11 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Documentation
+
+- Added bridge/plugin compatibility warnings and links in install/development/troubleshooting docs, referencing the
+  canonical bridge-side `0.x` version compatibility guide.
+
 ## [0.5.1] - 2026-02-24
 
 ### Changed
@@ -26,8 +31,8 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - Added `outputSchema` metadata for `remnote_search` and `remnote_read_note`, including `detail`, `remType`, and
   `cardDirection` response fields for AI clients.
 - Search responses now include `detail`, `remType`, and `cardDirection`.
-- Added end-to-end integration test tooling with `npm run test:integration` and a standalone
-  `./run-status-check.sh` helper.
+- Added end-to-end integration test tooling with `npm run test:integration` and a standalone `./run-status-check.sh`
+  helper.
 - Added ChatGPT setup documentation with screenshots and linked it from quick-start/docs navigation.
 
 ### Changed

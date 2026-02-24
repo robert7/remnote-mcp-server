@@ -1,8 +1,8 @@
 # Integration Testing
 
 The integration test suite validates the full MCP server chain end-to-end against a live RemNote instance. Unlike the
-unit tests (which mock the WebSocket bridge), these tests send real MCP tool calls through the running server to
-RemNote and verify the responses.
+unit tests (which mock the WebSocket bridge), these tests send real MCP tool calls through the running server to RemNote
+and verify the responses.
 
 ## Prerequisites
 
@@ -45,8 +45,8 @@ The suite runs five sequential workflows:
 
 ## Test Artifacts
 
-All test content is prefixed with `[MCP-TEST]` followed by a unique run ID (ISO timestamp). RemNote's bridge plugin
-does not support deleting notes, so test artifacts persist and must be cleaned up manually.
+All test content is prefixed with `[MCP-TEST]` followed by a unique run ID (ISO timestamp). RemNote's bridge plugin does
+not support deleting notes, so test artifacts persist and must be cleaned up manually.
 
 To clean up: search your RemNote knowledge base for `[MCP-TEST]` and delete the matching notes.
 

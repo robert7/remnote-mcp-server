@@ -22,6 +22,9 @@ cat ~/.claude.json | grep -A 5 remnote
 
 # 5. Check RemNote plugin status
 # (Open RemNote → Plugin control panel)
+
+# 6. Check server version
+remnote-mcp-server --version
 ```
 
 ## Server Issues
@@ -206,6 +209,18 @@ RemNote MCP Server v0.2.1 listening { wsPort: 3002, httpPort: 3001 }
 - Check logs for error messages
 - Enable plugin auto-reconnect
 
+### Bridge / Server Version Mismatch After Upgrade
+
+**Symptom:** Plugin shows `Connected`, but MCP tool calls fail after upgrading the bridge plugin or server
+
+**Solution:**
+
+1. Check plugin version in the Automation Bridge panel (or via `remnote_status` output `pluginVersion`).
+2. Check server version: `remnote-mcp-server --version`.
+3. Install a compatible server version for the bridge plugin version (`0.x` minor versions may break compatibility).
+4. See the [Bridge / Consumer Version Compatibility
+   Guide](https://github.com/robert7/remnote-mcp-bridge/blob/main/docs/guides/bridge-consumer-version-compatibility.md).
+
 ### Plugin Shows Wrong Version
 
 **Symptom:** `remnote_status` shows old plugin version
@@ -307,8 +322,8 @@ RemNote MCP Server v0.2.1 listening { wsPort: 3002, httpPort: 3001 }
 Invalid session ID: ...
 ```
 
-**Cause:** MCP HTTP sessions are stored in memory. Restarting the server invalidates existing sessions. Some MCP
-clients (including current Claude Code versions) may continue using the old session ID instead of reinitializing.
+**Cause:** MCP HTTP sessions are stored in memory. Restarting the server invalidates existing sessions. Some MCP clients
+(including current Claude Code versions) may continue using the old session ID instead of reinitializing.
 
 **What to do:**
 

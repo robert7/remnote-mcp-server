@@ -8,8 +8,9 @@ By default, the RemNote MCP Server binds to localhost (127.0.0.1) and is only ac
 To enable cloud-based AI services to access your RemNote knowledge base, you need to expose the HTTP MCP endpoint
 remotely.
 
-**Security Warning:** The methods described here provide **no authentication** by default and expose your RemNote access to anyone with the URL. Of course,
-**you can configure authentication** and access controls with tools like ngrok, Cloudflare or Tailscale.
+**Security Warning:** The methods described here provide **no authentication** by default and expose your RemNote access
+to anyone with the URL. Of course, **you can configure authentication** and access controls with tools like ngrok,
+Cloudflare or Tailscale.
 
 Unless you configure authentication, use remote access only for:
 
@@ -113,9 +114,9 @@ https://abc123.ngrok-free.app/mcp
 
 ### Testing
 
-To test the exposed endpoint, use the curl command from the
-[Troubleshooting Guide](troubleshooting.md#testing-the-mcp-http-endpoint), replacing `http://localhost:3001` with your
-ngrok HTTPS URL (for example, `https://abc123.ngrok-free.app`).
+To test the exposed endpoint, use the curl command from the [Troubleshooting
+Guide](troubleshooting.md#testing-the-mcp-http-endpoint), replacing `http://localhost:3001` with your ngrok HTTPS URL
+(for example, `https://abc123.ngrok-free.app`).
 
 Expected response: JSON with server capabilities and an `mcp-session-id` header.
 
@@ -148,9 +149,9 @@ Important: include the required `Accept: application/json, text/event-stream` he
 3. Stop the tunnel when not in use
 4. Do not share URLs publicly
 5. Optionally add ngrok traffic policy authentication
-6. For OAuth-based gating, review ngrok OAuth traffic policy actions:
-   [Traffic policy overview](https://ngrok.com/docs/traffic-policy/index#traffic-policy-overview),
-   [OAuth action](https://ngrok.com/docs/traffic-policy/actions/oauth)
+6. For OAuth-based gating, review ngrok OAuth traffic policy actions: [Traffic policy
+   overview](https://ngrok.com/docs/traffic-policy/index#traffic-policy-overview), [OAuth
+   action](https://ngrok.com/docs/traffic-policy/actions/oauth)
 
 ## Alternative Solutions
 
@@ -160,7 +161,9 @@ Cloudflare Tunnel is a free alternative with optional identity and access contro
 
 - Docs: [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/)
 - Signup: [try.cloudflare.com](https://try.cloudflare.com/)
-- Optional: configure [Access policies](https://developers.cloudflare.com/cloudflare-one/access-controls/policies/policy-management/) for authentication and access control
+- Optional: configure [Access
+  policies](https://developers.cloudflare.com/cloudflare-one/access-controls/policies/policy-management/) for
+  authentication and access control
 
 ### Tailscale
 
@@ -198,7 +201,8 @@ Security warning: this exposes the server to any device on your network.
 
 1. Verify server is running: `lsof -i :3001`
 2. Verify tunnel forwarding to port 3001 (for ngrok, check `http://127.0.0.1:4040`)
-3. Test local endpoint first (see [Troubleshooting: Testing the MCP HTTP Endpoint](troubleshooting.md#testing-the-mcp-http-endpoint))
+3. Test local endpoint first (see [Troubleshooting: Testing the MCP HTTP
+   Endpoint](troubleshooting.md#testing-the-mcp-http-endpoint))
 
 ### RemNote Plugin Not Connecting
 

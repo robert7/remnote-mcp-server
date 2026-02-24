@@ -6,8 +6,8 @@ Complete installation instructions for the RemNote MCP Server.
 
 - **Node.js** >= 18.0.0
 - **RemNote app** (desktop or web browser)
-- **RemNote Automation Bridge plugin** - Install from [GitHub](https://github.com/robert7/remnote-mcp-bridge) - registration in
-  the RemNote marketplace is pending approval
+- **RemNote Automation Bridge plugin** - Install from [GitHub](https://github.com/robert7/remnote-mcp-bridge) -
+  registration in the RemNote marketplace is pending approval
 - **An MCP client** - Examples:
   - [Claude Code CLI](https://claude.com/claude-code)
   - [Accomplish](https://github.com/accomplish-ai/accomplish) (formerly Openwork)
@@ -17,10 +17,15 @@ Complete installation instructions for the RemNote MCP Server.
 
 **Recommended for most users.**
 
+> **Version compatibility (`0.x` semver):** before installing/upgrading, check the [Bridge / Consumer Version Compatibility Guide](https://github.com/robert7/remnote-mcp-bridge/blob/main/docs/guides/bridge-consumer-version-compatibility.md) and pick a `remnote-mcp-server` version compatible with your installed bridge plugin version.
+
 ### Install Globally
 
 ```bash
 npm install -g remnote-mcp-server
+
+# Example pinned install when you need a specific compatible version
+npm install -g remnote-mcp-server@0.5.0
 ```
 
 ### Verify Installation
@@ -44,6 +49,8 @@ npm uninstall -g remnote-mcp-server
 **For contributors and developers.** See [Development Setup Guide](development-setup.md) for detailed instructions.
 
 **Quick start:**
+
+> Prefer a checkout/tag that matches your installed bridge plugin minor version. See the [Bridge / Consumer Version Compatibility Guide](https://github.com/robert7/remnote-mcp-bridge/blob/main/docs/guides/bridge-consumer-version-compatibility.md).
 
 ```bash
 git clone https://github.com/robert7/remnote-mcp-server.git
@@ -218,9 +225,17 @@ export PATH="$(npm config get prefix)/bin:$PATH"
 
 **Solution:** See [Troubleshooting Guide](troubleshooting.md#plugin-wont-connect)
 
+### Bridge / Server Version Mismatch (0.x)
+
+**Symptom:** Plugin connects, but tool calls fail or behave unexpectedly after upgrading the plugin or server
+
+**Solution:** Check bridge and server versions and install a compatible server version for your bridge plugin version.
+See the [Bridge / Consumer Version Compatibility
+Guide](https://github.com/robert7/remnote-mcp-bridge/blob/main/docs/guides/bridge-consumer-version-compatibility.md).
+
 ## Next Steps
 
-- [Configure your AI client](configuration.md) - Set up  CLI, Accomplish, or Claude Cowork
+- [Configure your AI client](configuration.md) - Set up CLI, Accomplish, or Claude Cowork
 - [Learn the MCP tools](tools-reference.md) - Explore available RemNote operations
 - [View demos](../demo.md) - See the server in action with different clients
 

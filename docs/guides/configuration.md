@@ -23,9 +23,12 @@ remnote-mcp-server
 
 Choose your AI client and follow its configuration guide:
 
-- **[Claude Code CLI](configuration-claude-code-CLI.md)** - Anthropic's command-line interface tool that integrates with their Claude AI models
-- **[Accomplish](configuration-accomplish.md)** - open source AI desktop agent that automates file management, document creation, and browser tasks
-- **[Claude Cowork](configuration-claude-cowork.md)** - Anthropic's research preview feature in the Claude Desktop app that extends the agentic architecture
+- **[Claude Code CLI](configuration-claude-code-CLI.md)** - Anthropic's command-line interface tool that integrates with
+  their Claude AI models
+- **[Accomplish](configuration-accomplish.md)** - open source AI desktop agent that automates file management, document
+  creation, and browser tasks
+- **[Claude Cowork](configuration-claude-cowork.md)** - Anthropic's research preview feature in the Claude Desktop app
+  that extends the agentic architecture
 of Claude Code to non-coding knowledge work
 
 ## Other MCP Clients

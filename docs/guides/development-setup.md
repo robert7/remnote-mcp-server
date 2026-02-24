@@ -24,6 +24,8 @@ cd remnote-mcp-server
 npm install
 ```
 
+> If you will test against an existing bridge plugin install, match your local server checkout/version to the bridge plugin version line (`0.x` semver). See the [Bridge / Consumer Version Compatibility Guide](https://github.com/robert7/remnote-mcp-bridge/blob/main/docs/guides/bridge-consumer-version-compatibility.md).
+
 This installs both production and development dependencies, including:
 
 - TypeScript and type definitions
@@ -178,7 +180,7 @@ describe('Component Name', () => {
 
 1. Server running (`npm run dev` or `npm start`)
 2. RemNote app running with RemNote Automation Bridge plugin connected
-3. MCP client configured (e.g.,  CLI)
+3. MCP client configured (e.g., CLI)
 
 **Test steps:**
 

@@ -4,7 +4,8 @@
 ![CI](https://github.com/robert7/remnote-mcp-server/actions/workflows/ci.yml/badge.svg)
 [![codecov](https://codecov.io/gh/robert7/remnote-mcp-server/branch/main/graph/badge.svg)](https://codecov.io/gh/robert7/remnote-mcp-server)
 
-MCP server that bridges AI agents (e.g. Claude Code) to [RemNote](https://remnote.com/) via the [RemNote Automation Bridge plugin](https://github.com/robert7/remnote-mcp-bridge).
+MCP server that bridges AI agents (e.g. Claude Code) to [RemNote](https://remnote.com/) via the [RemNote Automation
+Bridge plugin](https://github.com/robert7/remnote-mcp-bridge).
 
 > This is a working solution, but still experimental. If you run into any issues, please [report them here](https://github.com/robert7/remnote-mcp-server/issues).
 
@@ -14,8 +15,8 @@ The RemNote MCP Server enables AI assistants like Claude Code to interact direct
 through the Model Context Protocol (MCP). Create notes, search your knowledge base, update existing notes, and maintain
 your daily journal—all through conversational commands.
 
-For some agentic workflows or CLI-first automation, the companion app **[remnote-cli](https://github.com/robert7/remnote-cli)**
-may be a better fit than running a full MCP server.
+For some agentic workflows or CLI-first automation, the companion app
+**[remnote-cli](https://github.com/robert7/remnote-cli)** may be a better fit than running a full MCP server.
 
 ## Demo
 
@@ -25,8 +26,8 @@ See AI agent examples in action with RemNote: **[View Demo →](docs/demo.md)**
 
 This system consists of **two separate components** that work together:
 
-1. **[RemNote Automation Bridge](https://github.com/robert7/remnote-mcp-bridge)** - A RemNote plugin that runs in your browser
-   or RemNote desktop app and exposes RemNote API functionality via WebSocket
+1. **[RemNote Automation Bridge](https://github.com/robert7/remnote-mcp-bridge)** - A RemNote plugin that runs in your
+   browser or RemNote desktop app and exposes RemNote API functionality via WebSocket
 2. **RemNote MCP Server** (this project) - A standalone server that connects your AI assistant to the bridge using MCP
    protocol
 
@@ -65,15 +66,17 @@ connection always stays local for security. See [Remote Access Guide](docs/guide
 
 ### 1. Install the Server
 
+> **Version compatibility (`0.x` semver):** install a `remnote-mcp-server` version compatible with your installed RemNote Automation Bridge plugin version. See the [Bridge / Consumer Version Compatibility Guide](https://github.com/robert7/remnote-mcp-bridge/blob/main/docs/guides/bridge-consumer-version-compatibility.md).
+
 ```bash
 npm install -g remnote-mcp-server
 ```
 
 ### 2. Install the RemNote Plugin
 
-Install the [RemNote Automation Bridge plugin](https://github.com/robert7/remnote-mcp-bridge) in your RemNote app. Currently
-available from GitHub; registration in the RemNote marketplace is pending approval. Configure the plugin to connect
-to `ws://127.0.0.1:3002`.
+Install the [RemNote Automation Bridge plugin](https://github.com/robert7/remnote-mcp-bridge) in your RemNote app.
+Currently available from GitHub; registration in the RemNote marketplace is pending approval. Configure the plugin
+to connect to `ws://127.0.0.1:3002`.
 
 ### 3. Start the Server
 
@@ -102,6 +105,9 @@ Keep this terminal running.
 ### Getting Started
 
 - **[Installation Guide](docs/guides/installation.md)** - Complete installation instructions
+- **[Bridge / Consumer Version Compatibility
+  Guide](https://github.com/robert7/remnote-mcp-bridge/blob/main/docs/guides/bridge-consumer-version-compatibility.md)**
+  \- Match server version to installed bridge plugin version (`0.x` semver)
 - **[Configuration Guide](docs/guides/configuration.md)** - Configure Claude Code CLI, Accomplish, and other clients
 - **[ChatGPT Configuration Guide](docs/guides/configuration-chatgpt.md)** - Set up ChatGPT Apps with your MCP server
 - **[Demo & Screenshots](docs/demo.md)** - See the server in action with different AI clients
@@ -208,12 +214,17 @@ See [CLI Options Reference](docs/guides/cli-options.md) for all options.
 
 - Verify configuration: `claude mcp list`
 - Restart Claude Code completely
+- If this started after upgrades, verify bridge/server version compatibility (`0.x` minor versions may break); see the
+  [Bridge / Consumer Version Compatibility
+  Guide](https://github.com/robert7/remnote-mcp-bridge/blob/main/docs/guides/bridge-consumer-version-compatibility.md)
 
 See the [Troubleshooting Guide](docs/guides/troubleshooting.md) for detailed solutions.
 
 ## Contributing & Development
 
 **Development setup:**
+
+> **Version compatibility tip:** when testing against a local or marketplace-installed bridge plugin, use a server checkout/tag compatible with that bridge plugin version (see the [Bridge / Consumer Version Compatibility Guide](https://github.com/robert7/remnote-mcp-bridge/blob/main/docs/guides/bridge-consumer-version-compatibility.md)).
 
 ```bash
 git clone https://github.com/robert7/remnote-mcp-server.git
