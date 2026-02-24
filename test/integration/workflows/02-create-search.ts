@@ -8,15 +8,23 @@
 import { assertTruthy, assertHasField, assertIsArray } from '../assertions.js';
 import type { WorkflowContext, WorkflowResult, SharedState, StepResult } from '../types.js';
 
+function summarizeSearchResults(
+  results: Array<Record<string, unknown>>
+): Array<Record<string, unknown>> {
+  return results.slice(0, 8).map((r) => ({
+    remId: r.remId,
+    title: r.title,
+    headline: r.headline,
+    hasContent: 'content' in r,
+    hasContentStructured: 'contentStructured' in r,
+  }));
+}
+
 function findMatchingSearchResult(
   results: Array<Record<string, unknown>>,
-  runId: string
+  remId: string
 ): Record<string, unknown> {
-  const match = results.find((r) => {
-    const title = typeof r.title === 'string' ? r.title : '';
-    const headline = typeof r.headline === 'string' ? r.headline : '';
-    return title.includes(runId) || headline.includes(runId);
-  });
+  const match = results.find((r) => r.remId === remId);
   assertTruthy(match, 'should find matching note');
   return match as Record<string, unknown>;
 }
@@ -137,16 +145,20 @@ export async function createSearchWorkflow(
   for (const mode of ['markdown', 'structured', 'none'] as const) {
     const start = Date.now();
     const label = `Search includeContent=${mode} returns expected shape`;
+    const query = `[MCP-TEST] ${ctx.runId}`;
+    let debugResults: Array<Record<string, unknown>> | null = null;
     try {
       const result = await ctx.client.callTool('remnote_search', {
-        query: `[MCP-TEST] Rich Note ${ctx.runId}`,
+        query,
         includeContent: mode,
       });
       assertHasField(result, 'results', `search ${mode}`);
       assertIsArray(result.results, `search ${mode} results`);
       const results = result.results as Array<Record<string, unknown>>;
+      debugResults = results;
       assertTruthy(results.length > 0, `search ${mode} should return results`);
-      const match = findMatchingSearchResult(results, ctx.runId);
+      assertTruthy(typeof state.noteBId === 'string', 'rich note remId should be recorded');
+      const match = findMatchingSearchResult(results, state.noteBId as string);
       assertSearchContentModeShape(match, mode);
       steps.push({
         label,
@@ -158,7 +170,15 @@ export async function createSearchWorkflow(
         label,
         passed: false,
         durationMs: Date.now() - start,
-        error: (e as Error).message,
+        error:
+          `${(e as Error).message} | query=${JSON.stringify(query)} expectedRemId=${JSON.stringify(
+            state.noteBId ?? null
+          )}` +
+          (debugResults
+            ? ` resultCount=${debugResults.length} topResults=${JSON.stringify(
+                summarizeSearchResults(debugResults)
+              )}`
+            : ''),
       });
     }
   }

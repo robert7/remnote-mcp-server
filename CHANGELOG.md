@@ -13,6 +13,8 @@ Versioning](https://semver.org/spec/v2.0.0.html).
   don't send a `hello` message, by falling back to `pluginVersion` from the `get_status` response.
 - Integration tests now cover `remnote_search` `includeContent` modes (`markdown`, `structured`, `none`) with
   mode-specific response-shape assertions, and no longer use the legacy boolean `includeContent` value.
+- Integration `Read & Update` workflow now validates the current `remnote_read_note` response contract (`content` /
+  `contentProperties`) and covers `includeContent` modes (`markdown`, `none`) instead of the removed `children` field.
 
 ### Added
 
