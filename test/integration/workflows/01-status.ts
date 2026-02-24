@@ -57,5 +57,33 @@ export async function statusWorkflow(
     }
   }
 
+  // Step 3: Fail fast on bridge/server version mismatch
+  {
+    const start = Date.now();
+    try {
+      const result = await ctx.client.callTool('remnote_status');
+      assertHasField(result, 'serverVersion', 'status response serverVersion');
+      assertTruthy(typeof result.serverVersion === 'string', 'serverVersion should be a string');
+      assertTruthy(
+        !('version_warning' in result),
+        `version mismatch detected (server=${String(result.serverVersion)}, bridge=${String(
+          result.pluginVersion
+        )}): ${String(result.version_warning)}`
+      );
+      steps.push({
+        label: 'Server/bridge versions are compatible',
+        passed: true,
+        durationMs: Date.now() - start,
+      });
+    } catch (e) {
+      steps.push({
+        label: 'Server/bridge versions are compatible',
+        passed: false,
+        durationMs: Date.now() - start,
+        error: (e as Error).message,
+      });
+    }
+  }
+
   return { name: 'Status Check', steps, skipped: false };
 }

@@ -8,6 +8,44 @@
 import { assertTruthy, assertHasField, assertIsArray } from '../assertions.js';
 import type { WorkflowContext, WorkflowResult, SharedState, StepResult } from '../types.js';
 
+function findMatchingSearchResult(
+  results: Array<Record<string, unknown>>,
+  runId: string
+): Record<string, unknown> {
+  const match = results.find((r) => {
+    const title = typeof r.title === 'string' ? r.title : '';
+    const headline = typeof r.headline === 'string' ? r.headline : '';
+    return title.includes(runId) || headline.includes(runId);
+  });
+  assertTruthy(match, 'should find matching note');
+  return match as Record<string, unknown>;
+}
+
+function assertSearchContentModeShape(
+  note: Record<string, unknown>,
+  mode: 'markdown' | 'structured' | 'none'
+): void {
+  if (mode === 'markdown') {
+    assertTruthy(typeof note.content === 'string', 'markdown mode should include string content');
+    assertTruthy((note.content as string).length > 0, 'markdown content should be non-empty');
+    assertTruthy(!('contentStructured' in note), 'markdown mode should omit contentStructured');
+    return;
+  }
+
+  if (mode === 'structured') {
+    assertIsArray(note.contentStructured, 'structured mode contentStructured');
+    assertTruthy(
+      Array.isArray(note.contentStructured) && note.contentStructured.length > 0,
+      'structured mode should include non-empty contentStructured'
+    );
+    assertTruthy(!('content' in note), 'structured mode should omit markdown content');
+    return;
+  }
+
+  assertTruthy(!('content' in note), 'none mode should omit markdown content');
+  assertTruthy(!('contentStructured' in note), 'none mode should omit structured content');
+}
+
 export async function createSearchWorkflow(
   ctx: WorkflowContext,
   state: SharedState
@@ -95,28 +133,29 @@ export async function createSearchWorkflow(
     }
   }
 
-  // Step 4: Search with includeContent returns content
-  {
+  // Step 4-6: Search with includeContent modes
+  for (const mode of ['markdown', 'structured', 'none'] as const) {
     const start = Date.now();
+    const label = `Search includeContent=${mode} returns expected shape`;
     try {
       const result = await ctx.client.callTool('remnote_search', {
         query: `[MCP-TEST] Rich Note ${ctx.runId}`,
-        includeContent: true,
+        includeContent: mode,
       });
-      assertHasField(result, 'results', 'search with content');
+      assertHasField(result, 'results', `search ${mode}`);
+      assertIsArray(result.results, `search ${mode} results`);
       const results = result.results as Array<Record<string, unknown>>;
-      assertTruthy(results.length > 0, 'search should return results');
-      const match = results.find((r) => typeof r.title === 'string' && r.title.includes(ctx.runId));
-      assertTruthy(match, 'should find matching note');
-      assertHasField(match as Record<string, unknown>, 'content', 'matching result');
+      assertTruthy(results.length > 0, `search ${mode} should return results`);
+      const match = findMatchingSearchResult(results, ctx.runId);
+      assertSearchContentModeShape(match, mode);
       steps.push({
-        label: 'Search with includeContent returns content',
+        label,
         passed: true,
         durationMs: Date.now() - start,
       });
     } catch (e) {
       steps.push({
-        label: 'Search with includeContent returns content',
+        label,
         passed: false,
         durationMs: Date.now() - start,
         error: (e as Error).message,
