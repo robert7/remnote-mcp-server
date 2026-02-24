@@ -547,7 +547,11 @@ describe('HttpMcpServer', () => {
       await waitForHttpServer(port);
       expect(mockLogger.child).toHaveBeenCalledWith({ context: 'http-server' });
       expect(mockLogger.info).toHaveBeenCalledWith(
-        { port, host: '127.0.0.1' },
+        expect.objectContaining({
+          port,
+          host: '127.0.0.1',
+          serverInstanceId: expect.any(String),
+        }),
         'HTTP server started'
       );
       await httpServer.stop();
