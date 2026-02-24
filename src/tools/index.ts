@@ -27,7 +27,7 @@ export const CREATE_NOTE_TOOL = {
 export const SEARCH_TOOL = {
   name: 'remnote_search',
   description:
-    'Search the RemNote knowledge base. Results are sorted by type: documents first, then concepts, descriptors, portals, and plain text. Use includeContent: "markdown" to render child subtree as indented markdown.',
+    'Search the RemNote knowledge base. Results are sorted by type: documents first, then concepts, descriptors, portals, and plain text. Use includeContent: "markdown" for indented markdown previews or "structured" for nested child objects with remIds.',
   inputSchema: {
     type: 'object' as const,
     properties: {
@@ -35,13 +35,14 @@ export const SEARCH_TOOL = {
       limit: { type: 'number', description: 'Maximum results (1-150, default: 50)' },
       includeContent: {
         type: 'string',
-        enum: ['none', 'markdown'],
+        enum: ['none', 'markdown', 'structured'],
         description:
-          'Content rendering mode: "none" omits content (default), "markdown" renders child subtree as indented markdown',
+          'Content rendering mode: "none" omits content (default), "markdown" renders child subtree as indented markdown, "structured" returns nested child objects with remIds',
       },
       depth: {
         type: 'number',
-        description: 'Depth of child hierarchy to render (0-10, default: 1)',
+        description:
+          'Depth of child hierarchy to render for markdown/structured content (0-10, default: 1)',
       },
       childLimit: {
         type: 'number',
@@ -90,6 +91,43 @@ export const SEARCH_TOOL = {
               type: 'string',
               description:
                 'Rendered markdown content of child subtree (only when includeContent="markdown")',
+            },
+            contentStructured: {
+              type: 'array',
+              description:
+                'Structured child subtree with nested remIds and metadata (only when includeContent="structured")',
+              items: {
+                type: 'object',
+                properties: {
+                  remId: { type: 'string', description: 'Child Rem ID' },
+                  title: { type: 'string', description: 'Rendered child title' },
+                  headline: {
+                    type: 'string',
+                    description: 'Display-oriented child line with type-aware delimiter',
+                  },
+                  aliases: {
+                    type: 'array',
+                    items: { type: 'string' },
+                    description: 'Alternate names for the child Rem (omitted if none)',
+                  },
+                  remType: {
+                    type: 'string',
+                    description:
+                      'Child Rem classification: document, dailyDocument, concept, descriptor, portal, or text',
+                  },
+                  cardDirection: {
+                    type: 'string',
+                    description:
+                      'Child flashcard direction: forward, reverse, or bidirectional (omitted if not a flashcard)',
+                  },
+                  children: {
+                    type: 'array',
+                    description: 'Nested child nodes (same shape recursively)',
+                    items: { type: 'object' },
+                  },
+                },
+                required: ['remId', 'title', 'headline', 'remType', 'children'],
+              },
             },
             contentProperties: {
               type: 'object',

@@ -21,6 +21,8 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 ### Enhanced
 
 - `remnote_search` tool now supports `includeContent: "markdown"` to render child subtrees as indented markdown previews.
+- `remnote_search` tool now also supports `includeContent: "structured"` to return nested child objects with `remId`s
+  via `contentStructured` for follow-up note reads/navigation.
 - `remnote_read_note` tool now returns rendered markdown content of the child subtree by default.
 - New output fields in both tools: `headline` (display-oriented full line with type-aware delimiters), `aliases`
   (alternate names), `contentProperties` (rendering metadata: `childrenRendered`, `childrenTotal`, `contentTruncated`).
@@ -43,6 +45,7 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - Added bridge/plugin compatibility warnings and links in install/development/troubleshooting docs, referencing the
   canonical bridge-side `0.x` version compatibility guide.
 - Updated tools reference parameter docs for string `includeContent` and corrected search/read depth defaults.
+- Updated tools reference for `remnote_search includeContent: "structured"` and `contentStructured` use cases.
 
 ## [0.5.1] - 2026-02-24
 

@@ -412,10 +412,7 @@ describe('WebSocketServer - Hello Message', () => {
     client.send(JSON.stringify({ type: 'hello', version: '0.5.0' }));
     await wait(100);
 
-    expect(mockLogger.info).toHaveBeenCalledWith(
-      { bridgeVersion: '0.5.0' },
-      'Bridge identified'
-    );
+    expect(mockLogger.info).toHaveBeenCalledWith({ bridgeVersion: '0.5.0' }, 'Bridge identified');
   });
 
   it('should log warning on version mismatch', async () => {

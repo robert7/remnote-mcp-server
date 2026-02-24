@@ -11,16 +11,18 @@ export const SearchSchema = z.object({
   query: z.string().describe('Search query text'),
   limit: z.number().int().min(1).max(150).default(50).describe('Maximum results'),
   includeContent: z
-    .enum(['none', 'markdown'])
+    .enum(['none', 'markdown', 'structured'])
     .default('none')
-    .describe('Content rendering mode: "none" omits content, "markdown" renders child subtree'),
+    .describe(
+      'Content rendering mode: "none" omits content, "markdown" renders child subtree, "structured" returns nested child objects with remIds'
+    ),
   depth: z
     .number()
     .int()
     .min(0)
     .max(10)
     .default(1)
-    .describe('Depth of child hierarchy to render (when includeContent is markdown)'),
+    .describe('Depth of child hierarchy to render (when includeContent is markdown or structured)'),
   childLimit: z
     .number()
     .int()

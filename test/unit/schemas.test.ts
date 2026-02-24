@@ -74,6 +74,11 @@ describe('SearchSchema', () => {
     expect(result.includeContent).toBe('markdown');
   });
 
+  it('should validate with includeContent structured', () => {
+    const result = SearchSchema.parse({ query: 'test', includeContent: 'structured' });
+    expect(result.includeContent).toBe('structured');
+  });
+
   it('should apply default search depth of 1', () => {
     const result = SearchSchema.parse({ query: 'test' });
     expect(result.depth).toBe(1);

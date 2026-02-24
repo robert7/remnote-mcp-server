@@ -85,7 +85,7 @@ Search your RemNote knowledge base with full-text search.
 |-----------|------|----------|-------------|
 | `query` | string | Yes | Search query text |
 | `limit` | number | No | Maximum results to return (1-150, default: 50) |
-| `includeContent` | string | No | Content mode: `none` (default) or `markdown` |
+| `includeContent` | string | No | Content mode: `none` (default), `markdown`, or `structured` |
 | `depth` | number | No | Max child depth for rendered content (0-10, default: 1) |
 
 ### Usage
@@ -151,6 +151,7 @@ Returns array of matching notes:
 - Increase `limit` for comprehensive searches
 - Use `includeContent: "none"` (default) for faster searches when you only need titles
 - Use `includeContent: "markdown"` when you need rendered child context
+- Use `includeContent: "structured"` when you need nested child `remId`s for follow-up reads/navigation
 
 ## remnote_read_note
 

@@ -65,6 +65,22 @@ describe('Tool Definitions', () => {
     expect(SEARCH_TOOL.inputSchema.required).toContain('query');
   });
 
+  it('should advertise structured search content mode and contentStructured output', () => {
+    const includeContent = (
+      SEARCH_TOOL.inputSchema.properties.includeContent as {
+        enum?: string[];
+      }
+    ).enum;
+    const searchResultProps = ((
+      SEARCH_TOOL.outputSchema.properties.results as {
+        items?: { properties?: Record<string, unknown> };
+      }
+    ).items?.properties ?? {}) as Record<string, unknown>;
+
+    expect(includeContent).toContain('structured');
+    expect(searchResultProps.contentStructured).toBeDefined();
+  });
+
   it('should not advertise detail in search/read output schemas', () => {
     const searchResultProps = ((
       SEARCH_TOOL.outputSchema.properties.results as {
@@ -244,6 +260,24 @@ describe('Tool Handlers - search', () => {
       depth: 1, // default
       childLimit: 20, // default
       maxContentLength: 3000, // default
+    });
+  });
+
+  it('should pass through includeContent structured', async () => {
+    await mockServer.callHandler(CallToolRequestSchema, {
+      params: {
+        name: 'remnote_search',
+        arguments: { query: 'test', includeContent: 'structured', depth: 2 },
+      },
+    });
+
+    expect(mockWsServer.sendRequest).toHaveBeenCalledWith('search', {
+      query: 'test',
+      limit: 50,
+      includeContent: 'structured',
+      depth: 2,
+      childLimit: 20,
+      maxContentLength: 3000,
     });
   });
 });
