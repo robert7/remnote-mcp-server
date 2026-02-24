@@ -7,6 +7,8 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-02-24
+
 ### Changed
 
 - Improved invalid MCP session error responses to explicitly indicate session reinitialization is required after
