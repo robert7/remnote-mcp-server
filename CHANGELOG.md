@@ -7,6 +7,25 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Enhanced
+
+- `remnote_search` tool now supports `includeContent: "markdown"` to render child subtrees as indented markdown previews.
+- `remnote_read_note` tool now returns rendered markdown content of the child subtree by default.
+- New output fields in both tools: `headline` (display-oriented full line with type-aware delimiters), `aliases`
+  (alternate names), `contentProperties` (rendering metadata: `childrenRendered`, `childrenTotal`, `contentTruncated`).
+- New input parameters for both tools: `childLimit`, `maxContentLength`.
+
+### Changed
+
+- **BREAKING**: `includeContent` parameter changed from `boolean` to `'none' | 'markdown'` string enum in both
+  `SearchSchema` and `ReadNoteSchema`.
+- **BREAKING**: `remnote_read_note` no longer returns `children` array. Use `content` (markdown mode) instead.
+- **BREAKING**: `content` field in `remnote_read_note` changed from echoing `title` to rendered markdown of child subtree.
+- Default `depth` for `remnote_read_note` increased from 3 to 5.
+- Search schema defaults: `depth=3`, `childLimit=20`, `maxContentLength=3000`.
+- Read schema defaults: `depth=5`, `childLimit=100`, `maxContentLength=100000`.
+- Updated `outputSchema` for both `SEARCH_TOOL` and `READ_NOTE_TOOL` to reflect new fields.
+
 ### Documentation
 
 - Added bridge/plugin compatibility warnings and links in install/development/troubleshooting docs, referencing the

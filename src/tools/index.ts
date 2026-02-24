@@ -26,15 +26,29 @@ export const CREATE_NOTE_TOOL = {
 export const SEARCH_TOOL = {
   name: 'remnote_search',
   description:
-    'Search the RemNote knowledge base. Results are sorted by type: documents first, then concepts, descriptors, portals, and plain text.',
+    'Search the RemNote knowledge base. Results are sorted by type: documents first, then concepts, descriptors, portals, and plain text. Use includeContent: "markdown" to render child subtree as indented markdown.',
   inputSchema: {
     type: 'object' as const,
     properties: {
       query: { type: 'string', description: 'Search query text' },
       limit: { type: 'number', description: 'Maximum results (1-150, default: 50)' },
       includeContent: {
-        type: 'boolean',
-        description: 'Include first child bullets as content (default: false)',
+        type: 'string',
+        enum: ['none', 'markdown'],
+        description:
+          'Content rendering mode: "none" omits content (default), "markdown" renders child subtree as indented markdown',
+      },
+      depth: {
+        type: 'number',
+        description: 'Depth of child hierarchy to render (0-10, default: 3)',
+      },
+      childLimit: {
+        type: 'number',
+        description: 'Maximum children per level (1-500, default: 20)',
+      },
+      maxContentLength: {
+        type: 'number',
+        description: 'Maximum character length for rendered content (default: 3000)',
       },
     },
     required: ['query'],
@@ -51,9 +65,19 @@ export const SEARCH_TOOL = {
           properties: {
             remId: { type: 'string', description: 'Unique Rem ID' },
             title: { type: 'string', description: 'Rendered title with markdown formatting' },
+            headline: {
+              type: 'string',
+              description:
+                'Display-oriented full line: title + type-aware delimiter + detail (e.g. "Term :: Definition")',
+            },
             detail: {
               type: 'string',
               description: 'Back text for CDF/flashcard Rems (omitted if none)',
+            },
+            aliases: {
+              type: 'array',
+              items: { type: 'string' },
+              description: 'Alternate names for the Rem (omitted if none)',
             },
             remType: {
               type: 'string',
@@ -67,7 +91,26 @@ export const SEARCH_TOOL = {
             },
             content: {
               type: 'string',
-              description: 'Child content (only when includeContent=true)',
+              description:
+                'Rendered markdown content of child subtree (only when includeContent="markdown")',
+            },
+            contentProperties: {
+              type: 'object',
+              description: 'Metadata about rendered content',
+              properties: {
+                childrenRendered: {
+                  type: 'number',
+                  description: 'Number of children included in rendered content',
+                },
+                childrenTotal: {
+                  type: 'number',
+                  description: 'Total children in subtree (capped at 2000)',
+                },
+                contentTruncated: {
+                  type: 'boolean',
+                  description: 'Whether content was truncated by maxContentLength',
+                },
+              },
             },
           },
         },
@@ -79,12 +122,29 @@ export const SEARCH_TOOL = {
 export const READ_NOTE_TOOL = {
   name: 'remnote_read_note',
   description:
-    'Read a specific note from RemNote by its Rem ID, including type classification and flashcard metadata',
+    'Read a specific note from RemNote by its Rem ID. Returns metadata and rendered markdown content of the child subtree. Use includeContent: "none" to skip content rendering.',
   inputSchema: {
     type: 'object' as const,
     properties: {
       remId: { type: 'string', description: 'The Rem ID to read' },
-      depth: { type: 'number', description: 'Depth of children to include (0-10, default: 3)' },
+      depth: {
+        type: 'number',
+        description: 'Depth of child hierarchy to render (0-10, default: 5)',
+      },
+      includeContent: {
+        type: 'string',
+        enum: ['none', 'markdown'],
+        description:
+          'Content rendering mode: "markdown" renders child subtree (default), "none" omits content',
+      },
+      childLimit: {
+        type: 'number',
+        description: 'Maximum children per level (1-500, default: 100)',
+      },
+      maxContentLength: {
+        type: 'number',
+        description: 'Maximum character length for rendered content (default: 100000)',
+      },
     },
     required: ['remId'],
   },
@@ -93,9 +153,19 @@ export const READ_NOTE_TOOL = {
     properties: {
       remId: { type: 'string', description: 'Unique Rem ID' },
       title: { type: 'string', description: 'Rendered title with markdown formatting' },
+      headline: {
+        type: 'string',
+        description:
+          'Display-oriented full line: title + type-aware delimiter + detail (e.g. "Term :: Definition")',
+      },
       detail: {
         type: 'string',
         description: 'Back text for CDF/flashcard Rems (omitted if none)',
+      },
+      aliases: {
+        type: 'array',
+        items: { type: 'string' },
+        description: 'Alternate names for the Rem (omitted if none)',
       },
       remType: {
         type: 'string',
@@ -107,16 +177,26 @@ export const READ_NOTE_TOOL = {
         description:
           'Flashcard direction: forward, reverse, or bidirectional (omitted if not a flashcard)',
       },
-      content: { type: 'string', description: 'Rendered title text (same as title)' },
-      children: {
-        type: 'array',
-        description: 'Child Rems up to requested depth',
-        items: {
-          type: 'object',
-          properties: {
-            remId: { type: 'string' },
-            text: { type: 'string' },
-            children: { type: 'array' },
+      content: {
+        type: 'string',
+        description:
+          'Rendered markdown content of child subtree (when includeContent="markdown", which is the default)',
+      },
+      contentProperties: {
+        type: 'object',
+        description: 'Metadata about rendered content',
+        properties: {
+          childrenRendered: {
+            type: 'number',
+            description: 'Number of children included in rendered content',
+          },
+          childrenTotal: {
+            type: 'number',
+            description: 'Total children in subtree (capped at 2000)',
+          },
+          contentTruncated: {
+            type: 'boolean',
+            description: 'Whether content was truncated by maxContentLength',
           },
         },
       },
