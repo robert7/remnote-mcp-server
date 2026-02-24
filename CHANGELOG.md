@@ -7,6 +7,11 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Legacy bridge warning**: `remnote_status` now injects `version_warning` for legacy bridge plugins (0.5.x) that
+  don't send a `hello` message, by falling back to `pluginVersion` from the `get_status` response.
+
 ### Added
 
 - **Automatic version compatibility checks**: Server receives bridge `hello` message on connect, stores bridge version,

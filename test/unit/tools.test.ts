@@ -424,6 +424,19 @@ describe('Tool Handlers - status', () => {
     const parsed = JSON.parse(result.content[0].text);
     expect(parsed.version_warning).toBeUndefined();
   });
+
+  it('should include version_warning when bridge version is null but pluginVersion in result mismatches', async () => {
+    mockWsServer.getBridgeVersion.mockReturnValue(null);
+    mockWsServer.getServerVersion.mockReturnValue('0.6.0');
+    mockWsServer.sendRequest.mockResolvedValue({ pluginVersion: '0.5.0' });
+
+    const result = (await mockServer.callHandler(CallToolRequestSchema, {
+      params: { name: 'remnote_status', arguments: {} },
+    })) as { content: { text: string }[] };
+
+    const parsed = JSON.parse(result.content[0].text);
+    expect(parsed.version_warning).toContain('Version mismatch');
+  });
 });
 
 describe('Tool Handler - Error Handling', () => {

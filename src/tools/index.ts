@@ -296,13 +296,20 @@ export function registerAllTools(server: Server, wsServer: WebSocketServer, logg
             result = { connected: false, serverVersion, message: 'RemNote plugin not connected' };
           } else {
             const statusResult = await wsServer.sendRequest('get_status', {});
-            const versionWarning = bridgeVersion
-              ? checkVersionCompatibility(serverVersion, bridgeVersion)
+            const statusObj =
+              typeof statusResult === 'object' && statusResult !== null
+                ? (statusResult as Record<string, unknown>)
+                : {};
+            const fallbackBridgeVersion =
+              typeof statusObj.pluginVersion === 'string' ? statusObj.pluginVersion : null;
+            const effectiveBridgeVersion = bridgeVersion ?? fallbackBridgeVersion;
+            const versionWarning = effectiveBridgeVersion
+              ? checkVersionCompatibility(serverVersion, effectiveBridgeVersion)
               : null;
             result = {
               connected: true,
               serverVersion,
-              ...(typeof statusResult === 'object' ? statusResult : {}),
+              ...statusObj,
               ...(versionWarning ? { version_warning: versionWarning } : {}),
             };
           }
