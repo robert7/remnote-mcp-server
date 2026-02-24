@@ -65,6 +65,18 @@ describe('Tool Definitions', () => {
     expect(SEARCH_TOOL.inputSchema.required).toContain('query');
   });
 
+  it('should not advertise detail in search/read output schemas', () => {
+    const searchResultProps = ((
+      SEARCH_TOOL.outputSchema.properties.results as {
+        items?: { properties?: Record<string, unknown> };
+      }
+    ).items?.properties ?? {}) as Record<string, unknown>;
+    const readProps = (READ_NOTE_TOOL.outputSchema.properties ?? {}) as Record<string, unknown>;
+
+    expect(searchResultProps.detail).toBeUndefined();
+    expect(readProps.detail).toBeUndefined();
+  });
+
   it('should have correct name for READ_NOTE_TOOL', () => {
     expect(READ_NOTE_TOOL.name).toBe('remnote_read_note');
   });
@@ -203,7 +215,12 @@ describe('Tool Handlers - search', () => {
       params: { name: 'remnote_search', arguments: validSearchInput },
     });
 
-    expect(mockWsServer.sendRequest).toHaveBeenCalledWith('search', validSearchInput);
+    expect(mockWsServer.sendRequest).toHaveBeenCalledWith('search', {
+      ...validSearchInput,
+      depth: 1,
+      childLimit: 20,
+      maxContentLength: 3000,
+    });
   });
 
   it('should return formatted JSON result', async () => {
@@ -223,7 +240,10 @@ describe('Tool Handlers - search', () => {
     expect(mockWsServer.sendRequest).toHaveBeenCalledWith('search', {
       query: 'test',
       limit: 50, // default
-      includeContent: false, // default
+      includeContent: 'none', // default
+      depth: 1, // default
+      childLimit: 20, // default
+      maxContentLength: 3000, // default
     });
   });
 });
@@ -245,7 +265,12 @@ describe('Tool Handlers - read_note', () => {
       params: { name: 'remnote_read_note', arguments: validReadNoteInput },
     });
 
-    expect(mockWsServer.sendRequest).toHaveBeenCalledWith('read_note', validReadNoteInput);
+    expect(mockWsServer.sendRequest).toHaveBeenCalledWith('read_note', {
+      ...validReadNoteInput,
+      includeContent: 'markdown',
+      childLimit: 100,
+      maxContentLength: 100000,
+    });
   });
 
   it('should apply default depth from schema', async () => {
@@ -255,7 +280,10 @@ describe('Tool Handlers - read_note', () => {
 
     expect(mockWsServer.sendRequest).toHaveBeenCalledWith('read_note', {
       remId: 'rem-123',
-      depth: 3, // default
+      depth: 5, // default
+      includeContent: 'markdown', // default
+      childLimit: 100, // default
+      maxContentLength: 100000, // default
     });
   });
 });

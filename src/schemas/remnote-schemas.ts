@@ -19,7 +19,7 @@ export const SearchSchema = z.object({
     .int()
     .min(0)
     .max(10)
-    .default(3)
+    .default(1)
     .describe('Depth of child hierarchy to render (when includeContent is markdown)'),
   childLimit: z
     .number()
@@ -39,13 +39,7 @@ export const SearchSchema = z.object({
 
 export const ReadNoteSchema = z.object({
   remId: z.string().describe('The Rem ID to read'),
-  depth: z
-    .number()
-    .int()
-    .min(0)
-    .max(10)
-    .default(5)
-    .describe('Depth of child hierarchy to render'),
+  depth: z.number().int().min(0).max(10).default(5).describe('Depth of child hierarchy to render'),
   includeContent: z
     .enum(['none', 'markdown'])
     .default('markdown')

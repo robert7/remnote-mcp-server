@@ -84,8 +84,9 @@ Search your RemNote knowledge base with full-text search.
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `query` | string | Yes | Search query text |
-| `limit` | number | No | Maximum results to return (1-100, default: 20) |
-| `includeContent` | boolean | No | Include child content in results (default: false) |
+| `limit` | number | No | Maximum results to return (1-150, default: 50) |
+| `includeContent` | string | No | Content mode: `none` (default) or `markdown` |
+| `depth` | number | No | Max child depth for rendered content (0-10, default: 1) |
 
 ### Usage
 
@@ -148,8 +149,8 @@ Returns array of matching notes:
 
 - Use specific terms for better results
 - Increase `limit` for comprehensive searches
-- Use `includeContent: false` (default) for faster searches when you only need titles
-- Use `includeContent: true` when you need to analyze note content
+- Use `includeContent: "none"` (default) for faster searches when you only need titles
+- Use `includeContent: "markdown"` when you need rendered child context
 
 ## remnote_read_note
 
@@ -160,7 +161,7 @@ Read a specific note by its Rem ID, including child content.
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `remId` | string | Yes | The Rem ID to read |
-| `depth` | number | No | Depth of children to include (0-10, default: 3) |
+| `depth` | number | No | Depth of children to include in rendered content (0-10, default: 5) |
 
 ### Usage
 

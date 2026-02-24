@@ -15,7 +15,7 @@ export const validCreateNoteInput = {
 export const validSearchInput = {
   query: 'test query',
   limit: 50,
-  includeContent: true,
+  includeContent: 'markdown',
 };
 
 export const validReadNoteInput = {

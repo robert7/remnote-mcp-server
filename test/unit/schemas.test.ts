@@ -50,7 +50,8 @@ describe('SearchSchema', () => {
     const result = SearchSchema.parse({ query: 'test' });
     expect(result.query).toBe('test');
     expect(result.limit).toBe(50); // default
-    expect(result.includeContent).toBe(false); // default
+    expect(result.includeContent).toBe('none'); // default
+    expect(result.depth).toBe(1); // default
   });
 
   it('should apply default limit of 50', () => {
@@ -58,9 +59,9 @@ describe('SearchSchema', () => {
     expect(result.limit).toBe(50);
   });
 
-  it('should apply default includeContent of false', () => {
+  it('should apply default includeContent of "none"', () => {
     const result = SearchSchema.parse({ query: 'test' });
-    expect(result.includeContent).toBe(false);
+    expect(result.includeContent).toBe('none');
   });
 
   it('should validate with custom limit', () => {
@@ -68,9 +69,14 @@ describe('SearchSchema', () => {
     expect(result.limit).toBe(50);
   });
 
-  it('should validate with includeContent true', () => {
-    const result = SearchSchema.parse({ query: 'test', includeContent: true });
-    expect(result.includeContent).toBe(true);
+  it('should validate with includeContent markdown', () => {
+    const result = SearchSchema.parse({ query: 'test', includeContent: 'markdown' });
+    expect(result.includeContent).toBe('markdown');
+  });
+
+  it('should apply default search depth of 1', () => {
+    const result = SearchSchema.parse({ query: 'test' });
+    expect(result.depth).toBe(1);
   });
 
   it('should reject limit less than 1', () => {
@@ -94,12 +100,12 @@ describe('ReadNoteSchema', () => {
   it('should validate with only required remId field', () => {
     const result = ReadNoteSchema.parse({ remId: 'rem-123' });
     expect(result.remId).toBe('rem-123');
-    expect(result.depth).toBe(3); // default
+    expect(result.depth).toBe(5); // default
   });
 
-  it('should apply default depth of 3', () => {
+  it('should apply default depth of 5', () => {
     const result = ReadNoteSchema.parse({ remId: 'rem-123' });
-    expect(result.depth).toBe(3);
+    expect(result.depth).toBe(5);
   });
 
   it('should validate with custom depth', () => {

@@ -32,8 +32,9 @@ Versioning](https://semver.org/spec/v2.0.0.html).
   `SearchSchema` and `ReadNoteSchema`.
 - **BREAKING**: `remnote_read_note` no longer returns `children` array. Use `content` (markdown mode) instead.
 - **BREAKING**: `content` field in `remnote_read_note` changed from echoing `title` to rendered markdown of child subtree.
+- **BREAKING**: `detail` field removed from advertised `remnote_search` / `remnote_read_note` output schemas (bridge no longer returns it).
 - Default `depth` for `remnote_read_note` increased from 3 to 5.
-- Search schema defaults: `depth=3`, `childLimit=20`, `maxContentLength=3000`.
+- Search schema defaults: `depth=1`, `childLimit=20`, `maxContentLength=3000`.
 - Read schema defaults: `depth=5`, `childLimit=100`, `maxContentLength=100000`.
 - Updated `outputSchema` for both `SEARCH_TOOL` and `READ_NOTE_TOOL` to reflect new fields.
 
@@ -41,6 +42,7 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Added bridge/plugin compatibility warnings and links in install/development/troubleshooting docs, referencing the
   canonical bridge-side `0.x` version compatibility guide.
+- Updated tools reference parameter docs for string `includeContent` and corrected search/read depth defaults.
 
 ## [0.5.1] - 2026-02-24
 

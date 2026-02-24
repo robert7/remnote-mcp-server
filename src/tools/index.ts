@@ -41,7 +41,7 @@ export const SEARCH_TOOL = {
       },
       depth: {
         type: 'number',
-        description: 'Depth of child hierarchy to render (0-10, default: 3)',
+        description: 'Depth of child hierarchy to render (0-10, default: 1)',
       },
       childLimit: {
         type: 'number',
@@ -70,10 +70,6 @@ export const SEARCH_TOOL = {
               type: 'string',
               description:
                 'Display-oriented full line: title + type-aware delimiter + detail (e.g. "Term :: Definition")',
-            },
-            detail: {
-              type: 'string',
-              description: 'Back text for CDF/flashcard Rems (omitted if none)',
             },
             aliases: {
               type: 'array',
@@ -158,10 +154,6 @@ export const READ_NOTE_TOOL = {
         type: 'string',
         description:
           'Display-oriented full line: title + type-aware delimiter + detail (e.g. "Term :: Definition")',
-      },
-      detail: {
-        type: 'string',
-        description: 'Back text for CDF/flashcard Rems (omitted if none)',
       },
       aliases: {
         type: 'array',
