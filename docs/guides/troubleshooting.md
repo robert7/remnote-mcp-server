@@ -299,6 +299,32 @@ RemNote MCP Server v0.2.1 listening { wsPort: 3002, httpPort: 3001 }
    # Update configuration to match
    ```
 
+### `Invalid session ID` After Server Restart
+
+**Symptom:** Claude Code tool calls fail after restarting `remnote-mcp-server` with an error like:
+
+```text
+Invalid session ID: ...
+```
+
+**Cause:** MCP HTTP sessions are stored in memory. Restarting the server invalidates existing sessions. Some MCP
+clients (including current Claude Code versions) may continue using the old session ID instead of reinitializing.
+
+**What to do:**
+
+1. **Restart Claude Code CLI completely** (or otherwise refresh the MCP connection/session)
+2. **Retry the tool call**
+3. **Check Claude Code MCP logs** if it still fails:
+   ```bash
+   tail -f ~/.claude/debug/mcp-*.log
+   ```
+
+**Notes:**
+
+- The server now returns a clearer error indicating reinitialization is required after invalid/expired sessions
+- This is expected after server restarts until the client performs a new MCP handshake (`initialize` +
+  `notifications/initialized`)
+
 ### Configuration Not Working
 
 **Symptom:** Configuration changes don't take effect
@@ -620,6 +646,7 @@ Include in your bug report:
 | Port already in use | `kill $(lsof -t -i:3001); kill $(lsof -t -i:3002)` |
 | Plugin won't connect | Check URL: `ws://127.0.0.1:3002` |
 | Tools not appearing | `claude mcp list` then restart Claude Code |
+| `Invalid session ID` after restart | Restart Claude Code (refresh MCP session), then retry |
 | Configuration ignored | Verify `~/.claude.json` format, restart client |
 | Connection timeout | Verify server running: `lsof -i :3001` |
 | Remote access failing | Use HTTPS ngrok URL with `/mcp` path |

@@ -7,6 +7,16 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- Improved invalid MCP session error responses to explicitly indicate session reinitialization is required after
+  restart/expiry, with structured error metadata for clients and diagnostics.
+
+### Documentation
+
+- Added troubleshooting guidance for Claude Code `Invalid session ID` errors after restarting `remnote-mcp-server`,
+  including restart/refresh steps and log checks.
+
 ## [0.5.0] - 2026-02-21
 
 ### Added

@@ -19,6 +19,7 @@ export class HttpMcpServer {
   private wsServer: WebSocketServer;
   private serverInfo: ServerInfo;
   private logger: Logger;
+  private serverInstanceId: string;
   private transports = new Map<string, StreamableHTTPServerTransport>();
 
   constructor(
@@ -33,6 +34,7 @@ export class HttpMcpServer {
     this.wsServer = wsServer;
     this.serverInfo = serverInfo;
     this.logger = logger.child({ context: 'http-server' });
+    this.serverInstanceId = randomUUID();
 
     // Create Express app with JSON parsing
     this.app = express();
@@ -184,11 +186,26 @@ export class HttpMcpServer {
     const transport = this.transports.get(sessionId);
 
     if (!transport) {
+      this.logger.warn(
+        {
+          requestedSessionId: sessionId,
+          method: (body as { method?: unknown })?.method ?? 'unknown',
+          serverInstanceId: this.serverInstanceId,
+        },
+        'Invalid MCP session ID received; client must reinitialize session'
+      );
+
       res.status(400).json({
         jsonrpc: '2.0',
         error: {
           code: -32600,
-          message: `Invalid session ID: ${sessionId}`,
+          message: `Invalid session ID: ${sessionId}. Session may have expired or server was restarted. Reinitialize MCP session (initialize + notifications/initialized).`,
+          data: {
+            reason: 'session_invalidated',
+            requiresReinitialize: true,
+            retryable: true,
+            serverInstanceId: this.serverInstanceId,
+          },
         },
         id: (body as { id?: unknown })?.id ?? null,
       });
@@ -202,7 +219,10 @@ export class HttpMcpServer {
     return new Promise((resolve, reject) => {
       try {
         this.server = this.app.listen(this.port, this.host, () => {
-          this.logger.info({ port: this.port, host: this.host }, 'HTTP server started');
+          this.logger.info(
+            { port: this.port, host: this.host, serverInstanceId: this.serverInstanceId },
+            'HTTP server started'
+          );
           resolve();
         });
 

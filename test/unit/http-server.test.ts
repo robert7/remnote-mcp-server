@@ -227,11 +227,13 @@ describe('HttpMcpServer', () => {
     it('should reject request with invalid session ID', async () => {
       await httpServer.start();
       await waitForHttpServer(port);
+      mockLogger.warn = vi.fn();
 
       const response = await fetch(`http://127.0.0.1:${port}/mcp`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          Accept: 'application/json, text/event-stream',
           'mcp-session-id': 'invalid-session-id',
         },
         body: JSON.stringify({
@@ -245,6 +247,24 @@ describe('HttpMcpServer', () => {
       const data = await response.json();
       expect(data.error).toBeDefined();
       expect(data.error.message).toContain('Invalid session ID');
+      expect(data.error.message).toContain('server was restarted');
+      expect(data.error.message).toContain('Reinitialize MCP session');
+      expect(data.error.data).toEqual(
+        expect.objectContaining({
+          reason: 'session_invalidated',
+          requiresReinitialize: true,
+          retryable: true,
+          serverInstanceId: expect.any(String),
+        })
+      );
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          requestedSessionId: 'invalid-session-id',
+          method: 'tools/list',
+          serverInstanceId: expect.any(String),
+        }),
+        'Invalid MCP session ID received; client must reinitialize session'
+      );
     });
 
     it('should reject non-initialize request without session ID', async () => {
