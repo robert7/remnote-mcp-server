@@ -6,6 +6,7 @@ import { SearchSchema } from '../schemas/remnote-schemas.js';
 import { ReadNoteSchema } from '../schemas/remnote-schemas.js';
 import { UpdateNoteSchema } from '../schemas/remnote-schemas.js';
 import { AppendJournalSchema } from '../schemas/remnote-schemas.js';
+import { checkVersionCompatibility } from '../version-compat.js';
 import type { Logger } from '../logger.js';
 
 export const CREATE_NOTE_TOOL = {
@@ -288,11 +289,22 @@ export function registerAllTools(server: Server, wsServer: WebSocketServer, logg
 
         case 'remnote_status': {
           const connected = wsServer.isConnected();
+          const serverVersion = wsServer.getServerVersion();
+          const bridgeVersion = wsServer.getBridgeVersion();
+
           if (!connected) {
-            result = { connected: false, message: 'RemNote plugin not connected' };
+            result = { connected: false, serverVersion, message: 'RemNote plugin not connected' };
           } else {
             const statusResult = await wsServer.sendRequest('get_status', {});
-            result = { connected: true, ...(typeof statusResult === 'object' ? statusResult : {}) };
+            const versionWarning = bridgeVersion
+              ? checkVersionCompatibility(serverVersion, bridgeVersion)
+              : null;
+            result = {
+              connected: true,
+              serverVersion,
+              ...(typeof statusResult === 'object' ? statusResult : {}),
+              ...(versionWarning ? { version_warning: versionWarning } : {}),
+            };
           }
           break;
         }

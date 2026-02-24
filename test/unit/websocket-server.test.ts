@@ -20,7 +20,7 @@ describe('WebSocketServer - Lifecycle', () => {
   beforeEach(() => {
     port = getRandomPort();
     mockLogger = createMockLogger();
-    wsServer = new WebSocketServer(port, '127.0.0.1', mockLogger);
+    wsServer = new WebSocketServer(port, '127.0.0.1', mockLogger, '0.5.1');
   });
 
   afterEach(async () => {
@@ -53,7 +53,7 @@ describe('WebSocketServer - Lifecycle', () => {
   it('should reject when port is already in use', async () => {
     await wsServer.start();
 
-    const duplicateServer = new WebSocketServer(port, '127.0.0.1', createMockLogger());
+    const duplicateServer = new WebSocketServer(port, '127.0.0.1', createMockLogger(), '0.5.1');
     await expect(duplicateServer.start()).rejects.toThrow();
     await duplicateServer.stop();
   });
@@ -68,7 +68,7 @@ describe('WebSocketServer - Connection State', () => {
   beforeEach(async () => {
     port = getRandomPort();
     mockLogger = createMockLogger();
-    wsServer = new WebSocketServer(port, '127.0.0.1', mockLogger);
+    wsServer = new WebSocketServer(port, '127.0.0.1', mockLogger, '0.5.1');
     await wsServer.start();
   });
 
@@ -148,7 +148,7 @@ describe('WebSocketServer - Single Client Model', () => {
   beforeEach(async () => {
     port = getRandomPort();
     mockLogger = createMockLogger();
-    wsServer = new WebSocketServer(port, '127.0.0.1', mockLogger);
+    wsServer = new WebSocketServer(port, '127.0.0.1', mockLogger, '0.5.1');
     await wsServer.start();
   });
 
@@ -208,7 +208,7 @@ describe('WebSocketServer - Request/Response', () => {
   beforeEach(async () => {
     port = getRandomPort();
     mockLogger = createMockLogger();
-    wsServer = new WebSocketServer(port, '127.0.0.1', mockLogger);
+    wsServer = new WebSocketServer(port, '127.0.0.1', mockLogger, '0.5.1');
     await wsServer.start();
 
     client = new WebSocket(`ws://localhost:${port}`);
@@ -335,7 +335,7 @@ describe('WebSocketServer - Heartbeat Protocol', () => {
   beforeEach(async () => {
     port = getRandomPort();
     mockLogger = createMockLogger();
-    wsServer = new WebSocketServer(port, '127.0.0.1', mockLogger);
+    wsServer = new WebSocketServer(port, '127.0.0.1', mockLogger, '0.5.1');
     await wsServer.start();
 
     client = new WebSocket(`ws://localhost:${port}`);
@@ -374,6 +374,86 @@ describe('WebSocketServer - Heartbeat Protocol', () => {
   });
 });
 
+describe('WebSocketServer - Hello Message', () => {
+  let wsServer: WebSocketServer;
+  let port: number;
+  let client: WebSocket;
+  let mockLogger: ReturnType<typeof createMockLogger>;
+
+  beforeEach(async () => {
+    port = getRandomPort();
+    mockLogger = createMockLogger();
+    wsServer = new WebSocketServer(port, '127.0.0.1', mockLogger, '0.5.1');
+    await wsServer.start();
+
+    client = new WebSocket(`ws://localhost:${port}`);
+    await wait(100);
+  });
+
+  afterEach(async () => {
+    if (client && client.readyState === WebSocket.OPEN) {
+      client.close();
+    }
+    await wsServer.stop();
+  });
+
+  it('should store bridge version from hello message', async () => {
+    expect(wsServer.getBridgeVersion()).toBeNull();
+
+    client.send(JSON.stringify({ type: 'hello', version: '0.5.0' }));
+    await wait(100);
+
+    expect(wsServer.getBridgeVersion()).toBe('0.5.0');
+  });
+
+  it('should log bridge version on hello', async () => {
+    mockLogger.info = vi.fn();
+
+    client.send(JSON.stringify({ type: 'hello', version: '0.5.0' }));
+    await wait(100);
+
+    expect(mockLogger.info).toHaveBeenCalledWith(
+      { bridgeVersion: '0.5.0' },
+      'Bridge identified'
+    );
+  });
+
+  it('should log warning on version mismatch', async () => {
+    mockLogger.warn = vi.fn();
+
+    client.send(JSON.stringify({ type: 'hello', version: '0.6.0' }));
+    await wait(100);
+
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect.objectContaining({ warning: expect.stringContaining('Version mismatch') }),
+      'Bridge version compatibility warning'
+    );
+  });
+
+  it('should not log warning on compatible versions', async () => {
+    mockLogger.warn = vi.fn();
+
+    client.send(JSON.stringify({ type: 'hello', version: '0.5.2' }));
+    await wait(100);
+
+    expect(mockLogger.warn).not.toHaveBeenCalled();
+  });
+
+  it('should clear bridge version on disconnect', async () => {
+    client.send(JSON.stringify({ type: 'hello', version: '0.5.0' }));
+    await wait(100);
+    expect(wsServer.getBridgeVersion()).toBe('0.5.0');
+
+    client.close();
+    await wait(100);
+    expect(wsServer.getBridgeVersion()).toBeNull();
+  });
+
+  it('should expose server version', () => {
+    expect(wsServer.getServerVersion()).toBe('0.5.1');
+  });
+});
+
 describe('WebSocketServer - Error Handling', () => {
   let wsServer: WebSocketServer;
   let port: number;
@@ -383,7 +463,7 @@ describe('WebSocketServer - Error Handling', () => {
   beforeEach(async () => {
     port = getRandomPort();
     mockLogger = createMockLogger();
-    wsServer = new WebSocketServer(port, '127.0.0.1', mockLogger);
+    wsServer = new WebSocketServer(port, '127.0.0.1', mockLogger, '0.5.1');
     await wsServer.start();
   });
 
@@ -440,7 +520,7 @@ describe('WebSocketServer - Logging', () => {
   beforeEach(async () => {
     port = getRandomPort();
     mockLogger = createMockLogger();
-    wsServer = new WebSocketServer(port, '127.0.0.1', mockLogger);
+    wsServer = new WebSocketServer(port, '127.0.0.1', mockLogger, '0.5.1');
     await wsServer.start();
   });
 
@@ -572,6 +652,7 @@ describe('WebSocketServer - Request/Response Logging', () => {
       port,
       '127.0.0.1',
       mockLogger,
+      '0.5.1',
       mockRequestLogger,
       mockResponseLogger
     );

@@ -329,6 +329,8 @@ describe('Tool Handlers - status', () => {
   let mockWsServer: {
     sendRequest: ReturnType<typeof vi.fn>;
     isConnected: ReturnType<typeof vi.fn>;
+    getServerVersion: ReturnType<typeof vi.fn>;
+    getBridgeVersion: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
@@ -336,6 +338,8 @@ describe('Tool Handlers - status', () => {
     mockWsServer = {
       sendRequest: vi.fn().mockResolvedValue(sampleStatusResult),
       isConnected: vi.fn().mockReturnValue(true),
+      getServerVersion: vi.fn().mockReturnValue('0.5.1'),
+      getBridgeVersion: vi.fn().mockReturnValue('0.5.0'),
     };
     registerAllTools(mockServer as never, mockWsServer as never, createMockLogger() as never);
   });
@@ -365,6 +369,7 @@ describe('Tool Handlers - status', () => {
 
     const parsed = JSON.parse(result.content[0].text);
     expect(parsed.connected).toBe(false);
+    expect(parsed.serverVersion).toBe('0.5.1');
     expect(parsed.message).toContain('not connected');
   });
 
@@ -384,8 +389,40 @@ describe('Tool Handlers - status', () => {
 
     const parsed = JSON.parse(result.content[0].text);
     expect(parsed.connected).toBe(true);
+    expect(parsed.serverVersion).toBe('0.5.1');
     expect(parsed.version).toBe('1.0.0');
     expect(parsed.statistics).toBeDefined();
+  });
+
+  it('should include version_warning when bridge version mismatches', async () => {
+    mockWsServer.getBridgeVersion.mockReturnValue('0.6.0');
+
+    const result = (await mockServer.callHandler(CallToolRequestSchema, {
+      params: { name: 'remnote_status', arguments: {} },
+    })) as { content: { text: string }[] };
+
+    const parsed = JSON.parse(result.content[0].text);
+    expect(parsed.version_warning).toContain('Version mismatch');
+  });
+
+  it('should not include version_warning when versions are compatible', async () => {
+    const result = (await mockServer.callHandler(CallToolRequestSchema, {
+      params: { name: 'remnote_status', arguments: {} },
+    })) as { content: { text: string }[] };
+
+    const parsed = JSON.parse(result.content[0].text);
+    expect(parsed.version_warning).toBeUndefined();
+  });
+
+  it('should not include version_warning when bridge version is null', async () => {
+    mockWsServer.getBridgeVersion.mockReturnValue(null);
+
+    const result = (await mockServer.callHandler(CallToolRequestSchema, {
+      params: { name: 'remnote_status', arguments: {} },
+    })) as { content: { text: string }[] };
+
+    const parsed = JSON.parse(result.content[0].text);
+    expect(parsed.version_warning).toBeUndefined();
   });
 });
 

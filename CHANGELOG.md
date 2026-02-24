@@ -7,6 +7,12 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **Automatic version compatibility checks**: Server receives bridge `hello` message on connect, stores bridge version,
+  and logs a warning if minor versions differ (0.x rule). `remnote_status` response now includes `serverVersion` and
+  `version_warning` (when bridge/server minor versions differ).
+
 ### Enhanced
 
 - `remnote_search` tool now supports `includeContent: "markdown"` to render child subtrees as indented markdown previews.

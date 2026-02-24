@@ -46,6 +46,7 @@ async function main() {
     config.wsPort,
     config.wsHost,
     logger,
+    packageJson.version,
     requestLogger,
     responseLogger
   );
