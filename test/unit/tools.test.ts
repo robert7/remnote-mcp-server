@@ -93,6 +93,20 @@ describe('Tool Definitions', () => {
     expect(readProps.detail).toBeUndefined();
   });
 
+  it('should advertise parent context fields in search/read output schemas', () => {
+    const searchResultProps = ((
+      SEARCH_TOOL.outputSchema.properties.results as {
+        items?: { properties?: Record<string, unknown> };
+      }
+    ).items?.properties ?? {}) as Record<string, unknown>;
+    const readProps = (READ_NOTE_TOOL.outputSchema.properties ?? {}) as Record<string, unknown>;
+
+    expect(searchResultProps.parentRemId).toBeDefined();
+    expect(searchResultProps.parentTitle).toBeDefined();
+    expect(readProps.parentRemId).toBeDefined();
+    expect(readProps.parentTitle).toBeDefined();
+  });
+
   it('should have correct name for READ_NOTE_TOOL', () => {
     expect(READ_NOTE_TOOL.name).toBe('remnote_read_note');
   });

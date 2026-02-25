@@ -5,7 +5,7 @@
  * and re-reads to verify the changes persisted.
  */
 
-import { assertTruthy, assertHasField, assertContains } from '../assertions.js';
+import { assertTruthy, assertHasField, assertContains, assertEqual } from '../assertions.js';
 import type { WorkflowContext, WorkflowResult, SharedState, StepResult } from '../types.js';
 
 function summarizeReadResult(result: Record<string, unknown>): Record<string, unknown> {
@@ -26,15 +26,20 @@ export async function readUpdateWorkflow(
 ): Promise<WorkflowResult> {
   const steps: StepResult[] = [];
 
-  if (!state.noteAId || !state.noteBId) {
+  if (
+    !state.noteAId ||
+    !state.noteBId ||
+    !state.integrationParentRemId ||
+    !state.integrationParentTitle
+  ) {
     return {
       name: 'Read & Update',
       steps: [
         {
-          label: 'Skipped — missing note IDs from workflow 02',
+          label: 'Skipped — missing note IDs or integration parent from workflow 02/setup',
           passed: false,
           durationMs: 0,
-          error: 'No note IDs available',
+          error: 'No note IDs or integration parent state available',
         },
       ],
       skipped: true,
@@ -51,6 +56,18 @@ export async function readUpdateWorkflow(
       });
       assertHasField(result, 'title', 'read simple note');
       assertHasField(result, 'remId', 'read simple note');
+      assertHasField(result, 'parentRemId', 'read simple note parentRemId');
+      assertHasField(result, 'parentTitle', 'read simple note parentTitle');
+      assertEqual(
+        result.parentRemId as string,
+        state.integrationParentRemId as string,
+        'read simple note parentRemId should match integration parent'
+      );
+      assertEqual(
+        result.parentTitle as string,
+        state.integrationParentTitle as string,
+        'read simple note parentTitle should match integration parent'
+      );
       steps.push({ label: 'Read simple note', passed: true, durationMs: Date.now() - start });
     } catch (e) {
       steps.push({
@@ -76,6 +93,18 @@ export async function readUpdateWorkflow(
       debugResult = result;
       assertHasField(result, 'remId', 'read rich note remId');
       assertHasField(result, 'title', 'read rich note title');
+      assertHasField(result, 'parentRemId', 'read rich note parentRemId');
+      assertHasField(result, 'parentTitle', 'read rich note parentTitle');
+      assertEqual(
+        result.parentRemId as string,
+        state.integrationParentRemId as string,
+        'read rich note parentRemId should match integration parent'
+      );
+      assertEqual(
+        result.parentTitle as string,
+        state.integrationParentTitle as string,
+        'read rich note parentTitle should match integration parent'
+      );
       if (mode === 'markdown') {
         assertHasField(result, 'content', 'read rich note markdown');
         assertTruthy(typeof result.content === 'string', 'content should be a string');
@@ -85,7 +114,10 @@ export async function readUpdateWorkflow(
         );
         assertHasField(result, 'contentProperties', 'read rich note contentProperties');
         const props = result.contentProperties as Record<string, unknown>;
-        assertTruthy(typeof props.childrenRendered === 'number', 'childrenRendered should be number');
+        assertTruthy(
+          typeof props.childrenRendered === 'number',
+          'childrenRendered should be number'
+        );
         assertTruthy(typeof props.childrenTotal === 'number', 'childrenTotal should be number');
         assertTruthy((props.childrenTotal as number) > 0, 'childrenTotal should be > 0');
       } else {

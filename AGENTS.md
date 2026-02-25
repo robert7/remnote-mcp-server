@@ -86,6 +86,15 @@ See **.agents/dev-requirements.md** for detailed guidelines on:
 
 **If you skip any of these steps, the task is INCOMPLETE.**
 
+## CRITICAL: Integration Test Execution Policy
+
+AI agents MUST NEVER run integration tests in this repository.
+
+- Do not run `./run-integration-test.sh`
+- Do not run `npm run test:integration`
+- Ask the human collaborator to run integration tests manually and share logs
+- Use unit/static checks (`typecheck`, `lint`, unit tests) for agent-side verification
+
 ## MANDATORY: Documentation Change Requirements
 
 **Before making ANY documentation change, you MUST read .agents/dev-documentation.md** for documentation standards and

@@ -27,6 +27,8 @@ export interface WorkflowContext {
 
 /** Shared state passed between workflows for cross-workflow dependencies. */
 export interface SharedState {
+  integrationParentRemId?: string;
+  integrationParentTitle?: string;
   noteAId?: string;
   noteBId?: string;
 }

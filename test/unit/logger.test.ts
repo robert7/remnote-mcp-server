@@ -1,23 +1,31 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { createLogger, createRequestResponseLogger, ensureLogDirectory } from '../../src/logger.js';
 import type { Logger } from '../../src/logger.js';
-import { mkdir, rm } from 'fs/promises';
+import { mkdir, rm, mkdtemp } from 'fs/promises';
 import { existsSync } from 'fs';
 import { join } from 'path';
+import { tmpdir } from 'os';
 
-const TEST_LOG_DIR = join(process.cwd(), 'test-logs');
 const RM_OPTS = { recursive: true, force: true, maxRetries: 3, retryDelay: 100 } as const;
+let testLogDir = '';
+
+function makeLogPath(fileName: string): string {
+  return join(
+    testLogDir,
+    `${fileName}-${Date.now()}-${Math.random().toString(16).slice(2, 8)}.log`
+  );
+}
 
 describe('Logger', () => {
   // Track loggers with file destinations for proper cleanup
   let activeLoggers: Logger[] = [];
 
-  beforeEach(async () => {
+  beforeAll(async () => {
+    testLogDir = await mkdtemp(join(tmpdir(), 'remnote-mcp-server-logger-tests-'));
+  });
+
+  beforeEach(() => {
     activeLoggers = [];
-    // Clean up test logs directory from prior runs
-    if (existsSync(TEST_LOG_DIR)) {
-      await rm(TEST_LOG_DIR, RM_OPTS);
-    }
   });
 
   afterEach(async () => {
@@ -30,10 +38,11 @@ describe('Logger', () => {
       await new Promise((resolve) => setTimeout(resolve, 50));
     }
     activeLoggers = [];
+  });
 
-    // Now safe to remove
-    if (existsSync(TEST_LOG_DIR)) {
-      await rm(TEST_LOG_DIR, RM_OPTS);
+  afterAll(async () => {
+    if (testLogDir && existsSync(testLogDir)) {
+      await rm(testLogDir, RM_OPTS);
     }
   });
 
@@ -52,13 +61,13 @@ describe('Logger', () => {
     });
 
     it('should create logger with file output', async () => {
-      await mkdir(TEST_LOG_DIR, { recursive: true });
       const logger = createLogger({
         consoleLevel: 'info',
         fileLevel: 'debug',
-        filePath: join(TEST_LOG_DIR, 'test.log'),
+        filePath: makeLogPath('create-with-file'),
         pretty: false,
       });
+      activeLoggers.push(logger);
 
       expect(logger).toBeDefined();
     });
@@ -85,8 +94,7 @@ describe('Logger', () => {
 
   describe('createRequestResponseLogger', () => {
     it('should create request/response logger', async () => {
-      await mkdir(TEST_LOG_DIR, { recursive: true });
-      const filePath = join(TEST_LOG_DIR, 'request.jsonl');
+      const filePath = makeLogPath('request');
       const logger = createRequestResponseLogger(filePath);
       activeLoggers.push(logger);
 
@@ -95,8 +103,7 @@ describe('Logger', () => {
     });
 
     it('should log in JSON Lines format', async () => {
-      await mkdir(TEST_LOG_DIR, { recursive: true });
-      const filePath = join(TEST_LOG_DIR, 'request.jsonl');
+      const filePath = makeLogPath('request-lines');
       const logger = createRequestResponseLogger(filePath);
       activeLoggers.push(logger);
 
@@ -112,22 +119,23 @@ describe('Logger', () => {
 
   describe('ensureLogDirectory', () => {
     it('should create directory if it does not exist', async () => {
-      const logPath = join(TEST_LOG_DIR, 'subdir', 'test.log');
+      const logPath = join(testLogDir, 'subdir', 'test.log');
 
       await ensureLogDirectory(logPath);
 
       // Verify directory was created
-      expect(existsSync(join(TEST_LOG_DIR, 'subdir'))).toBe(true);
+      expect(existsSync(join(testLogDir, 'subdir'))).toBe(true);
     });
 
     it('should not error if directory already exists', async () => {
-      const logPath = join(TEST_LOG_DIR, 'test.log');
+      const existingDir = join(testLogDir, 'existing-dir');
+      const logPath = join(existingDir, 'test.log');
 
-      await mkdir(TEST_LOG_DIR, { recursive: true });
+      await mkdir(existingDir, { recursive: true });
       await ensureLogDirectory(logPath);
 
       // Should not throw
-      expect(existsSync(TEST_LOG_DIR)).toBe(true);
+      expect(existsSync(existingDir)).toBe(true);
     });
 
     it('should throw error if directory creation fails', async () => {
@@ -154,26 +162,26 @@ describe('Logger', () => {
 
   describe('Log Level Filtering', () => {
     it('should use minimum log level when file is more verbose', async () => {
-      await mkdir(TEST_LOG_DIR, { recursive: true });
       const logger = createLogger({
         consoleLevel: 'info',
         fileLevel: 'debug',
-        filePath: join(TEST_LOG_DIR, 'test.log'),
+        filePath: makeLogPath('min-level-file-verbose'),
         pretty: false,
       });
+      activeLoggers.push(logger);
 
       // Should use debug as minimum level
       expect(logger.level).toBe('debug');
     });
 
     it('should use minimum log level when console is more verbose', async () => {
-      await mkdir(TEST_LOG_DIR, { recursive: true });
       const logger = createLogger({
         consoleLevel: 'debug',
         fileLevel: 'warn',
-        filePath: join(TEST_LOG_DIR, 'test.log'),
+        filePath: makeLogPath('min-level-console-verbose'),
         pretty: false,
       });
+      activeLoggers.push(logger);
 
       // Should use debug as minimum level
       expect(logger.level).toBe('debug');

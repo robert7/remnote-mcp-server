@@ -2,14 +2,14 @@
  * WebSocketServer unit tests
  * Tests for the WebSocket bridge server implementation
  *
- * Note: These tests use real WebSocketServer instances on random ports
+ * Note: These tests use real WebSocketServer instances on OS-assigned available ports
  * to avoid complex mocking issues while still providing good test coverage
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { WebSocketServer } from '../../src/websocket-server.js';
 import { WebSocket } from 'ws';
-import { getRandomPort, wait } from '../helpers/test-server.js';
+import { getAvailablePort, wait } from '../helpers/test-server.js';
 import { createMockLogger } from '../setup.js';
 
 describe('WebSocketServer - Lifecycle', () => {
@@ -17,8 +17,8 @@ describe('WebSocketServer - Lifecycle', () => {
   let port: number;
   let mockLogger: ReturnType<typeof createMockLogger>;
 
-  beforeEach(() => {
-    port = getRandomPort();
+  beforeEach(async () => {
+    port = await getAvailablePort();
     mockLogger = createMockLogger();
     wsServer = new WebSocketServer(port, '127.0.0.1', mockLogger, '0.5.1');
   });
@@ -66,7 +66,7 @@ describe('WebSocketServer - Connection State', () => {
   let mockLogger: ReturnType<typeof createMockLogger>;
 
   beforeEach(async () => {
-    port = getRandomPort();
+    port = await getAvailablePort();
     mockLogger = createMockLogger();
     wsServer = new WebSocketServer(port, '127.0.0.1', mockLogger, '0.5.1');
     await wsServer.start();
@@ -146,7 +146,7 @@ describe('WebSocketServer - Single Client Model', () => {
   let mockLogger: ReturnType<typeof createMockLogger>;
 
   beforeEach(async () => {
-    port = getRandomPort();
+    port = await getAvailablePort();
     mockLogger = createMockLogger();
     wsServer = new WebSocketServer(port, '127.0.0.1', mockLogger, '0.5.1');
     await wsServer.start();
@@ -206,7 +206,7 @@ describe('WebSocketServer - Request/Response', () => {
   let mockLogger: ReturnType<typeof createMockLogger>;
 
   beforeEach(async () => {
-    port = getRandomPort();
+    port = await getAvailablePort();
     mockLogger = createMockLogger();
     wsServer = new WebSocketServer(port, '127.0.0.1', mockLogger, '0.5.1');
     await wsServer.start();
@@ -333,7 +333,7 @@ describe('WebSocketServer - Heartbeat Protocol', () => {
   let mockLogger: ReturnType<typeof createMockLogger>;
 
   beforeEach(async () => {
-    port = getRandomPort();
+    port = await getAvailablePort();
     mockLogger = createMockLogger();
     wsServer = new WebSocketServer(port, '127.0.0.1', mockLogger, '0.5.1');
     await wsServer.start();
@@ -381,7 +381,7 @@ describe('WebSocketServer - Hello Message', () => {
   let mockLogger: ReturnType<typeof createMockLogger>;
 
   beforeEach(async () => {
-    port = getRandomPort();
+    port = await getAvailablePort();
     mockLogger = createMockLogger();
     wsServer = new WebSocketServer(port, '127.0.0.1', mockLogger, '0.5.1');
     await wsServer.start();
@@ -458,7 +458,7 @@ describe('WebSocketServer - Error Handling', () => {
   let mockLogger: ReturnType<typeof createMockLogger>;
 
   beforeEach(async () => {
-    port = getRandomPort();
+    port = await getAvailablePort();
     mockLogger = createMockLogger();
     wsServer = new WebSocketServer(port, '127.0.0.1', mockLogger, '0.5.1');
     await wsServer.start();
@@ -515,7 +515,7 @@ describe('WebSocketServer - Logging', () => {
   let mockLogger: ReturnType<typeof createMockLogger>;
 
   beforeEach(async () => {
-    port = getRandomPort();
+    port = await getAvailablePort();
     mockLogger = createMockLogger();
     wsServer = new WebSocketServer(port, '127.0.0.1', mockLogger, '0.5.1');
     await wsServer.start();
@@ -641,7 +641,7 @@ describe('WebSocketServer - Request/Response Logging', () => {
   let mockResponseLogger: ReturnType<typeof createMockLogger>;
 
   beforeEach(async () => {
-    port = getRandomPort();
+    port = await getAvailablePort();
     mockLogger = createMockLogger();
     mockRequestLogger = createMockLogger();
     mockResponseLogger = createMockLogger();

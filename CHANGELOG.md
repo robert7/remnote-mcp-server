@@ -15,6 +15,8 @@ Versioning](https://semver.org/spec/v2.0.0.html).
   mode-specific response-shape assertions, and no longer use the legacy boolean `includeContent` value.
 - Integration `Read & Update` workflow now validates the current `remnote_read_note` response contract (`content` /
   `contentProperties`) and covers `includeContent` modes (`markdown`, `none`) instead of the removed `children` field.
+- Stabilized flaky unit quality runs by switching websocket tests to OS-assigned available ports and isolating logger
+  file-output tests to per-run temp directories.
 
 ### Added
 
@@ -29,9 +31,13 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - `remnote_search` tool now also supports `includeContent: "structured"` to return nested child objects with `remId`s
   via `contentStructured` for follow-up note reads/navigation.
 - `remnote_read_note` tool now returns rendered markdown content of the child subtree by default.
+- `remnote_search` and `remnote_read_note` now advertise parent context fields in `outputSchema`:
+  `parentRemId` and `parentTitle` (omitted for top-level notes).
 - New output fields in both tools: `headline` (display-oriented full line with type-aware delimiters), `aliases`
   (alternate names), `contentProperties` (rendering metadata: `childrenRendered`, `childrenTotal`, `contentTruncated`).
 - New input parameters for both tools: `childLimit`, `maxContentLength`.
+- Integration workflows now reuse a shared root-level anchor note
+  `RemNote Automation Bridge [temporary integration test data]` and create all test notes under that parent.
 
 ### Changed
 
@@ -44,6 +50,7 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - Search schema defaults: `depth=1`, `childLimit=20`, `maxContentLength=3000`.
 - Read schema defaults: `depth=5`, `childLimit=100`, `maxContentLength=100000`.
 - Updated `outputSchema` for both `SEARCH_TOOL` and `READ_NOTE_TOOL` to reflect new fields.
+- Standardized root shell script bootstrapping so Node-dependent scripts source `node-check.sh` via script-dir paths at startup (including `publish-to-npm.sh` and `run-status-check.sh`).
 
 ### Documentation
 
@@ -51,6 +58,7 @@ Versioning](https://semver.org/spec/v2.0.0.html).
   canonical bridge-side `0.x` version compatibility guide.
 - Updated tools reference parameter docs for string `includeContent` and corrected search/read depth defaults.
 - Updated tools reference for `remnote_search includeContent: "structured"` and `contentStructured` use cases.
+- Updated `AGENTS.md` with an explicit policy that AI agents must never run integration tests and should ask the human collaborator to execute them manually.
 
 ## [0.5.1] - 2026-02-24
 

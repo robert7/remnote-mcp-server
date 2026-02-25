@@ -115,15 +115,18 @@ Returns array of matching notes:
     {
       "remId": "abc123",
       "title": "Machine Learning Basics",
-      "score": 0.95
+      "headline": "Machine Learning Basics",
+      "parentRemId": "parent987",
+      "parentTitle": "AI Notes",
+      "remType": "document"
     },
     {
       "remId": "def456",
       "title": "Deep Learning Overview",
-      "score": 0.87
+      "headline": "Deep Learning Overview",
+      "remType": "text"
     }
-  ],
-  "count": 2
+  ]
 }
 ```
 
@@ -134,14 +137,13 @@ Returns array of matching notes:
     {
       "remId": "abc123",
       "title": "Machine Learning Basics",
-      "score": 0.95,
-      "content": [
-        "Supervised learning",
-        "Unsupervised learning"
-      ]
+      "headline": "Machine Learning Basics",
+      "parentRemId": "parent987",
+      "parentTitle": "AI Notes",
+      "remType": "document",
+      "content": "- Supervised learning\n- Unsupervised learning\n"
     }
-  ],
-  "count": 1
+  ]
 }
 ```
 
@@ -152,6 +154,7 @@ Returns array of matching notes:
 - Use `includeContent: "none"` (default) for faster searches when you only need titles
 - Use `includeContent: "markdown"` when you need rendered child context
 - Use `includeContent: "structured"` when you need nested child `remId`s for follow-up reads/navigation
+- Use `parentRemId` and `parentTitle` to show where a result sits in your hierarchy.
 
 ## remnote_read_note
 
@@ -163,6 +166,7 @@ Read a specific note by its Rem ID, including child content.
 |-----------|------|----------|-------------|
 | `remId` | string | Yes | The Rem ID to read |
 | `depth` | number | No | Depth of children to include in rendered content (0-10, default: 5) |
+| `includeContent` | string | No | Content mode: `markdown` (default) or `none` |
 
 ### Usage
 
@@ -183,34 +187,29 @@ Read note xyz789 with depth 0 (no children)
 
 ### Response
 
-Returns the note with hierarchical content:
+Returns note metadata plus optional rendered child content:
 
 ```json
 {
   "remId": "abc123",
   "title": "Project Overview",
-  "children": [
-    {
-      "remId": "child1",
-      "text": "Goals",
-      "children": [
-        {
-          "remId": "child1a",
-          "text": "Improve performance"
-        }
-      ]
-    },
-    {
-      "remId": "child2",
-      "text": "Timeline"
-    }
-  ]
+  "headline": "Project Overview",
+  "parentRemId": "folder001",
+  "parentTitle": "Work Projects",
+  "remType": "document",
+  "content": "- Goals\n  - Improve performance\n- Timeline\n",
+  "contentProperties": {
+    "childrenRendered": 3,
+    "childrenTotal": 3,
+    "contentTruncated": false
+  }
 }
 ```
 
 ### Tips
 
 - Use `depth: 0` for just the note title (no children)
+- Use `includeContent: "none"` when you only need metadata and parent context.
 - Use `depth: 1-3` for common hierarchies
 - Use `depth: 4-10` for deep nested structures
 - Higher depth may be slower for large hierarchies

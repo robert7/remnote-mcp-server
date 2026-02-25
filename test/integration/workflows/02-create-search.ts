@@ -5,7 +5,7 @@
  * for them to verify they are findable. Returns note IDs for downstream workflows.
  */
 
-import { assertTruthy, assertHasField, assertIsArray } from '../assertions.js';
+import { assertTruthy, assertHasField, assertIsArray, assertEqual } from '../assertions.js';
 import type { WorkflowContext, WorkflowResult, SharedState, StepResult } from '../types.js';
 
 function summarizeSearchResults(
@@ -27,6 +27,25 @@ function findMatchingSearchResult(
   const match = results.find((r) => r.remId === remId);
   assertTruthy(match, 'should find matching note');
   return match as Record<string, unknown>;
+}
+
+function assertParentContext(
+  note: Record<string, unknown>,
+  state: SharedState,
+  label: string
+): void {
+  assertTruthy(typeof state.integrationParentRemId === 'string', `${label}: parent remId in state`);
+  assertTruthy(typeof state.integrationParentTitle === 'string', `${label}: parent title in state`);
+  assertEqual(
+    note.parentRemId as string,
+    state.integrationParentRemId as string,
+    `${label}: parentRemId`
+  );
+  assertEqual(
+    note.parentTitle as string,
+    state.integrationParentTitle as string,
+    `${label}: parentTitle`
+  );
 }
 
 function assertSearchContentModeShape(
@@ -61,12 +80,28 @@ export async function createSearchWorkflow(
   const steps: StepResult[] = [];
   const delay = parseInt(process.env.MCP_TEST_DELAY ?? '2000', 10);
 
+  if (!state.integrationParentRemId) {
+    return {
+      name: 'Create & Search',
+      steps: [
+        {
+          label: 'Skipped — integration parent note not initialized',
+          passed: false,
+          durationMs: 0,
+          error: 'No integrationParentRemId in shared state',
+        },
+      ],
+      skipped: true,
+    };
+  }
+
   // Step 1: Create simple note
   {
     const start = Date.now();
     try {
       const result = await ctx.client.callTool('remnote_create_note', {
         title: `[MCP-TEST] Simple Note ${ctx.runId}`,
+        parentId: state.integrationParentRemId,
       });
       assertHasField(result, 'remId', 'create simple note');
       assertTruthy(typeof result.remId === 'string', 'remId should be a string');
@@ -88,6 +123,7 @@ export async function createSearchWorkflow(
     try {
       const result = await ctx.client.callTool('remnote_create_note', {
         title: `[MCP-TEST] Rich Note ${ctx.runId}`,
+        parentId: state.integrationParentRemId,
         content: 'Bullet one\nBullet two\nBullet three',
         tags: ['mcp-test-tag'],
       });
@@ -126,6 +162,9 @@ export async function createSearchWorkflow(
       assertTruthy(results.length > 0, 'search should return at least one result');
       const found = results.some((r) => typeof r.title === 'string' && r.title.includes(ctx.runId));
       assertTruthy(found, 'at least one result title should contain runId');
+      assertTruthy(typeof state.noteAId === 'string', 'simple note remId should be recorded');
+      const simpleMatch = findMatchingSearchResult(results, state.noteAId as string);
+      assertParentContext(simpleMatch, state, 'search simple note parent context');
       steps.push({
         label: 'Search finds simple note',
         passed: true,
@@ -160,6 +199,7 @@ export async function createSearchWorkflow(
       assertTruthy(typeof state.noteBId === 'string', 'rich note remId should be recorded');
       const match = findMatchingSearchResult(results, state.noteBId as string);
       assertSearchContentModeShape(match, mode);
+      assertParentContext(match, state, `search ${mode} parent context`);
       steps.push({
         label,
         passed: true,

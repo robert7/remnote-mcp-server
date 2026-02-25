@@ -72,6 +72,14 @@ export const SEARCH_TOOL = {
               description:
                 'Display-oriented full line: title + type-aware delimiter + detail (e.g. "Term :: Definition")',
             },
+            parentRemId: {
+              type: 'string',
+              description: 'Direct parent Rem ID (omitted for top-level Rems)',
+            },
+            parentTitle: {
+              type: 'string',
+              description: 'Direct parent title/front text (omitted for top-level Rems)',
+            },
             aliases: {
               type: 'array',
               items: { type: 'string' },
@@ -192,6 +200,14 @@ export const READ_NOTE_TOOL = {
         type: 'string',
         description:
           'Display-oriented full line: title + type-aware delimiter + detail (e.g. "Term :: Definition")',
+      },
+      parentRemId: {
+        type: 'string',
+        description: 'Direct parent Rem ID (omitted for top-level Rems)',
+      },
+      parentTitle: {
+        type: 'string',
+        description: 'Direct parent title/front text (omitted for top-level Rems)',
       },
       aliases: {
         type: 'array',

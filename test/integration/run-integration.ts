@@ -28,6 +28,7 @@ const RED = '\x1b[31m';
 const YELLOW = '\x1b[33m';
 const BOLD = '\x1b[1m';
 const DIM = '\x1b[2m';
+const INTEGRATION_PARENT_TITLE = 'RemNote Automation Bridge [temporary integration test data]';
 
 function printBanner(): void {
   console.log(`
@@ -95,6 +96,43 @@ function printSummary(results: WorkflowResult[], totalDurationMs: number): void 
   console.log('Search your RemNote KB for "[MCP-TEST]" to find and delete them.');
 }
 
+async function ensureIntegrationParentNote(
+  client: McpTestClient,
+  state: SharedState
+): Promise<void> {
+  const searchResult = await client.callTool('remnote_search', {
+    query: INTEGRATION_PARENT_TITLE,
+    limit: 50,
+  });
+
+  const candidates = Array.isArray(searchResult.results)
+    ? (searchResult.results as Array<Record<string, unknown>>)
+    : [];
+
+  const exactMatches = candidates.filter(
+    (item) => item.title === INTEGRATION_PARENT_TITLE && typeof item.remId === 'string'
+  );
+
+  if (exactMatches.length > 0) {
+    state.integrationParentRemId = exactMatches[0].remId as string;
+    state.integrationParentTitle = INTEGRATION_PARENT_TITLE;
+    return;
+  }
+
+  const createResult = await client.callTool('remnote_create_note', {
+    title: INTEGRATION_PARENT_TITLE,
+  });
+
+  if (typeof createResult.remId !== 'string') {
+    throw new Error(
+      `Failed to initialize integration parent note. Response: ${JSON.stringify(createResult)}`
+    );
+  }
+
+  state.integrationParentRemId = createResult.remId;
+  state.integrationParentTitle = INTEGRATION_PARENT_TITLE;
+}
+
 async function main(): Promise<void> {
   const skipConfirm = process.argv.includes('--yes');
   const baseUrl = process.env.REMNOTE_MCP_URL ?? 'http://127.0.0.1:3001';
@@ -126,6 +164,17 @@ async function main(): Promise<void> {
     console.error(`\n${RED}Failed to connect to MCP server at ${mcpUrl}${RESET}`);
     console.error(`${RED}${(e as Error).message}${RESET}`);
     console.error(`\nMake sure the server is running: ${BOLD}npm run dev${RESET}`);
+    process.exit(1);
+  }
+
+  try {
+    await ensureIntegrationParentNote(client, state);
+    console.log(`Integration parent: ${state.integrationParentRemId}`);
+  } catch (e) {
+    console.error(
+      `${RED}Failed to initialize integration parent note "${INTEGRATION_PARENT_TITLE}"${RESET}`
+    );
+    console.error(`${RED}${(e as Error).message}${RESET}`);
     process.exit(1);
   }
 
