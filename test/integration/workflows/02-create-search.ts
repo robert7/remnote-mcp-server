@@ -73,6 +73,69 @@ function assertSearchContentModeShape(
   assertTruthy(!('contentStructured' in note), 'none mode should omit structured content');
 }
 
+interface ExpectedTagTarget {
+  remId: string;
+  remType: string;
+  source: 'documentAncestor' | 'nearestNonDocumentAncestor' | 'self';
+}
+
+async function resolveExpectedSearchByTagTarget(
+  ctx: WorkflowContext,
+  taggedRemId: string
+): Promise<ExpectedTagTarget> {
+  const tagged = (await ctx.client.callTool('remnote_read_note', {
+    remId: taggedRemId,
+    includeContent: 'none',
+  })) as Record<string, unknown>;
+
+  let currentParentId =
+    typeof tagged.parentRemId === 'string' && tagged.parentRemId.length > 0
+      ? (tagged.parentRemId as string)
+      : undefined;
+
+  let nearestNonDocumentAncestor: { remId: string; remType: string } | undefined;
+
+  while (currentParentId) {
+    const parent = (await ctx.client.callTool('remnote_read_note', {
+      remId: currentParentId,
+      includeContent: 'none',
+    })) as Record<string, unknown>;
+
+    const parentRemId = parent.remId as string;
+    const parentRemType = parent.remType as string;
+    if (!nearestNonDocumentAncestor) {
+      nearestNonDocumentAncestor = { remId: parentRemId, remType: parentRemType };
+    }
+
+    if (parentRemType === 'document' || parentRemType === 'dailyDocument') {
+      return {
+        remId: parentRemId,
+        remType: parentRemType,
+        source: 'documentAncestor',
+      };
+    }
+
+    currentParentId =
+      typeof parent.parentRemId === 'string' && parent.parentRemId.length > 0
+        ? (parent.parentRemId as string)
+        : undefined;
+  }
+
+  if (nearestNonDocumentAncestor) {
+    return {
+      remId: nearestNonDocumentAncestor.remId,
+      remType: nearestNonDocumentAncestor.remType,
+      source: 'nearestNonDocumentAncestor',
+    };
+  }
+
+  return {
+    remId: tagged.remId as string,
+    remType: tagged.remType as string,
+    source: 'self',
+  };
+}
+
 export async function createSearchWorkflow(
   ctx: WorkflowContext,
   state: SharedState
@@ -228,6 +291,27 @@ export async function createSearchWorkflow(
   }
 
   // Step 7-9: Search by tag with includeContent modes
+  let expectedTagTarget: ExpectedTagTarget | undefined;
+  {
+    const start = Date.now();
+    try {
+      assertTruthy(typeof state.noteBId === 'string', 'rich note remId should be recorded');
+      expectedTagTarget = await resolveExpectedSearchByTagTarget(ctx, state.noteBId as string);
+      steps.push({
+        label: 'Resolve expected search-by-tag ancestor target',
+        passed: true,
+        durationMs: Date.now() - start,
+      });
+    } catch (e) {
+      steps.push({
+        label: 'Resolve expected search-by-tag ancestor target',
+        passed: false,
+        durationMs: Date.now() - start,
+        error: (e as Error).message,
+      });
+    }
+  }
+
   for (const mode of ['markdown', 'structured', 'none'] as const) {
     const start = Date.now();
     const label = `Search by tag includeContent=${mode} returns expected shape`;
@@ -243,11 +327,11 @@ export async function createSearchWorkflow(
       const results = result.results as Array<Record<string, unknown>>;
       debugResults = results;
       assertTruthy(results.length > 0, `search_by_tag ${mode} should return results`);
-      assertTruthy(
-        typeof state.integrationParentRemId === 'string',
-        'integration parent remId should be recorded'
+      assertTruthy(expectedTagTarget, 'expected tag target should be resolved');
+      const match = findMatchingSearchResult(
+        results,
+        (expectedTagTarget as ExpectedTagTarget).remId
       );
-      const match = findMatchingSearchResult(results, state.integrationParentRemId as string);
       assertSearchContentModeShape(match, mode);
       steps.push({
         label,
@@ -260,7 +344,7 @@ export async function createSearchWorkflow(
         passed: false,
         durationMs: Date.now() - start,
         error:
-          `${(e as Error).message} | tag=${JSON.stringify(state.searchByTagTag ?? null)}` +
+          `${(e as Error).message} | tag=${JSON.stringify(state.searchByTagTag ?? null)} expectedTarget=${JSON.stringify(expectedTagTarget ?? null)}` +
           (debugResults
             ? ` resultCount=${debugResults.length} topResults=${JSON.stringify(
                 summarizeSearchResults(debugResults)

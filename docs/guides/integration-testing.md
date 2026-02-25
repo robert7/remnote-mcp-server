@@ -48,7 +48,7 @@ The suite runs five sequential workflows:
 
 All test content is prefixed with `[MCP-TEST]` followed by a unique run ID (ISO timestamp), and is created under the
 shared root-level anchor note `RemNote Automation Bridge [temporary integration test data]`. If that anchor note already
-exists, integration tests reuse it (first search hit) instead of creating a duplicate.
+exists (exact title match, trim-normalized), integration tests reuse the first exact match instead of creating a duplicate.
 
 RemNote's bridge plugin does not support deleting notes, so test artifacts persist and must be cleaned up manually.
 

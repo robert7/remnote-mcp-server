@@ -29,6 +29,29 @@ const YELLOW = '\x1b[33m';
 const BOLD = '\x1b[1m';
 const DIM = '\x1b[2m';
 const INTEGRATION_PARENT_TITLE = 'RemNote Automation Bridge [temporary integration test data]';
+const INTEGRATION_PARENT_TAG = 'remnote-integration-root-anchor';
+const INTEGRATION_PARENT_SEARCH_QUERIES = [
+  INTEGRATION_PARENT_TITLE,
+  'RemNote Automation Bridge temporary integration test data',
+  'temporary integration test data',
+];
+
+interface IntegrationParentResolution {
+  status: 'reused' | 'created';
+  strategy: 'search' | 'tag' | 'create';
+  remId: string;
+  title: string;
+  exactMatches: number;
+  candidateCount: number;
+}
+
+function normalizeTitle(value: string): string {
+  return value
+    .normalize('NFKC')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+}
 
 function printBanner(): void {
   console.log(`
@@ -99,30 +122,84 @@ function printSummary(results: WorkflowResult[], totalDurationMs: number): void 
 async function ensureIntegrationParentNote(
   client: McpTestClient,
   state: SharedState
-): Promise<void> {
-  const searchResult = await client.callTool('remnote_search', {
-    query: INTEGRATION_PARENT_TITLE,
-    limit: 50,
+): Promise<IntegrationParentResolution> {
+  const expectedTitle = normalizeTitle(INTEGRATION_PARENT_TITLE);
+  const candidateMap = new Map<string, Record<string, unknown>>();
+
+  for (const query of INTEGRATION_PARENT_SEARCH_QUERIES) {
+    const searchResult = await client.callTool('remnote_search', {
+      query,
+      limit: 150,
+      includeContent: 'none',
+    });
+    const candidates = Array.isArray(searchResult.results)
+      ? (searchResult.results as Array<Record<string, unknown>>)
+      : [];
+    for (const candidate of candidates) {
+      if (typeof candidate.remId !== 'string') continue;
+      if (!candidateMap.has(candidate.remId)) {
+        candidateMap.set(candidate.remId, candidate);
+      }
+    }
+  }
+
+  const searchCandidates = Array.from(candidateMap.values());
+  const exactSearchMatches = searchCandidates.filter(
+    (item) =>
+      typeof item.title === 'string' && normalizeTitle(item.title as string) === expectedTitle
+  );
+
+  if (exactSearchMatches.length > 0) {
+    const selected = exactSearchMatches[0];
+    state.integrationParentRemId = selected.remId as string;
+    state.integrationParentTitle = selected.title as string;
+    // Ensure deterministic future lookups via dedicated anchor tag.
+    await client.callTool('remnote_update_note', {
+      remId: selected.remId as string,
+      addTags: [INTEGRATION_PARENT_TAG],
+    });
+    return {
+      status: 'reused',
+      strategy: 'search',
+      remId: selected.remId as string,
+      title: selected.title as string,
+      exactMatches: exactSearchMatches.length,
+      candidateCount: searchCandidates.length,
+    };
+  }
+
+  const byTagResult = await client.callTool('remnote_search_by_tag', {
+    tag: INTEGRATION_PARENT_TAG,
+    limit: 150,
     includeContent: 'none',
   });
-
-  const candidates = Array.isArray(searchResult.results)
-    ? (searchResult.results as Array<Record<string, unknown>>)
+  const tagCandidates = Array.isArray(byTagResult.results)
+    ? (byTagResult.results as Array<Record<string, unknown>>)
     : [];
+  const exactTagMatches = tagCandidates.filter(
+    (item) =>
+      typeof item.remId === 'string' &&
+      typeof item.title === 'string' &&
+      normalizeTitle(item.title as string) === expectedTitle
+  );
 
-  const firstCandidate = candidates.find((item) => typeof item.remId === 'string');
-
-  if (firstCandidate) {
-    state.integrationParentRemId = firstCandidate.remId as string;
-    state.integrationParentTitle =
-      typeof firstCandidate.title === 'string' && firstCandidate.title.length > 0
-        ? (firstCandidate.title as string)
-        : INTEGRATION_PARENT_TITLE;
-    return;
+  if (exactTagMatches.length > 0) {
+    const selected = exactTagMatches[0];
+    state.integrationParentRemId = selected.remId as string;
+    state.integrationParentTitle = selected.title as string;
+    return {
+      status: 'reused',
+      strategy: 'tag',
+      remId: selected.remId as string,
+      title: selected.title as string,
+      exactMatches: exactTagMatches.length,
+      candidateCount: tagCandidates.length,
+    };
   }
 
   const createResult = await client.callTool('remnote_create_note', {
     title: INTEGRATION_PARENT_TITLE,
+    tags: [INTEGRATION_PARENT_TAG],
   });
 
   if (typeof createResult.remId !== 'string') {
@@ -133,6 +210,14 @@ async function ensureIntegrationParentNote(
 
   state.integrationParentRemId = createResult.remId;
   state.integrationParentTitle = INTEGRATION_PARENT_TITLE;
+  return {
+    status: 'created',
+    strategy: 'create',
+    remId: createResult.remId,
+    title: INTEGRATION_PARENT_TITLE,
+    exactMatches: 0,
+    candidateCount: searchCandidates.length + tagCandidates.length,
+  };
 }
 
 async function main(): Promise<void> {
@@ -170,8 +255,16 @@ async function main(): Promise<void> {
   }
 
   try {
-    await ensureIntegrationParentNote(client, state);
-    console.log(`Integration parent: ${state.integrationParentRemId}`);
+    const parentResolution = await ensureIntegrationParentNote(client, state);
+    if (parentResolution.status === 'reused') {
+      console.log(
+        `Integration parent: found existing via ${parentResolution.strategy} "${parentResolution.title}" (${parentResolution.remId}) [exact matches: ${parentResolution.exactMatches}, candidates: ${parentResolution.candidateCount}]`
+      );
+    } else {
+      console.log(
+        `Integration parent: not found via search/tag lookups, created "${parentResolution.title}" (${parentResolution.remId}) [candidates checked: ${parentResolution.candidateCount}]`
+      );
+    }
   } catch (e) {
     console.error(
       `${RED}Failed to initialize integration parent note "${INTEGRATION_PARENT_TITLE}"${RESET}`
