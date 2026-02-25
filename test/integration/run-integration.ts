@@ -46,11 +46,7 @@ interface IntegrationParentResolution {
 }
 
 function normalizeTitle(value: string): string {
-  return value
-    .normalize('NFKC')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .toLowerCase();
+  return value.normalize('NFKC').replace(/\s+/g, ' ').trim().toLowerCase();
 }
 
 function printBanner(): void {
@@ -149,6 +145,17 @@ async function ensureIntegrationParentNote(
       typeof item.title === 'string' && normalizeTitle(item.title as string) === expectedTitle
   );
 
+  if (exactSearchMatches.length > 1) {
+    const duplicateIds = exactSearchMatches
+      .map((item) => item.remId)
+      .filter((id): id is string => typeof id === 'string');
+    throw new Error(
+      `Duplicate integration root notes detected (${exactSearchMatches.length} exact matches): ${duplicateIds.join(
+        ', '
+      )}. Keep exactly one "${INTEGRATION_PARENT_TITLE}" note and rerun integration tests.`
+    );
+  }
+
   if (exactSearchMatches.length > 0) {
     const selected = exactSearchMatches[0];
     state.integrationParentRemId = selected.remId as string;
@@ -182,6 +189,17 @@ async function ensureIntegrationParentNote(
       typeof item.title === 'string' &&
       normalizeTitle(item.title as string) === expectedTitle
   );
+
+  if (exactTagMatches.length > 1) {
+    const duplicateIds = exactTagMatches
+      .map((item) => item.remId)
+      .filter((id): id is string => typeof id === 'string');
+    throw new Error(
+      `Duplicate integration root notes detected via tag lookup (${exactTagMatches.length} exact matches): ${duplicateIds.join(
+        ', '
+      )}. Keep exactly one "${INTEGRATION_PARENT_TITLE}" note and rerun integration tests.`
+    );
+  }
 
   if (exactTagMatches.length > 0) {
     const selected = exactTagMatches[0];

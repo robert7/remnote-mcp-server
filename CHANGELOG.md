@@ -11,9 +11,12 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 - **Legacy bridge warning**: `remnote_status` now injects `version_warning` for legacy bridge plugins (0.5.x) that
   don't send a `hello` message, by falling back to `pluginVersion` from the `get_status` response.
-- Integration anchor-note reuse now selects the first exact title match (trim-normalized) for
-  `RemNote Automation Bridge [temporary integration test data]`, preventing repeated duplicate creation of
-  similarly named notes.
+- Integration anchor-note reuse now uses deterministic multi-strategy lookup for
+  `RemNote Automation Bridge [temporary integration test data]`:
+  multi-query title search (normalized exact match), then anchor-tag lookup (`remnote-integration-root-anchor`), then create.
+- Integration setup now backfills the anchor tag on reused title-search matches so subsequent runs resolve deterministically.
+- Integration setup now fails early when duplicate exact integration-root titles are detected, printing duplicate `remId`s
+  so test data can be cleaned before execution.
 - Integration runner startup now logs whether the anchor note was found or created, including selected `remId`.
 - Integration `search_by_tag` scenario now derives expected target from live ancestry traversal of the tagged note
   (nearest document/daily document fallback), avoiding false negatives when RemNote hierarchy returns document ancestors.

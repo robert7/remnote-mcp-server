@@ -47,8 +47,17 @@ The suite runs five sequential workflows:
 ## Test Artifacts
 
 All test content is prefixed with `[MCP-TEST]` followed by a unique run ID (ISO timestamp), and is created under the
-shared root-level anchor note `RemNote Automation Bridge [temporary integration test data]`. If that anchor note already
-exists (exact title match, trim-normalized), integration tests reuse the first exact match instead of creating a duplicate.
+shared root-level anchor note `RemNote Automation Bridge [temporary integration test data]`.
+
+Anchor resolution is deterministic:
+1. multi-query `remnote_search` lookup + exact title match (trim/whitespace normalized),
+2. fallback `remnote_search_by_tag` lookup using the dedicated anchor tag `remnote-integration-root-anchor`,
+3. create anchor note only if both lookups fail.
+
+When reusing a title-only hit, integration setup backfills the anchor tag for future deterministic lookup.
+
+Uniqueness is enforced: if more than one exact anchor-title match exists, the integration run fails immediately and
+prints duplicate `remId`s so you can clean up test data in RemNote.
 
 RemNote's bridge plugin does not support deleting notes, so test artifacts persist and must be cleaned up manually.
 
