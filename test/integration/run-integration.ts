@@ -103,19 +103,21 @@ async function ensureIntegrationParentNote(
   const searchResult = await client.callTool('remnote_search', {
     query: INTEGRATION_PARENT_TITLE,
     limit: 50,
+    includeContent: 'none',
   });
 
   const candidates = Array.isArray(searchResult.results)
     ? (searchResult.results as Array<Record<string, unknown>>)
     : [];
 
-  const exactMatches = candidates.filter(
-    (item) => item.title === INTEGRATION_PARENT_TITLE && typeof item.remId === 'string'
-  );
+  const firstCandidate = candidates.find((item) => typeof item.remId === 'string');
 
-  if (exactMatches.length > 0) {
-    state.integrationParentRemId = exactMatches[0].remId as string;
-    state.integrationParentTitle = INTEGRATION_PARENT_TITLE;
+  if (firstCandidate) {
+    state.integrationParentRemId = firstCandidate.remId as string;
+    state.integrationParentTitle =
+      typeof firstCandidate.title === 'string' && firstCandidate.title.length > 0
+        ? (firstCandidate.title as string)
+        : INTEGRATION_PARENT_TITLE;
     return;
   }
 

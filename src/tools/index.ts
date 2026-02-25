@@ -3,6 +3,7 @@ import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprot
 import { WebSocketServer } from '../websocket-server.js';
 import { CreateNoteSchema } from '../schemas/remnote-schemas.js';
 import { SearchSchema } from '../schemas/remnote-schemas.js';
+import { SearchByTagSchema } from '../schemas/remnote-schemas.js';
 import { ReadNoteSchema } from '../schemas/remnote-schemas.js';
 import { UpdateNoteSchema } from '../schemas/remnote-schemas.js';
 import { AppendJournalSchema } from '../schemas/remnote-schemas.js';
@@ -162,6 +163,43 @@ export const SEARCH_TOOL = {
   },
 };
 
+export const SEARCH_BY_TAG_TOOL = {
+  name: 'remnote_search_by_tag',
+  description:
+    'Find notes by tag and return resolved ancestor context targets (nearest document/daily document when available, otherwise nearest non-document ancestor). Supports the same includeContent modes as remnote_search.',
+  inputSchema: {
+    type: 'object' as const,
+    properties: {
+      tag: {
+        type: 'string',
+        description: 'Tag name to search (with or without # prefix)',
+      },
+      limit: { type: 'number', description: 'Maximum results (1-150, default: 50)' },
+      includeContent: {
+        type: 'string',
+        enum: ['none', 'markdown', 'structured'],
+        description:
+          'Content rendering mode: "none" omits content (default), "markdown" renders child subtree as indented markdown, "structured" returns nested child objects with remIds',
+      },
+      depth: {
+        type: 'number',
+        description:
+          'Depth of child hierarchy to render for markdown/structured content (0-10, default: 1)',
+      },
+      childLimit: {
+        type: 'number',
+        description: 'Maximum children per level (1-500, default: 20)',
+      },
+      maxContentLength: {
+        type: 'number',
+        description: 'Maximum character length for rendered content (default: 3000)',
+      },
+    },
+    required: ['tag'],
+  },
+  outputSchema: SEARCH_TOOL.outputSchema,
+};
+
 export const READ_NOTE_TOOL = {
   name: 'remnote_read_note',
   description:
@@ -315,6 +353,12 @@ export function registerAllTools(server: Server, wsServer: WebSocketServer, logg
           break;
         }
 
+        case 'remnote_search_by_tag': {
+          const args = SearchByTagSchema.parse(request.params.arguments);
+          result = await wsServer.sendRequest('search_by_tag', args);
+          break;
+        }
+
         case 'remnote_read_note': {
           const args = ReadNoteSchema.parse(request.params.arguments);
           result = await wsServer.sendRequest('read_note', args);
@@ -406,6 +450,7 @@ export function registerAllTools(server: Server, wsServer: WebSocketServer, logg
       tools: [
         CREATE_NOTE_TOOL,
         SEARCH_TOOL,
+        SEARCH_BY_TAG_TOOL,
         READ_NOTE_TOOL,
         UPDATE_NOTE_TOOL,
         APPEND_JOURNAL_TOOL,

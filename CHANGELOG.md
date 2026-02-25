@@ -11,6 +11,9 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 - **Legacy bridge warning**: `remnote_status` now injects `version_warning` for legacy bridge plugins (0.5.x) that
   don't send a `hello` message, by falling back to `pluginVersion` from the `get_status` response.
+- Integration anchor-note reuse now selects the first existing search hit by `remId` (instead of strict title-equality
+  filtering), preventing repeated duplicate creation of
+  `RemNote Automation Bridge [temporary integration test data]`.
 - Integration tests now cover `remnote_search` `includeContent` modes (`markdown`, `structured`, `none`) with
   mode-specific response-shape assertions, and no longer use the legacy boolean `includeContent` value.
 - Integration `Read & Update` workflow now validates the current `remnote_read_note` response contract (`content` /
@@ -30,6 +33,8 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - `remnote_search` tool now supports `includeContent: "markdown"` to render child subtrees as indented markdown previews.
 - `remnote_search` tool now also supports `includeContent: "structured"` to return nested child objects with `remId`s
   via `contentStructured` for follow-up note reads/navigation.
+- Added `remnote_search_by_tag` tool with the same content-rendering options as `remnote_search`
+  (`includeContent`, `depth`, `childLimit`, `maxContentLength`), returning ancestor-context targets from tagged matches.
 - `remnote_read_note` tool now returns rendered markdown content of the child subtree by default.
 - `remnote_search` and `remnote_read_note` now advertise parent context fields in `outputSchema`:
   `parentRemId` and `parentTitle` (omitted for top-level notes).
@@ -38,6 +43,8 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - New input parameters for both tools: `childLimit`, `maxContentLength`.
 - Integration workflows now reuse a shared root-level anchor note
   `RemNote Automation Bridge [temporary integration test data]` and create all test notes under that parent.
+- Integration Create & Search workflow now also validates `remnote_search_by_tag` with all three `includeContent`
+  modes (`markdown`, `structured`, `none`).
 
 ### Changed
 
@@ -58,6 +65,9 @@ Versioning](https://semver.org/spec/v2.0.0.html).
   canonical bridge-side `0.x` version compatibility guide.
 - Updated tools reference parameter docs for string `includeContent` and corrected search/read depth defaults.
 - Updated tools reference for `remnote_search includeContent: "structured"` and `contentStructured` use cases.
+- Updated tools/reference docs and README tool list to document `remnote_search_by_tag`.
+- Updated integration testing guide to document the shared integration anchor note reuse behavior and the
+  `remnote_search_by_tag` coverage.
 - Updated `AGENTS.md` with an explicit policy that AI agents must never run integration tests and should ask the human collaborator to execute them manually.
 
 ## [0.5.1] - 2026-02-24

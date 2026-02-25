@@ -29,6 +29,7 @@ export interface WorkflowContext {
 export interface SharedState {
   integrationParentRemId?: string;
   integrationParentTitle?: string;
+  searchByTagTag?: string;
   noteAId?: string;
   noteBId?: string;
 }

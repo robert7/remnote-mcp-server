@@ -95,6 +95,10 @@ export async function createSearchWorkflow(
     };
   }
 
+  if (!state.searchByTagTag) {
+    state.searchByTagTag = `mcp-test-tag-${ctx.runId.replace(/[^a-zA-Z0-9]/g, '-')}`;
+  }
+
   // Step 1: Create simple note
   {
     const start = Date.now();
@@ -125,7 +129,7 @@ export async function createSearchWorkflow(
         title: `[MCP-TEST] Rich Note ${ctx.runId}`,
         parentId: state.integrationParentRemId,
         content: 'Bullet one\nBullet two\nBullet three',
-        tags: ['mcp-test-tag'],
+        tags: [state.searchByTagTag],
       });
       assertHasField(result, 'remId', 'create rich note');
       assertTruthy(typeof result.remId === 'string', 'remId should be a string');
@@ -214,6 +218,49 @@ export async function createSearchWorkflow(
           `${(e as Error).message} | query=${JSON.stringify(query)} expectedRemId=${JSON.stringify(
             state.noteBId ?? null
           )}` +
+          (debugResults
+            ? ` resultCount=${debugResults.length} topResults=${JSON.stringify(
+                summarizeSearchResults(debugResults)
+              )}`
+            : ''),
+      });
+    }
+  }
+
+  // Step 7-9: Search by tag with includeContent modes
+  for (const mode of ['markdown', 'structured', 'none'] as const) {
+    const start = Date.now();
+    const label = `Search by tag includeContent=${mode} returns expected shape`;
+    let debugResults: Array<Record<string, unknown>> | null = null;
+    try {
+      assertTruthy(typeof state.searchByTagTag === 'string', 'searchByTagTag should be recorded');
+      const result = await ctx.client.callTool('remnote_search_by_tag', {
+        tag: state.searchByTagTag as string,
+        includeContent: mode,
+      });
+      assertHasField(result, 'results', `search_by_tag ${mode}`);
+      assertIsArray(result.results, `search_by_tag ${mode} results`);
+      const results = result.results as Array<Record<string, unknown>>;
+      debugResults = results;
+      assertTruthy(results.length > 0, `search_by_tag ${mode} should return results`);
+      assertTruthy(
+        typeof state.integrationParentRemId === 'string',
+        'integration parent remId should be recorded'
+      );
+      const match = findMatchingSearchResult(results, state.integrationParentRemId as string);
+      assertSearchContentModeShape(match, mode);
+      steps.push({
+        label,
+        passed: true,
+        durationMs: Date.now() - start,
+      });
+    } catch (e) {
+      steps.push({
+        label,
+        passed: false,
+        durationMs: Date.now() - start,
+        error:
+          `${(e as Error).message} | tag=${JSON.stringify(state.searchByTagTag ?? null)}` +
           (debugResults
             ? ` resultCount=${debugResults.length} topResults=${JSON.stringify(
                 summarizeSearchResults(debugResults)

@@ -8,6 +8,7 @@ import {
   registerAllTools,
   CREATE_NOTE_TOOL,
   SEARCH_TOOL,
+  SEARCH_BY_TAG_TOOL,
   READ_NOTE_TOOL,
   UPDATE_NOTE_TOOL,
   APPEND_JOURNAL_TOOL,
@@ -18,6 +19,7 @@ import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprot
 import {
   validCreateNoteInput,
   validSearchInput,
+  validSearchByTagInput,
   validReadNoteInput,
   validUpdateNoteInput,
   validAppendJournalInput,
@@ -63,6 +65,14 @@ describe('Tool Definitions', () => {
 
   it('should have required query field for SEARCH_TOOL', () => {
     expect(SEARCH_TOOL.inputSchema.required).toContain('query');
+  });
+
+  it('should have correct name for SEARCH_BY_TAG_TOOL', () => {
+    expect(SEARCH_BY_TAG_TOOL.name).toBe('remnote_search_by_tag');
+  });
+
+  it('should have required tag field for SEARCH_BY_TAG_TOOL', () => {
+    expect(SEARCH_BY_TAG_TOOL.inputSchema.required).toContain('tag');
   });
 
   it('should advertise structured search content mode and contentStructured output', () => {
@@ -159,14 +169,14 @@ describe('Tool Registration', () => {
     expect(mockServer.hasHandler(ListToolsRequestSchema)).toBe(true);
   });
 
-  it('should return all 6 tools in list', async () => {
+  it('should return all 7 tools in list', async () => {
     registerAllTools(mockServer as never, mockWsServer as never, createMockLogger());
 
     const result = (await mockServer.callHandler(ListToolsRequestSchema, {})) as {
       tools: unknown[];
     };
 
-    expect(result.tools).toHaveLength(6);
+    expect(result.tools).toHaveLength(7);
   });
 
   it('should include all tool names in list', async () => {
@@ -179,6 +189,7 @@ describe('Tool Registration', () => {
     const names = result.tools.map((t) => t.name);
     expect(names).toContain('remnote_create_note');
     expect(names).toContain('remnote_search');
+    expect(names).toContain('remnote_search_by_tag');
     expect(names).toContain('remnote_read_note');
     expect(names).toContain('remnote_update_note');
     expect(names).toContain('remnote_append_journal');
@@ -290,6 +301,47 @@ describe('Tool Handlers - search', () => {
       limit: 50,
       includeContent: 'structured',
       depth: 2,
+      childLimit: 20,
+      maxContentLength: 3000,
+    });
+  });
+});
+
+describe('Tool Handlers - search_by_tag', () => {
+  let mockServer: MockMCPServer;
+  let mockWsServer: { sendRequest: ReturnType<typeof vi.fn> };
+
+  beforeEach(() => {
+    mockServer = new MockMCPServer();
+    mockWsServer = {
+      sendRequest: vi.fn().mockResolvedValue(sampleSearchResults),
+    };
+    registerAllTools(mockServer as never, mockWsServer as never, createMockLogger() as never);
+  });
+
+  it('should call wsServer.sendRequest with search_by_tag action', async () => {
+    await mockServer.callHandler(CallToolRequestSchema, {
+      params: { name: 'remnote_search_by_tag', arguments: validSearchByTagInput },
+    });
+
+    expect(mockWsServer.sendRequest).toHaveBeenCalledWith('search_by_tag', {
+      ...validSearchByTagInput,
+      depth: 1,
+      childLimit: 20,
+      maxContentLength: 3000,
+    });
+  });
+
+  it('should apply default values from schema', async () => {
+    await mockServer.callHandler(CallToolRequestSchema, {
+      params: { name: 'remnote_search_by_tag', arguments: { tag: '#daily' } },
+    });
+
+    expect(mockWsServer.sendRequest).toHaveBeenCalledWith('search_by_tag', {
+      tag: '#daily',
+      limit: 50,
+      includeContent: 'none',
+      depth: 1,
       childLimit: 20,
       maxContentLength: 3000,
     });

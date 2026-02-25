@@ -4,7 +4,7 @@ Complete reference for all RemNote MCP tools available through the server.
 
 ## Overview
 
-The RemNote MCP Server exposes 6 tools that allow AI agents to interact with your RemNote knowledge base. Tools are
+The RemNote MCP Server exposes 7 tools that allow AI agents to interact with your RemNote knowledge base. Tools are
 automatically available in any connected MCP client.
 
 ## Tool Summary
@@ -13,6 +13,7 @@ automatically available in any connected MCP client.
 |------|-------------|----------|
 | `remnote_create_note` | Create new notes | Adding new knowledge, ideas, references |
 | `remnote_search` | Search knowledge base | Finding existing notes, exploring topics |
+| `remnote_search_by_tag` | Search by tag | Finding ancestor context for tagged notes |
 | `remnote_read_note` | Read note content | Retrieving details, reading hierarchies |
 | `remnote_update_note` | Modify existing notes | Appending content, adding tags, renaming |
 | `remnote_append_journal` | Add to daily document | Journaling, logging, daily notes |
@@ -155,6 +156,39 @@ Returns array of matching notes:
 - Use `includeContent: "markdown"` when you need rendered child context
 - Use `includeContent: "structured"` when you need nested child `remId`s for follow-up reads/navigation
 - Use `parentRemId` and `parentTitle` to show where a result sits in your hierarchy.
+
+## remnote_search_by_tag
+
+Search by tag and return resolved ancestor context targets.
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `tag` | string | Yes | Tag name (with or without `#` prefix) |
+| `limit` | number | No | Maximum results to return (1-150, default: 50) |
+| `includeContent` | string | No | Content mode: `none` (default), `markdown`, or `structured` |
+| `depth` | number | No | Max child depth for rendered content (0-10, default: 1) |
+
+### Behavior
+
+- For each tagged match, the bridge resolves the returned target to:
+  1) nearest ancestor document/daily document,
+  2) otherwise nearest non-document ancestor,
+  3) otherwise the tagged note itself.
+- Output shape is the same as `remnote_search`.
+
+### Usage
+
+**Find daily notes by tag:**
+```text
+Search by tag "#daily"
+```
+
+**Find tagged results with content:**
+```text
+Search by tag "project-review" and include structured content
+```
 
 ## remnote_read_note
 

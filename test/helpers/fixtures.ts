@@ -18,6 +18,12 @@ export const validSearchInput = {
   includeContent: 'markdown',
 };
 
+export const validSearchByTagInput = {
+  tag: 'mcp-test-tag',
+  limit: 50,
+  includeContent: 'markdown',
+};
+
 export const validReadNoteInput = {
   remId: 'rem-id-123',
   depth: 5,

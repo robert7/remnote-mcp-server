@@ -37,7 +37,8 @@ The suite runs five sequential workflows:
 1. **Status Check** — Verifies the server reports a connected plugin. If this fails, all subsequent workflows are
    skipped since there's no point testing tools without a live connection.
 2. **Create & Search** — Creates two notes (simple and rich with content/tags), waits for RemNote indexing, then
-   searches to verify they're findable.
+   validates both `remnote_search` and `remnote_search_by_tag` across `includeContent` modes (`markdown`,
+   `structured`, `none`).
 3. **Read & Update** — Reads the created notes, updates title/content/tags, and re-reads to verify persistence.
 4. **Journal** — Appends entries to today's daily document with and without timestamps.
 5. **Error Cases** — Sends invalid inputs (nonexistent IDs, missing required fields) and verifies the server handles
@@ -45,8 +46,11 @@ The suite runs five sequential workflows:
 
 ## Test Artifacts
 
-All test content is prefixed with `[MCP-TEST]` followed by a unique run ID (ISO timestamp). RemNote's bridge plugin does
-not support deleting notes, so test artifacts persist and must be cleaned up manually.
+All test content is prefixed with `[MCP-TEST]` followed by a unique run ID (ISO timestamp), and is created under the
+shared root-level anchor note `RemNote Automation Bridge [temporary integration test data]`. If that anchor note already
+exists, integration tests reuse it (first search hit) instead of creating a duplicate.
+
+RemNote's bridge plugin does not support deleting notes, so test artifacts persist and must be cleaned up manually.
 
 To clean up: search your RemNote knowledge base for `[MCP-TEST]` and delete the matching notes.
 

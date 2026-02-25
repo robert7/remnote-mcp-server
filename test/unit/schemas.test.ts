@@ -7,6 +7,7 @@ import { describe, it, expect } from 'vitest';
 import {
   CreateNoteSchema,
   SearchSchema,
+  SearchByTagSchema,
   ReadNoteSchema,
   UpdateNoteSchema,
   AppendJournalSchema,
@@ -142,6 +143,37 @@ describe('ReadNoteSchema', () => {
 
   it('should reject missing remId', () => {
     expect(() => ReadNoteSchema.parse({})).toThrow();
+  });
+});
+
+describe('SearchByTagSchema', () => {
+  it('should validate with required tag field', () => {
+    const result = SearchByTagSchema.parse({ tag: 'daily' });
+    expect(result.tag).toBe('daily');
+    expect(result.limit).toBe(50);
+    expect(result.includeContent).toBe('none');
+    expect(result.depth).toBe(1);
+    expect(result.childLimit).toBe(20);
+    expect(result.maxContentLength).toBe(3000);
+  });
+
+  it('should validate hash-prefixed tag', () => {
+    const result = SearchByTagSchema.parse({ tag: '#daily' });
+    expect(result.tag).toBe('#daily');
+  });
+
+  it('should validate includeContent structured mode', () => {
+    const result = SearchByTagSchema.parse({
+      tag: 'project',
+      includeContent: 'structured',
+      depth: 2,
+    });
+    expect(result.includeContent).toBe('structured');
+    expect(result.depth).toBe(2);
+  });
+
+  it('should reject empty tag', () => {
+    expect(() => SearchByTagSchema.parse({ tag: '' })).toThrow();
   });
 });
 
