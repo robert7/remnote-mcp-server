@@ -41,7 +41,7 @@ export function createLogger(config: LoggerConfig): pino.Logger {
     targets.push({
       level: config.fileLevel,
       target: 'pino/file',
-      options: { destination: config.filePath },
+      options: { destination: config.filePath, mkdir: true },
     });
   }
 
@@ -76,7 +76,7 @@ export function createLogger(config: LoggerConfig): pino.Logger {
       fallbackTargets.push({
         level: config.fileLevel,
         target: 'pino/file',
-        options: { destination: config.filePath },
+        options: { destination: config.filePath, mkdir: true },
       });
     }
 
@@ -98,7 +98,7 @@ export function createRequestResponseLogger(filePath: string): pino.Logger {
       level: 'info',
       timestamp: pino.stdTimeFunctions.isoTime,
     },
-    pino.destination(filePath)
+    pino.destination({ dest: filePath, mkdir: true })
   );
 }
 

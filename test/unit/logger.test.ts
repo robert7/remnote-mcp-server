@@ -115,6 +115,17 @@ describe('Logger', () => {
       // Verify file exists
       expect(existsSync(filePath)).toBe(true);
     });
+
+    it('should create missing nested directories for request/response logs', async () => {
+      const filePath = join(testLogDir, 'missing', 'nested', `rr-${Date.now()}.log`);
+      const logger = createRequestResponseLogger(filePath);
+      activeLoggers.push(logger);
+
+      logger.info({ type: 'response', id: 'test-456', status: 'ok' });
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      expect(existsSync(filePath)).toBe(true);
+    });
   });
 
   describe('ensureLogDirectory', () => {
@@ -162,29 +173,37 @@ describe('Logger', () => {
 
   describe('Log Level Filtering', () => {
     it('should use minimum log level when file is more verbose', async () => {
+      const filePath = makeLogPath('min-level-file-verbose');
       const logger = createLogger({
         consoleLevel: 'info',
         fileLevel: 'debug',
-        filePath: makeLogPath('min-level-file-verbose'),
+        filePath,
         pretty: false,
       });
       activeLoggers.push(logger);
+      logger.debug('debug message');
+      await new Promise((resolve) => setTimeout(resolve, 50));
 
       // Should use debug as minimum level
       expect(logger.level).toBe('debug');
+      expect(existsSync(filePath)).toBe(true);
     });
 
     it('should use minimum log level when console is more verbose', async () => {
+      const filePath = makeLogPath('min-level-console-verbose');
       const logger = createLogger({
         consoleLevel: 'debug',
         fileLevel: 'warn',
-        filePath: makeLogPath('min-level-console-verbose'),
+        filePath,
         pretty: false,
       });
       activeLoggers.push(logger);
+      logger.warn('warn message');
+      await new Promise((resolve) => setTimeout(resolve, 50));
 
       // Should use debug as minimum level
       expect(logger.level).toBe('debug');
+      expect(existsSync(filePath)).toBe(true);
     });
   });
 

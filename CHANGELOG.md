@@ -7,6 +7,11 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- Stabilized logger coverage runs in CI by enabling automatic directory creation for file logger destinations and
+  hardening logger tests against async transport timing races.
+
 ## [0.6.0] - 2026-02-25
 
 ### Added
