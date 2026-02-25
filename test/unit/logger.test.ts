@@ -16,6 +16,15 @@ function makeLogPath(fileName: string): string {
   );
 }
 
+async function waitForFile(path: string, timeoutMs = 1500, intervalMs = 25): Promise<boolean> {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    if (existsSync(path)) return true;
+    await new Promise((resolve) => setTimeout(resolve, intervalMs));
+  }
+  return existsSync(path);
+}
+
 describe('Logger', () => {
   // Track loggers with file destinations for proper cleanup
   let activeLoggers: Logger[] = [];
@@ -108,12 +117,10 @@ describe('Logger', () => {
       activeLoggers.push(logger);
 
       logger.info({ type: 'request', id: 'test-123', action: 'search' });
+      logger.flush();
 
-      // Wait for async write to complete
-      await new Promise((resolve) => setTimeout(resolve, 100));
-
-      // Verify file exists
-      expect(existsSync(filePath)).toBe(true);
+      // Verify file exists after async transport flush/write.
+      expect(await waitForFile(filePath)).toBe(true);
     });
 
     it('should create missing nested directories for request/response logs', async () => {
@@ -122,9 +129,9 @@ describe('Logger', () => {
       activeLoggers.push(logger);
 
       logger.info({ type: 'response', id: 'test-456', status: 'ok' });
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      logger.flush();
 
-      expect(existsSync(filePath)).toBe(true);
+      expect(await waitForFile(filePath)).toBe(true);
     });
   });
 
@@ -182,11 +189,11 @@ describe('Logger', () => {
       });
       activeLoggers.push(logger);
       logger.debug('debug message');
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      logger.flush();
 
       // Should use debug as minimum level
       expect(logger.level).toBe('debug');
-      expect(existsSync(filePath)).toBe(true);
+      expect(await waitForFile(filePath)).toBe(true);
     });
 
     it('should use minimum log level when console is more verbose', async () => {
@@ -199,11 +206,11 @@ describe('Logger', () => {
       });
       activeLoggers.push(logger);
       logger.warn('warn message');
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      logger.flush();
 
       // Should use debug as minimum level
       expect(logger.level).toBe('debug');
-      expect(existsSync(filePath)).toBe(true);
+      expect(await waitForFile(filePath)).toBe(true);
     });
   });
 
