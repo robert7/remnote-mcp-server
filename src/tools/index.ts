@@ -3,9 +3,11 @@ import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprot
 import { WebSocketServer } from '../websocket-server.js';
 import { CreateNoteSchema } from '../schemas/remnote-schemas.js';
 import { SearchSchema } from '../schemas/remnote-schemas.js';
+import { SearchByTagSchema } from '../schemas/remnote-schemas.js';
 import { ReadNoteSchema } from '../schemas/remnote-schemas.js';
 import { UpdateNoteSchema } from '../schemas/remnote-schemas.js';
 import { AppendJournalSchema } from '../schemas/remnote-schemas.js';
+import { checkVersionCompatibility } from '../version-compat.js';
 import type { Logger } from '../logger.js';
 
 export const CREATE_NOTE_TOOL = {
@@ -26,15 +28,30 @@ export const CREATE_NOTE_TOOL = {
 export const SEARCH_TOOL = {
   name: 'remnote_search',
   description:
-    'Search the RemNote knowledge base. Results are sorted by type: documents first, then concepts, descriptors, portals, and plain text.',
+    'Search the RemNote knowledge base. Results are sorted by type: documents first, then concepts, descriptors, portals, and plain text. Use includeContent: "markdown" for indented markdown previews or "structured" for nested child objects with remIds.',
   inputSchema: {
     type: 'object' as const,
     properties: {
       query: { type: 'string', description: 'Search query text' },
       limit: { type: 'number', description: 'Maximum results (1-150, default: 50)' },
       includeContent: {
-        type: 'boolean',
-        description: 'Include first child bullets as content (default: false)',
+        type: 'string',
+        enum: ['none', 'markdown', 'structured'],
+        description:
+          'Content rendering mode: "none" omits content (default), "markdown" renders child subtree as indented markdown, "structured" returns nested child objects with remIds',
+      },
+      depth: {
+        type: 'number',
+        description:
+          'Depth of child hierarchy to render for markdown/structured content (0-10, default: 1)',
+      },
+      childLimit: {
+        type: 'number',
+        description: 'Maximum children per level (1-500, default: 20)',
+      },
+      maxContentLength: {
+        type: 'number',
+        description: 'Maximum character length for rendered content (default: 3000)',
       },
     },
     required: ['query'],
@@ -51,9 +68,23 @@ export const SEARCH_TOOL = {
           properties: {
             remId: { type: 'string', description: 'Unique Rem ID' },
             title: { type: 'string', description: 'Rendered title with markdown formatting' },
-            detail: {
+            headline: {
               type: 'string',
-              description: 'Back text for CDF/flashcard Rems (omitted if none)',
+              description:
+                'Display-oriented full line: title + type-aware delimiter + detail (e.g. "Term :: Definition")',
+            },
+            parentRemId: {
+              type: 'string',
+              description: 'Direct parent Rem ID (omitted for top-level Rems)',
+            },
+            parentTitle: {
+              type: 'string',
+              description: 'Direct parent title/front text (omitted for top-level Rems)',
+            },
+            aliases: {
+              type: 'array',
+              items: { type: 'string' },
+              description: 'Alternate names for the Rem (omitted if none)',
             },
             remType: {
               type: 'string',
@@ -67,7 +98,63 @@ export const SEARCH_TOOL = {
             },
             content: {
               type: 'string',
-              description: 'Child content (only when includeContent=true)',
+              description:
+                'Rendered markdown content of child subtree (only when includeContent="markdown")',
+            },
+            contentStructured: {
+              type: 'array',
+              description:
+                'Structured child subtree with nested remIds and metadata (only when includeContent="structured")',
+              items: {
+                type: 'object',
+                properties: {
+                  remId: { type: 'string', description: 'Child Rem ID' },
+                  title: { type: 'string', description: 'Rendered child title' },
+                  headline: {
+                    type: 'string',
+                    description: 'Display-oriented child line with type-aware delimiter',
+                  },
+                  aliases: {
+                    type: 'array',
+                    items: { type: 'string' },
+                    description: 'Alternate names for the child Rem (omitted if none)',
+                  },
+                  remType: {
+                    type: 'string',
+                    description:
+                      'Child Rem classification: document, dailyDocument, concept, descriptor, portal, or text',
+                  },
+                  cardDirection: {
+                    type: 'string',
+                    description:
+                      'Child flashcard direction: forward, reverse, or bidirectional (omitted if not a flashcard)',
+                  },
+                  children: {
+                    type: 'array',
+                    description: 'Nested child nodes (same shape recursively)',
+                    items: { type: 'object' },
+                  },
+                },
+                required: ['remId', 'title', 'headline', 'remType', 'children'],
+              },
+            },
+            contentProperties: {
+              type: 'object',
+              description: 'Metadata about rendered content',
+              properties: {
+                childrenRendered: {
+                  type: 'number',
+                  description: 'Number of children included in rendered content',
+                },
+                childrenTotal: {
+                  type: 'number',
+                  description: 'Total children in subtree (capped at 2000)',
+                },
+                contentTruncated: {
+                  type: 'boolean',
+                  description: 'Whether content was truncated by maxContentLength',
+                },
+              },
             },
           },
         },
@@ -76,15 +163,69 @@ export const SEARCH_TOOL = {
   },
 };
 
+export const SEARCH_BY_TAG_TOOL = {
+  name: 'remnote_search_by_tag',
+  description:
+    'Find notes by tag and return resolved ancestor context targets (nearest document/daily document when available, otherwise nearest non-document ancestor). Supports the same includeContent modes as remnote_search.',
+  inputSchema: {
+    type: 'object' as const,
+    properties: {
+      tag: {
+        type: 'string',
+        description: 'Tag name to search (with or without # prefix)',
+      },
+      limit: { type: 'number', description: 'Maximum results (1-150, default: 50)' },
+      includeContent: {
+        type: 'string',
+        enum: ['none', 'markdown', 'structured'],
+        description:
+          'Content rendering mode: "none" omits content (default), "markdown" renders child subtree as indented markdown, "structured" returns nested child objects with remIds',
+      },
+      depth: {
+        type: 'number',
+        description:
+          'Depth of child hierarchy to render for markdown/structured content (0-10, default: 1)',
+      },
+      childLimit: {
+        type: 'number',
+        description: 'Maximum children per level (1-500, default: 20)',
+      },
+      maxContentLength: {
+        type: 'number',
+        description: 'Maximum character length for rendered content (default: 3000)',
+      },
+    },
+    required: ['tag'],
+  },
+  outputSchema: SEARCH_TOOL.outputSchema,
+};
+
 export const READ_NOTE_TOOL = {
   name: 'remnote_read_note',
   description:
-    'Read a specific note from RemNote by its Rem ID, including type classification and flashcard metadata',
+    'Read a specific note from RemNote by its Rem ID. Returns metadata and rendered markdown content of the child subtree. Use includeContent: "none" to skip content rendering.',
   inputSchema: {
     type: 'object' as const,
     properties: {
       remId: { type: 'string', description: 'The Rem ID to read' },
-      depth: { type: 'number', description: 'Depth of children to include (0-10, default: 3)' },
+      depth: {
+        type: 'number',
+        description: 'Depth of child hierarchy to render (0-10, default: 5)',
+      },
+      includeContent: {
+        type: 'string',
+        enum: ['none', 'markdown'],
+        description:
+          'Content rendering mode: "markdown" renders child subtree (default), "none" omits content',
+      },
+      childLimit: {
+        type: 'number',
+        description: 'Maximum children per level (1-500, default: 100)',
+      },
+      maxContentLength: {
+        type: 'number',
+        description: 'Maximum character length for rendered content (default: 100000)',
+      },
     },
     required: ['remId'],
   },
@@ -93,9 +234,23 @@ export const READ_NOTE_TOOL = {
     properties: {
       remId: { type: 'string', description: 'Unique Rem ID' },
       title: { type: 'string', description: 'Rendered title with markdown formatting' },
-      detail: {
+      headline: {
         type: 'string',
-        description: 'Back text for CDF/flashcard Rems (omitted if none)',
+        description:
+          'Display-oriented full line: title + type-aware delimiter + detail (e.g. "Term :: Definition")',
+      },
+      parentRemId: {
+        type: 'string',
+        description: 'Direct parent Rem ID (omitted for top-level Rems)',
+      },
+      parentTitle: {
+        type: 'string',
+        description: 'Direct parent title/front text (omitted for top-level Rems)',
+      },
+      aliases: {
+        type: 'array',
+        items: { type: 'string' },
+        description: 'Alternate names for the Rem (omitted if none)',
       },
       remType: {
         type: 'string',
@@ -107,16 +262,26 @@ export const READ_NOTE_TOOL = {
         description:
           'Flashcard direction: forward, reverse, or bidirectional (omitted if not a flashcard)',
       },
-      content: { type: 'string', description: 'Rendered title text (same as title)' },
-      children: {
-        type: 'array',
-        description: 'Child Rems up to requested depth',
-        items: {
-          type: 'object',
-          properties: {
-            remId: { type: 'string' },
-            text: { type: 'string' },
-            children: { type: 'array' },
+      content: {
+        type: 'string',
+        description:
+          'Rendered markdown content of child subtree (when includeContent="markdown", which is the default)',
+      },
+      contentProperties: {
+        type: 'object',
+        description: 'Metadata about rendered content',
+        properties: {
+          childrenRendered: {
+            type: 'number',
+            description: 'Number of children included in rendered content',
+          },
+          childrenTotal: {
+            type: 'number',
+            description: 'Total children in subtree (capped at 2000)',
+          },
+          contentTruncated: {
+            type: 'boolean',
+            description: 'Whether content was truncated by maxContentLength',
           },
         },
       },
@@ -188,6 +353,12 @@ export function registerAllTools(server: Server, wsServer: WebSocketServer, logg
           break;
         }
 
+        case 'remnote_search_by_tag': {
+          const args = SearchByTagSchema.parse(request.params.arguments);
+          result = await wsServer.sendRequest('search_by_tag', args);
+          break;
+        }
+
         case 'remnote_read_note': {
           const args = ReadNoteSchema.parse(request.params.arguments);
           result = await wsServer.sendRequest('read_note', args);
@@ -208,11 +379,29 @@ export function registerAllTools(server: Server, wsServer: WebSocketServer, logg
 
         case 'remnote_status': {
           const connected = wsServer.isConnected();
+          const serverVersion = wsServer.getServerVersion();
+          const bridgeVersion = wsServer.getBridgeVersion();
+
           if (!connected) {
-            result = { connected: false, message: 'RemNote plugin not connected' };
+            result = { connected: false, serverVersion, message: 'RemNote plugin not connected' };
           } else {
             const statusResult = await wsServer.sendRequest('get_status', {});
-            result = { connected: true, ...(typeof statusResult === 'object' ? statusResult : {}) };
+            const statusObj =
+              typeof statusResult === 'object' && statusResult !== null
+                ? (statusResult as Record<string, unknown>)
+                : {};
+            const fallbackBridgeVersion =
+              typeof statusObj.pluginVersion === 'string' ? statusObj.pluginVersion : null;
+            const effectiveBridgeVersion = bridgeVersion ?? fallbackBridgeVersion;
+            const versionWarning = effectiveBridgeVersion
+              ? checkVersionCompatibility(serverVersion, effectiveBridgeVersion)
+              : null;
+            result = {
+              connected: true,
+              serverVersion,
+              ...statusObj,
+              ...(versionWarning ? { version_warning: versionWarning } : {}),
+            };
           }
           break;
         }
@@ -261,6 +450,7 @@ export function registerAllTools(server: Server, wsServer: WebSocketServer, logg
       tools: [
         CREATE_NOTE_TOOL,
         SEARCH_TOOL,
+        SEARCH_BY_TAG_TOOL,
         READ_NOTE_TOOL,
         UPDATE_NOTE_TOOL,
         APPEND_JOURNAL_TOOL,

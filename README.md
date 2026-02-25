@@ -135,6 +135,7 @@ Keep this terminal running.
 |---------------------------|------------------------------------------------|
 | `remnote_create_note`     | Create new notes with optional parent and tags |
 | `remnote_search`          | Search knowledge base with full-text search    |
+| `remnote_search_by_tag`   | Search by tag with ancestor-context resolution |
 | `remnote_read_note`       | Read note by ID with configurable depth        |
 | `remnote_update_note`     | Update title, append content, or modify tags   |
 | `remnote_append_journal`  | Append to today's daily document               |

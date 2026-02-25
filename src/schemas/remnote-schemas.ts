@@ -10,12 +10,88 @@ export const CreateNoteSchema = z.object({
 export const SearchSchema = z.object({
   query: z.string().describe('Search query text'),
   limit: z.number().int().min(1).max(150).default(50).describe('Maximum results'),
-  includeContent: z.boolean().default(false).describe('Include child content in results'),
+  includeContent: z
+    .enum(['none', 'markdown', 'structured'])
+    .default('none')
+    .describe(
+      'Content rendering mode: "none" omits content, "markdown" renders child subtree, "structured" returns nested child objects with remIds'
+    ),
+  depth: z
+    .number()
+    .int()
+    .min(0)
+    .max(10)
+    .default(1)
+    .describe('Depth of child hierarchy to render (when includeContent is markdown or structured)'),
+  childLimit: z
+    .number()
+    .int()
+    .min(1)
+    .max(500)
+    .default(20)
+    .describe('Maximum children per level in rendered content'),
+  maxContentLength: z
+    .number()
+    .int()
+    .min(100)
+    .max(200000)
+    .default(3000)
+    .describe('Maximum character length for rendered content'),
+});
+
+export const SearchByTagSchema = z.object({
+  tag: z.string().min(1).describe('Tag name to search (with or without # prefix)'),
+  limit: z.number().int().min(1).max(150).default(50).describe('Maximum results'),
+  includeContent: z
+    .enum(['none', 'markdown', 'structured'])
+    .default('none')
+    .describe(
+      'Content rendering mode: "none" omits content, "markdown" renders child subtree, "structured" returns nested child objects with remIds'
+    ),
+  depth: z
+    .number()
+    .int()
+    .min(0)
+    .max(10)
+    .default(1)
+    .describe('Depth of child hierarchy to render (when includeContent is markdown or structured)'),
+  childLimit: z
+    .number()
+    .int()
+    .min(1)
+    .max(500)
+    .default(20)
+    .describe('Maximum children per level in rendered content'),
+  maxContentLength: z
+    .number()
+    .int()
+    .min(100)
+    .max(200000)
+    .default(3000)
+    .describe('Maximum character length for rendered content'),
 });
 
 export const ReadNoteSchema = z.object({
   remId: z.string().describe('The Rem ID to read'),
-  depth: z.number().int().min(0).max(10).default(3).describe('Depth of children'),
+  depth: z.number().int().min(0).max(10).default(5).describe('Depth of child hierarchy to render'),
+  includeContent: z
+    .enum(['none', 'markdown'])
+    .default('markdown')
+    .describe('Content rendering mode: "none" omits content, "markdown" renders child subtree'),
+  childLimit: z
+    .number()
+    .int()
+    .min(1)
+    .max(500)
+    .default(100)
+    .describe('Maximum children per level in rendered content'),
+  maxContentLength: z
+    .number()
+    .int()
+    .min(100)
+    .max(200000)
+    .default(100000)
+    .describe('Maximum character length for rendered content'),
 });
 
 export const UpdateNoteSchema = z.object({

@@ -1,15 +1,39 @@
 /**
  * Test server utilities
- * Helper functions for creating test WebSocket servers on random ports
+ * Helper functions for creating test servers and waiting for readiness
  */
 
 import { createConnection } from 'net';
+import { createServer } from 'net';
 
 /**
- * Get a random port between 3000 and 4000 for testing
+ * Ask the OS for an available ephemeral port.
+ *
+ * This avoids flaky collisions from pseudo-random fixed ranges.
  */
-export function getRandomPort(): number {
-  return Math.floor(Math.random() * 1000) + 3000;
+export async function getAvailablePort(host = '127.0.0.1'): Promise<number> {
+  return new Promise((resolve, reject) => {
+    const server = createServer();
+    server.unref();
+
+    server.on('error', reject);
+    server.listen(0, host, () => {
+      const address = server.address();
+      if (!address || typeof address === 'string') {
+        server.close(() => reject(new Error('Failed to resolve ephemeral port')));
+        return;
+      }
+
+      const { port } = address;
+      server.close((err) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve(port);
+      });
+    });
+  });
 }
 
 /**

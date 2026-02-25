@@ -5,8 +5,20 @@
  * and re-reads to verify the changes persisted.
  */
 
-import { assertTruthy, assertHasField, assertIsArray, assertContains } from '../assertions.js';
+import { assertTruthy, assertHasField, assertContains, assertEqual } from '../assertions.js';
 import type { WorkflowContext, WorkflowResult, SharedState, StepResult } from '../types.js';
+
+function summarizeReadResult(result: Record<string, unknown>): Record<string, unknown> {
+  return {
+    remId: result.remId,
+    title: result.title,
+    keys: Object.keys(result),
+    hasContent: 'content' in result,
+    hasContentProperties: 'contentProperties' in result,
+    contentLength: typeof result.content === 'string' ? result.content.length : undefined,
+    contentProperties: result.contentProperties,
+  };
+}
 
 export async function readUpdateWorkflow(
   ctx: WorkflowContext,
@@ -14,15 +26,20 @@ export async function readUpdateWorkflow(
 ): Promise<WorkflowResult> {
   const steps: StepResult[] = [];
 
-  if (!state.noteAId || !state.noteBId) {
+  if (
+    !state.noteAId ||
+    !state.noteBId ||
+    !state.integrationParentRemId ||
+    !state.integrationParentTitle
+  ) {
     return {
       name: 'Read & Update',
       steps: [
         {
-          label: 'Skipped — missing note IDs from workflow 02',
+          label: 'Skipped — missing note IDs or integration parent from workflow 02/setup',
           passed: false,
           durationMs: 0,
-          error: 'No note IDs available',
+          error: 'No note IDs or integration parent state available',
         },
       ],
       skipped: true,
@@ -39,6 +56,18 @@ export async function readUpdateWorkflow(
       });
       assertHasField(result, 'title', 'read simple note');
       assertHasField(result, 'remId', 'read simple note');
+      assertHasField(result, 'parentRemId', 'read simple note parentRemId');
+      assertHasField(result, 'parentTitle', 'read simple note parentTitle');
+      assertEqual(
+        result.parentRemId as string,
+        state.integrationParentRemId as string,
+        'read simple note parentRemId should match integration parent'
+      );
+      assertEqual(
+        result.parentTitle as string,
+        state.integrationParentTitle as string,
+        'read simple note parentTitle should match integration parent'
+      );
       steps.push({ label: 'Read simple note', passed: true, durationMs: Date.now() - start });
     } catch (e) {
       steps.push({
@@ -50,29 +79,64 @@ export async function readUpdateWorkflow(
     }
   }
 
-  // Step 2: Read rich note has children
-  {
+  // Step 2-3: Read rich note includeContent modes
+  for (const mode of ['markdown', 'none'] as const) {
     const start = Date.now();
+    const label = `Read rich note includeContent=${mode} returns expected shape`;
+    let debugResult: Record<string, unknown> | null = null;
     try {
       const result = await ctx.client.callTool('remnote_read_note', {
         remId: state.noteBId,
         depth: 3,
+        includeContent: mode,
       });
-      assertHasField(result, 'children', 'read rich note');
-      assertIsArray(result.children, 'children');
-      const children = result.children as unknown[];
-      assertTruthy(children.length > 0, 'rich note should have children from bullet content');
+      debugResult = result;
+      assertHasField(result, 'remId', 'read rich note remId');
+      assertHasField(result, 'title', 'read rich note title');
+      assertHasField(result, 'parentRemId', 'read rich note parentRemId');
+      assertHasField(result, 'parentTitle', 'read rich note parentTitle');
+      assertEqual(
+        result.parentRemId as string,
+        state.integrationParentRemId as string,
+        'read rich note parentRemId should match integration parent'
+      );
+      assertEqual(
+        result.parentTitle as string,
+        state.integrationParentTitle as string,
+        'read rich note parentTitle should match integration parent'
+      );
+      if (mode === 'markdown') {
+        assertHasField(result, 'content', 'read rich note markdown');
+        assertTruthy(typeof result.content === 'string', 'content should be a string');
+        assertTruthy(
+          (result.content as string).length > 0,
+          'rich note should include rendered content in markdown mode'
+        );
+        assertHasField(result, 'contentProperties', 'read rich note contentProperties');
+        const props = result.contentProperties as Record<string, unknown>;
+        assertTruthy(
+          typeof props.childrenRendered === 'number',
+          'childrenRendered should be number'
+        );
+        assertTruthy(typeof props.childrenTotal === 'number', 'childrenTotal should be number');
+        assertTruthy((props.childrenTotal as number) > 0, 'childrenTotal should be > 0');
+      } else {
+        assertTruthy(!('content' in result), 'none mode should omit content');
+        assertTruthy(!('contentProperties' in result), 'none mode should omit contentProperties');
+      }
       steps.push({
-        label: 'Read rich note has children',
+        label,
         passed: true,
         durationMs: Date.now() - start,
       });
     } catch (e) {
       steps.push({
-        label: 'Read rich note has children',
+        label,
         passed: false,
         durationMs: Date.now() - start,
-        error: (e as Error).message,
+        error:
+          `${(e as Error).message} | remId=${JSON.stringify(state.noteBId)} mode=${mode}` +
+          (debugResult ? ` result=${JSON.stringify(summarizeReadResult(debugResult))}` : ''),
       });
     }
   }

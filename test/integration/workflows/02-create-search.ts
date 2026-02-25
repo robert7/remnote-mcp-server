@@ -5,8 +5,136 @@
  * for them to verify they are findable. Returns note IDs for downstream workflows.
  */
 
-import { assertTruthy, assertHasField, assertIsArray } from '../assertions.js';
+import { assertTruthy, assertHasField, assertIsArray, assertEqual } from '../assertions.js';
 import type { WorkflowContext, WorkflowResult, SharedState, StepResult } from '../types.js';
+
+function summarizeSearchResults(
+  results: Array<Record<string, unknown>>
+): Array<Record<string, unknown>> {
+  return results.slice(0, 8).map((r) => ({
+    remId: r.remId,
+    title: r.title,
+    headline: r.headline,
+    hasContent: 'content' in r,
+    hasContentStructured: 'contentStructured' in r,
+  }));
+}
+
+function findMatchingSearchResult(
+  results: Array<Record<string, unknown>>,
+  remId: string
+): Record<string, unknown> {
+  const match = results.find((r) => r.remId === remId);
+  assertTruthy(match, 'should find matching note');
+  return match as Record<string, unknown>;
+}
+
+function assertParentContext(
+  note: Record<string, unknown>,
+  state: SharedState,
+  label: string
+): void {
+  assertTruthy(typeof state.integrationParentRemId === 'string', `${label}: parent remId in state`);
+  assertTruthy(typeof state.integrationParentTitle === 'string', `${label}: parent title in state`);
+  assertEqual(
+    note.parentRemId as string,
+    state.integrationParentRemId as string,
+    `${label}: parentRemId`
+  );
+  assertEqual(
+    note.parentTitle as string,
+    state.integrationParentTitle as string,
+    `${label}: parentTitle`
+  );
+}
+
+function assertSearchContentModeShape(
+  note: Record<string, unknown>,
+  mode: 'markdown' | 'structured' | 'none'
+): void {
+  if (mode === 'markdown') {
+    assertTruthy(typeof note.content === 'string', 'markdown mode should include string content');
+    assertTruthy((note.content as string).length > 0, 'markdown content should be non-empty');
+    assertTruthy(!('contentStructured' in note), 'markdown mode should omit contentStructured');
+    return;
+  }
+
+  if (mode === 'structured') {
+    assertIsArray(note.contentStructured, 'structured mode contentStructured');
+    assertTruthy(
+      Array.isArray(note.contentStructured) && note.contentStructured.length > 0,
+      'structured mode should include non-empty contentStructured'
+    );
+    assertTruthy(!('content' in note), 'structured mode should omit markdown content');
+    return;
+  }
+
+  assertTruthy(!('content' in note), 'none mode should omit markdown content');
+  assertTruthy(!('contentStructured' in note), 'none mode should omit structured content');
+}
+
+interface ExpectedTagTarget {
+  remId: string;
+  remType: string;
+  source: 'documentAncestor' | 'nearestNonDocumentAncestor' | 'self';
+}
+
+async function resolveExpectedSearchByTagTarget(
+  ctx: WorkflowContext,
+  taggedRemId: string
+): Promise<ExpectedTagTarget> {
+  const tagged = (await ctx.client.callTool('remnote_read_note', {
+    remId: taggedRemId,
+    includeContent: 'none',
+  })) as Record<string, unknown>;
+
+  let currentParentId =
+    typeof tagged.parentRemId === 'string' && tagged.parentRemId.length > 0
+      ? (tagged.parentRemId as string)
+      : undefined;
+
+  let nearestNonDocumentAncestor: { remId: string; remType: string } | undefined;
+
+  while (currentParentId) {
+    const parent = (await ctx.client.callTool('remnote_read_note', {
+      remId: currentParentId,
+      includeContent: 'none',
+    })) as Record<string, unknown>;
+
+    const parentRemId = parent.remId as string;
+    const parentRemType = parent.remType as string;
+    if (!nearestNonDocumentAncestor) {
+      nearestNonDocumentAncestor = { remId: parentRemId, remType: parentRemType };
+    }
+
+    if (parentRemType === 'document' || parentRemType === 'dailyDocument') {
+      return {
+        remId: parentRemId,
+        remType: parentRemType,
+        source: 'documentAncestor',
+      };
+    }
+
+    currentParentId =
+      typeof parent.parentRemId === 'string' && parent.parentRemId.length > 0
+        ? (parent.parentRemId as string)
+        : undefined;
+  }
+
+  if (nearestNonDocumentAncestor) {
+    return {
+      remId: nearestNonDocumentAncestor.remId,
+      remType: nearestNonDocumentAncestor.remType,
+      source: 'nearestNonDocumentAncestor',
+    };
+  }
+
+  return {
+    remId: tagged.remId as string,
+    remType: tagged.remType as string,
+    source: 'self',
+  };
+}
 
 export async function createSearchWorkflow(
   ctx: WorkflowContext,
@@ -15,12 +143,32 @@ export async function createSearchWorkflow(
   const steps: StepResult[] = [];
   const delay = parseInt(process.env.MCP_TEST_DELAY ?? '2000', 10);
 
+  if (!state.integrationParentRemId) {
+    return {
+      name: 'Create & Search',
+      steps: [
+        {
+          label: 'Skipped — integration parent note not initialized',
+          passed: false,
+          durationMs: 0,
+          error: 'No integrationParentRemId in shared state',
+        },
+      ],
+      skipped: true,
+    };
+  }
+
+  if (!state.searchByTagTag) {
+    state.searchByTagTag = `mcp-test-tag-${ctx.runId.replace(/[^a-zA-Z0-9]/g, '-')}`;
+  }
+
   // Step 1: Create simple note
   {
     const start = Date.now();
     try {
       const result = await ctx.client.callTool('remnote_create_note', {
         title: `[MCP-TEST] Simple Note ${ctx.runId}`,
+        parentId: state.integrationParentRemId,
       });
       assertHasField(result, 'remId', 'create simple note');
       assertTruthy(typeof result.remId === 'string', 'remId should be a string');
@@ -42,8 +190,9 @@ export async function createSearchWorkflow(
     try {
       const result = await ctx.client.callTool('remnote_create_note', {
         title: `[MCP-TEST] Rich Note ${ctx.runId}`,
+        parentId: state.integrationParentRemId,
         content: 'Bullet one\nBullet two\nBullet three',
-        tags: ['mcp-test-tag'],
+        tags: [state.searchByTagTag],
       });
       assertHasField(result, 'remId', 'create rich note');
       assertTruthy(typeof result.remId === 'string', 'remId should be a string');
@@ -80,6 +229,9 @@ export async function createSearchWorkflow(
       assertTruthy(results.length > 0, 'search should return at least one result');
       const found = results.some((r) => typeof r.title === 'string' && r.title.includes(ctx.runId));
       assertTruthy(found, 'at least one result title should contain runId');
+      assertTruthy(typeof state.noteAId === 'string', 'simple note remId should be recorded');
+      const simpleMatch = findMatchingSearchResult(results, state.noteAId as string);
+      assertParentContext(simpleMatch, state, 'search simple note parent context');
       steps.push({
         label: 'Search finds simple note',
         passed: true,
@@ -95,31 +247,109 @@ export async function createSearchWorkflow(
     }
   }
 
-  // Step 4: Search with includeContent returns content
-  {
+  // Step 4-6: Search with includeContent modes
+  for (const mode of ['markdown', 'structured', 'none'] as const) {
     const start = Date.now();
+    const label = `Search includeContent=${mode} returns expected shape`;
+    const query = `[MCP-TEST] ${ctx.runId}`;
+    let debugResults: Array<Record<string, unknown>> | null = null;
     try {
       const result = await ctx.client.callTool('remnote_search', {
-        query: `[MCP-TEST] Rich Note ${ctx.runId}`,
-        includeContent: true,
+        query,
+        includeContent: mode,
       });
-      assertHasField(result, 'results', 'search with content');
+      assertHasField(result, 'results', `search ${mode}`);
+      assertIsArray(result.results, `search ${mode} results`);
       const results = result.results as Array<Record<string, unknown>>;
-      assertTruthy(results.length > 0, 'search should return results');
-      const match = results.find((r) => typeof r.title === 'string' && r.title.includes(ctx.runId));
-      assertTruthy(match, 'should find matching note');
-      assertHasField(match as Record<string, unknown>, 'content', 'matching result');
+      debugResults = results;
+      assertTruthy(results.length > 0, `search ${mode} should return results`);
+      assertTruthy(typeof state.noteBId === 'string', 'rich note remId should be recorded');
+      const match = findMatchingSearchResult(results, state.noteBId as string);
+      assertSearchContentModeShape(match, mode);
+      assertParentContext(match, state, `search ${mode} parent context`);
       steps.push({
-        label: 'Search with includeContent returns content',
+        label,
         passed: true,
         durationMs: Date.now() - start,
       });
     } catch (e) {
       steps.push({
-        label: 'Search with includeContent returns content',
+        label,
+        passed: false,
+        durationMs: Date.now() - start,
+        error:
+          `${(e as Error).message} | query=${JSON.stringify(query)} expectedRemId=${JSON.stringify(
+            state.noteBId ?? null
+          )}` +
+          (debugResults
+            ? ` resultCount=${debugResults.length} topResults=${JSON.stringify(
+                summarizeSearchResults(debugResults)
+              )}`
+            : ''),
+      });
+    }
+  }
+
+  // Step 7-9: Search by tag with includeContent modes
+  let expectedTagTarget: ExpectedTagTarget | undefined;
+  {
+    const start = Date.now();
+    try {
+      assertTruthy(typeof state.noteBId === 'string', 'rich note remId should be recorded');
+      expectedTagTarget = await resolveExpectedSearchByTagTarget(ctx, state.noteBId as string);
+      steps.push({
+        label: 'Resolve expected search-by-tag ancestor target',
+        passed: true,
+        durationMs: Date.now() - start,
+      });
+    } catch (e) {
+      steps.push({
+        label: 'Resolve expected search-by-tag ancestor target',
         passed: false,
         durationMs: Date.now() - start,
         error: (e as Error).message,
+      });
+    }
+  }
+
+  for (const mode of ['markdown', 'structured', 'none'] as const) {
+    const start = Date.now();
+    const label = `Search by tag includeContent=${mode} returns expected shape`;
+    let debugResults: Array<Record<string, unknown>> | null = null;
+    try {
+      assertTruthy(typeof state.searchByTagTag === 'string', 'searchByTagTag should be recorded');
+      const result = await ctx.client.callTool('remnote_search_by_tag', {
+        tag: state.searchByTagTag as string,
+        includeContent: mode,
+      });
+      assertHasField(result, 'results', `search_by_tag ${mode}`);
+      assertIsArray(result.results, `search_by_tag ${mode} results`);
+      const results = result.results as Array<Record<string, unknown>>;
+      debugResults = results;
+      assertTruthy(results.length > 0, `search_by_tag ${mode} should return results`);
+      assertTruthy(expectedTagTarget, 'expected tag target should be resolved');
+      const match = findMatchingSearchResult(
+        results,
+        (expectedTagTarget as ExpectedTagTarget).remId
+      );
+      assertSearchContentModeShape(match, mode);
+      steps.push({
+        label,
+        passed: true,
+        durationMs: Date.now() - start,
+      });
+    } catch (e) {
+      steps.push({
+        label,
+        passed: false,
+        durationMs: Date.now() - start,
+        error:
+          `${(e as Error).message} | tag=${JSON.stringify(state.searchByTagTag ?? null)} expectedTarget=${JSON.stringify(expectedTagTarget ?? null)}` +
+          (debugResults
+            ? ` resultCount=${debugResults.length} topResults=${JSON.stringify(
+                summarizeSearchResults(debugResults)
+              )}`
+            : ''),
       });
     }
   }

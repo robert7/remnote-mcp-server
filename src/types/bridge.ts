@@ -17,6 +17,14 @@ export interface BridgeResponse {
 }
 
 /**
+ * Sent by the bridge plugin on connect to identify its version.
+ */
+export interface HelloMessage {
+  type: 'hello';
+  version: string;
+}
+
+/**
  * Heartbeat messages
  */
 export interface HeartbeatPing {
@@ -27,4 +35,9 @@ export interface HeartbeatPong {
   type: 'pong';
 }
 
-export type BridgeMessage = BridgeRequest | BridgeResponse | HeartbeatPing | HeartbeatPong;
+export type BridgeMessage =
+  | BridgeRequest
+  | BridgeResponse
+  | HelloMessage
+  | HeartbeatPing
+  | HeartbeatPong;

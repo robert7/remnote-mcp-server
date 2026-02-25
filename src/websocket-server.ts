@@ -1,6 +1,7 @@
 import { WebSocketServer as WSServer, WebSocket } from 'ws';
 import { randomUUID } from 'crypto';
 import { BridgeRequest, BridgeResponse, BridgeMessage } from './types/bridge.js';
+import { checkVersionCompatibility } from './version-compat.js';
 import type { Logger } from './logger.js';
 
 export class WebSocketServer {
@@ -11,6 +12,8 @@ export class WebSocketServer {
   private logger: Logger;
   private requestLogger: Logger | null = null;
   private responseLogger: Logger | null = null;
+  private serverVersion: string;
+  private bridgeVersion: string | null = null;
   private pendingRequests = new Map<
     string,
     {
@@ -26,12 +29,14 @@ export class WebSocketServer {
     port: number,
     host: string,
     logger: Logger,
+    serverVersion: string,
     requestLogger?: Logger,
     responseLogger?: Logger
   ) {
     this.port = port;
     this.host = host;
     this.logger = logger.child({ context: 'websocket-server' });
+    this.serverVersion = serverVersion;
     this.requestLogger = requestLogger || null;
     this.responseLogger = responseLogger || null;
   }
@@ -71,6 +76,7 @@ export class WebSocketServer {
         ws.on('close', () => {
           this.logger.info('WebSocket client disconnected');
           this.client = null;
+          this.bridgeVersion = null;
 
           // Reject all pending requests
           for (const [_id, pending] of this.pendingRequests.entries()) {
@@ -174,6 +180,14 @@ export class WebSocketServer {
     return this.client !== null && this.client.readyState === WebSocket.OPEN;
   }
 
+  getBridgeVersion(): string | null {
+    return this.bridgeVersion;
+  }
+
+  getServerVersion(): string {
+    return this.serverVersion;
+  }
+
   onClientConnect(callback: () => void): void {
     this.connectCallbacks.push(callback);
   }
@@ -192,6 +206,18 @@ export class WebSocketServer {
         },
         'Received message'
       );
+
+      // Handle hello from bridge plugin
+      if ('type' in message && message.type === 'hello') {
+        this.bridgeVersion = message.version;
+        this.logger.info({ bridgeVersion: message.version }, 'Bridge identified');
+
+        const warning = checkVersionCompatibility(this.serverVersion, message.version);
+        if (warning) {
+          this.logger.warn({ warning }, 'Bridge version compatibility warning');
+        }
+        return;
+      }
 
       // Handle pong response to ping
       if ('type' in message && message.type === 'pong') {

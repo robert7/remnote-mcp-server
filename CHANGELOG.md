@@ -7,10 +7,74 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Legacy bridge warning**: `remnote_status` now injects `version_warning` for legacy bridge plugins (0.5.x) that
+  don't send a `hello` message, by falling back to `pluginVersion` from the `get_status` response.
+- Integration anchor-note reuse now uses deterministic multi-strategy lookup for
+  `RemNote Automation Bridge [temporary integration test data]`:
+  multi-query title search (normalized exact match), then anchor-tag lookup (`remnote-integration-root-anchor`), then create.
+- Integration setup now backfills the anchor tag on reused title-search matches so subsequent runs resolve deterministically.
+- Integration setup now fails early when duplicate exact integration-root titles are detected, printing duplicate `remId`s
+  so test data can be cleaned before execution.
+- Integration runner startup now logs whether the anchor note was found or created, including selected `remId`.
+- Integration `search_by_tag` scenario now derives expected target from live ancestry traversal of the tagged note
+  (nearest document/daily document fallback), avoiding false negatives when RemNote hierarchy returns document ancestors.
+- Integration tests now cover `remnote_search` `includeContent` modes (`markdown`, `structured`, `none`) with
+  mode-specific response-shape assertions, and no longer use the legacy boolean `includeContent` value.
+- Integration `Read & Update` workflow now validates the current `remnote_read_note` response contract (`content` /
+  `contentProperties`) and covers `includeContent` modes (`markdown`, `none`) instead of the removed `children` field.
+- Stabilized flaky unit quality runs by switching websocket tests to OS-assigned available ports, adding retry-on-`EADDRINUSE`
+  startup in websocket test setup, and isolating logger file-output tests to per-run temp directories.
+
+### Added
+
+- **Automatic version compatibility checks**: Server receives bridge `hello` message on connect, stores bridge version,
+  and logs a warning if minor versions differ (0.x rule). `remnote_status` response now includes `serverVersion` and
+  `version_warning` (when bridge/server minor versions differ).
+- Integration `Status Check` workflow now fails fast when `remnote_status` reports a bridge/server `version_warning`.
+
+### Enhanced
+
+- `remnote_search` tool now supports `includeContent: "markdown"` to render child subtrees as indented markdown previews.
+- `remnote_search` tool now also supports `includeContent: "structured"` to return nested child objects with `remId`s
+  via `contentStructured` for follow-up note reads/navigation.
+- Added `remnote_search_by_tag` tool with the same content-rendering options as `remnote_search`
+  (`includeContent`, `depth`, `childLimit`, `maxContentLength`), returning ancestor-context targets from tagged matches.
+- `remnote_read_note` tool now returns rendered markdown content of the child subtree by default.
+- `remnote_search` and `remnote_read_note` now advertise parent context fields in `outputSchema`:
+  `parentRemId` and `parentTitle` (omitted for top-level notes).
+- New output fields in both tools: `headline` (display-oriented full line with type-aware delimiters), `aliases`
+  (alternate names), `contentProperties` (rendering metadata: `childrenRendered`, `childrenTotal`, `contentTruncated`).
+- New input parameters for both tools: `childLimit`, `maxContentLength`.
+- Integration workflows now reuse a shared root-level anchor note
+  `RemNote Automation Bridge [temporary integration test data]` and create all test notes under that parent.
+- Integration Create & Search workflow now also validates `remnote_search_by_tag` with all three `includeContent`
+  modes (`markdown`, `structured`, `none`).
+
+### Changed
+
+- **BREAKING**: `includeContent` parameter changed from `boolean` to `'none' | 'markdown'` string enum in both
+  `SearchSchema` and `ReadNoteSchema`.
+- **BREAKING**: `remnote_read_note` no longer returns `children` array. Use `content` (markdown mode) instead.
+- **BREAKING**: `content` field in `remnote_read_note` changed from echoing `title` to rendered markdown of child subtree.
+- **BREAKING**: `detail` field removed from advertised `remnote_search` / `remnote_read_note` output schemas (bridge no longer returns it).
+- Default `depth` for `remnote_read_note` increased from 3 to 5.
+- Search schema defaults: `depth=1`, `childLimit=20`, `maxContentLength=3000`.
+- Read schema defaults: `depth=5`, `childLimit=100`, `maxContentLength=100000`.
+- Updated `outputSchema` for both `SEARCH_TOOL` and `READ_NOTE_TOOL` to reflect new fields.
+- Standardized root shell script bootstrapping so Node-dependent scripts source `node-check.sh` via script-dir paths at startup (including `publish-to-npm.sh` and `run-status-check.sh`).
+
 ### Documentation
 
 - Added bridge/plugin compatibility warnings and links in install/development/troubleshooting docs, referencing the
   canonical bridge-side `0.x` version compatibility guide.
+- Updated tools reference parameter docs for string `includeContent` and corrected search/read depth defaults.
+- Updated tools reference for `remnote_search includeContent: "structured"` and `contentStructured` use cases.
+- Updated tools/reference docs and README tool list to document `remnote_search_by_tag`.
+- Updated integration testing guide to document the shared integration anchor note reuse behavior and the
+  `remnote_search_by_tag` coverage.
+- Updated `AGENTS.md` with an explicit policy that AI agents must never run integration tests and should ask the human collaborator to execute them manually.
 
 ## [0.5.1] - 2026-02-24
 

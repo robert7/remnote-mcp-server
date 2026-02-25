@@ -8,6 +8,7 @@ import {
   registerAllTools,
   CREATE_NOTE_TOOL,
   SEARCH_TOOL,
+  SEARCH_BY_TAG_TOOL,
   READ_NOTE_TOOL,
   UPDATE_NOTE_TOOL,
   APPEND_JOURNAL_TOOL,
@@ -18,6 +19,7 @@ import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprot
 import {
   validCreateNoteInput,
   validSearchInput,
+  validSearchByTagInput,
   validReadNoteInput,
   validUpdateNoteInput,
   validAppendJournalInput,
@@ -63,6 +65,56 @@ describe('Tool Definitions', () => {
 
   it('should have required query field for SEARCH_TOOL', () => {
     expect(SEARCH_TOOL.inputSchema.required).toContain('query');
+  });
+
+  it('should have correct name for SEARCH_BY_TAG_TOOL', () => {
+    expect(SEARCH_BY_TAG_TOOL.name).toBe('remnote_search_by_tag');
+  });
+
+  it('should have required tag field for SEARCH_BY_TAG_TOOL', () => {
+    expect(SEARCH_BY_TAG_TOOL.inputSchema.required).toContain('tag');
+  });
+
+  it('should advertise structured search content mode and contentStructured output', () => {
+    const includeContent = (
+      SEARCH_TOOL.inputSchema.properties.includeContent as {
+        enum?: string[];
+      }
+    ).enum;
+    const searchResultProps = ((
+      SEARCH_TOOL.outputSchema.properties.results as {
+        items?: { properties?: Record<string, unknown> };
+      }
+    ).items?.properties ?? {}) as Record<string, unknown>;
+
+    expect(includeContent).toContain('structured');
+    expect(searchResultProps.contentStructured).toBeDefined();
+  });
+
+  it('should not advertise detail in search/read output schemas', () => {
+    const searchResultProps = ((
+      SEARCH_TOOL.outputSchema.properties.results as {
+        items?: { properties?: Record<string, unknown> };
+      }
+    ).items?.properties ?? {}) as Record<string, unknown>;
+    const readProps = (READ_NOTE_TOOL.outputSchema.properties ?? {}) as Record<string, unknown>;
+
+    expect(searchResultProps.detail).toBeUndefined();
+    expect(readProps.detail).toBeUndefined();
+  });
+
+  it('should advertise parent context fields in search/read output schemas', () => {
+    const searchResultProps = ((
+      SEARCH_TOOL.outputSchema.properties.results as {
+        items?: { properties?: Record<string, unknown> };
+      }
+    ).items?.properties ?? {}) as Record<string, unknown>;
+    const readProps = (READ_NOTE_TOOL.outputSchema.properties ?? {}) as Record<string, unknown>;
+
+    expect(searchResultProps.parentRemId).toBeDefined();
+    expect(searchResultProps.parentTitle).toBeDefined();
+    expect(readProps.parentRemId).toBeDefined();
+    expect(readProps.parentTitle).toBeDefined();
   });
 
   it('should have correct name for READ_NOTE_TOOL', () => {
@@ -117,14 +169,14 @@ describe('Tool Registration', () => {
     expect(mockServer.hasHandler(ListToolsRequestSchema)).toBe(true);
   });
 
-  it('should return all 6 tools in list', async () => {
+  it('should return all 7 tools in list', async () => {
     registerAllTools(mockServer as never, mockWsServer as never, createMockLogger());
 
     const result = (await mockServer.callHandler(ListToolsRequestSchema, {})) as {
       tools: unknown[];
     };
 
-    expect(result.tools).toHaveLength(6);
+    expect(result.tools).toHaveLength(7);
   });
 
   it('should include all tool names in list', async () => {
@@ -137,6 +189,7 @@ describe('Tool Registration', () => {
     const names = result.tools.map((t) => t.name);
     expect(names).toContain('remnote_create_note');
     expect(names).toContain('remnote_search');
+    expect(names).toContain('remnote_search_by_tag');
     expect(names).toContain('remnote_read_note');
     expect(names).toContain('remnote_update_note');
     expect(names).toContain('remnote_append_journal');
@@ -203,7 +256,12 @@ describe('Tool Handlers - search', () => {
       params: { name: 'remnote_search', arguments: validSearchInput },
     });
 
-    expect(mockWsServer.sendRequest).toHaveBeenCalledWith('search', validSearchInput);
+    expect(mockWsServer.sendRequest).toHaveBeenCalledWith('search', {
+      ...validSearchInput,
+      depth: 1,
+      childLimit: 20,
+      maxContentLength: 3000,
+    });
   });
 
   it('should return formatted JSON result', async () => {
@@ -223,7 +281,69 @@ describe('Tool Handlers - search', () => {
     expect(mockWsServer.sendRequest).toHaveBeenCalledWith('search', {
       query: 'test',
       limit: 50, // default
-      includeContent: false, // default
+      includeContent: 'none', // default
+      depth: 1, // default
+      childLimit: 20, // default
+      maxContentLength: 3000, // default
+    });
+  });
+
+  it('should pass through includeContent structured', async () => {
+    await mockServer.callHandler(CallToolRequestSchema, {
+      params: {
+        name: 'remnote_search',
+        arguments: { query: 'test', includeContent: 'structured', depth: 2 },
+      },
+    });
+
+    expect(mockWsServer.sendRequest).toHaveBeenCalledWith('search', {
+      query: 'test',
+      limit: 50,
+      includeContent: 'structured',
+      depth: 2,
+      childLimit: 20,
+      maxContentLength: 3000,
+    });
+  });
+});
+
+describe('Tool Handlers - search_by_tag', () => {
+  let mockServer: MockMCPServer;
+  let mockWsServer: { sendRequest: ReturnType<typeof vi.fn> };
+
+  beforeEach(() => {
+    mockServer = new MockMCPServer();
+    mockWsServer = {
+      sendRequest: vi.fn().mockResolvedValue(sampleSearchResults),
+    };
+    registerAllTools(mockServer as never, mockWsServer as never, createMockLogger() as never);
+  });
+
+  it('should call wsServer.sendRequest with search_by_tag action', async () => {
+    await mockServer.callHandler(CallToolRequestSchema, {
+      params: { name: 'remnote_search_by_tag', arguments: validSearchByTagInput },
+    });
+
+    expect(mockWsServer.sendRequest).toHaveBeenCalledWith('search_by_tag', {
+      ...validSearchByTagInput,
+      depth: 1,
+      childLimit: 20,
+      maxContentLength: 3000,
+    });
+  });
+
+  it('should apply default values from schema', async () => {
+    await mockServer.callHandler(CallToolRequestSchema, {
+      params: { name: 'remnote_search_by_tag', arguments: { tag: '#daily' } },
+    });
+
+    expect(mockWsServer.sendRequest).toHaveBeenCalledWith('search_by_tag', {
+      tag: '#daily',
+      limit: 50,
+      includeContent: 'none',
+      depth: 1,
+      childLimit: 20,
+      maxContentLength: 3000,
     });
   });
 });
@@ -245,7 +365,12 @@ describe('Tool Handlers - read_note', () => {
       params: { name: 'remnote_read_note', arguments: validReadNoteInput },
     });
 
-    expect(mockWsServer.sendRequest).toHaveBeenCalledWith('read_note', validReadNoteInput);
+    expect(mockWsServer.sendRequest).toHaveBeenCalledWith('read_note', {
+      ...validReadNoteInput,
+      includeContent: 'markdown',
+      childLimit: 100,
+      maxContentLength: 100000,
+    });
   });
 
   it('should apply default depth from schema', async () => {
@@ -255,7 +380,10 @@ describe('Tool Handlers - read_note', () => {
 
     expect(mockWsServer.sendRequest).toHaveBeenCalledWith('read_note', {
       remId: 'rem-123',
-      depth: 3, // default
+      depth: 5, // default
+      includeContent: 'markdown', // default
+      childLimit: 100, // default
+      maxContentLength: 100000, // default
     });
   });
 });
@@ -329,6 +457,8 @@ describe('Tool Handlers - status', () => {
   let mockWsServer: {
     sendRequest: ReturnType<typeof vi.fn>;
     isConnected: ReturnType<typeof vi.fn>;
+    getServerVersion: ReturnType<typeof vi.fn>;
+    getBridgeVersion: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
@@ -336,6 +466,8 @@ describe('Tool Handlers - status', () => {
     mockWsServer = {
       sendRequest: vi.fn().mockResolvedValue(sampleStatusResult),
       isConnected: vi.fn().mockReturnValue(true),
+      getServerVersion: vi.fn().mockReturnValue('0.5.1'),
+      getBridgeVersion: vi.fn().mockReturnValue('0.5.0'),
     };
     registerAllTools(mockServer as never, mockWsServer as never, createMockLogger() as never);
   });
@@ -365,6 +497,7 @@ describe('Tool Handlers - status', () => {
 
     const parsed = JSON.parse(result.content[0].text);
     expect(parsed.connected).toBe(false);
+    expect(parsed.serverVersion).toBe('0.5.1');
     expect(parsed.message).toContain('not connected');
   });
 
@@ -384,8 +517,53 @@ describe('Tool Handlers - status', () => {
 
     const parsed = JSON.parse(result.content[0].text);
     expect(parsed.connected).toBe(true);
+    expect(parsed.serverVersion).toBe('0.5.1');
     expect(parsed.version).toBe('1.0.0');
     expect(parsed.statistics).toBeDefined();
+  });
+
+  it('should include version_warning when bridge version mismatches', async () => {
+    mockWsServer.getBridgeVersion.mockReturnValue('0.6.0');
+
+    const result = (await mockServer.callHandler(CallToolRequestSchema, {
+      params: { name: 'remnote_status', arguments: {} },
+    })) as { content: { text: string }[] };
+
+    const parsed = JSON.parse(result.content[0].text);
+    expect(parsed.version_warning).toContain('Version mismatch');
+  });
+
+  it('should not include version_warning when versions are compatible', async () => {
+    const result = (await mockServer.callHandler(CallToolRequestSchema, {
+      params: { name: 'remnote_status', arguments: {} },
+    })) as { content: { text: string }[] };
+
+    const parsed = JSON.parse(result.content[0].text);
+    expect(parsed.version_warning).toBeUndefined();
+  });
+
+  it('should not include version_warning when bridge version is null', async () => {
+    mockWsServer.getBridgeVersion.mockReturnValue(null);
+
+    const result = (await mockServer.callHandler(CallToolRequestSchema, {
+      params: { name: 'remnote_status', arguments: {} },
+    })) as { content: { text: string }[] };
+
+    const parsed = JSON.parse(result.content[0].text);
+    expect(parsed.version_warning).toBeUndefined();
+  });
+
+  it('should include version_warning when bridge version is null but pluginVersion in result mismatches', async () => {
+    mockWsServer.getBridgeVersion.mockReturnValue(null);
+    mockWsServer.getServerVersion.mockReturnValue('0.6.0');
+    mockWsServer.sendRequest.mockResolvedValue({ pluginVersion: '0.5.0' });
+
+    const result = (await mockServer.callHandler(CallToolRequestSchema, {
+      params: { name: 'remnote_status', arguments: {} },
+    })) as { content: { text: string }[] };
+
+    const parsed = JSON.parse(result.content[0].text);
+    expect(parsed.version_warning).toContain('Version mismatch');
   });
 });
 

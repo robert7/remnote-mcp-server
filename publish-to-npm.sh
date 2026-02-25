@@ -3,7 +3,8 @@
 set -e
 
 # Ensure Node.js and npm are available
-source ./node-check.sh || exit 1
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/node-check.sh" || exit 1
 
 # Colors for output
 RED='\033[0;31m'

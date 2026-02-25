@@ -15,7 +15,13 @@ export const validCreateNoteInput = {
 export const validSearchInput = {
   query: 'test query',
   limit: 50,
-  includeContent: true,
+  includeContent: 'markdown',
+};
+
+export const validSearchByTagInput = {
+  tag: 'mcp-test-tag',
+  limit: 50,
+  includeContent: 'markdown',
 };
 
 export const validReadNoteInput = {

@@ -4,7 +4,7 @@ Complete reference for all RemNote MCP tools available through the server.
 
 ## Overview
 
-The RemNote MCP Server exposes 6 tools that allow AI agents to interact with your RemNote knowledge base. Tools are
+The RemNote MCP Server exposes 7 tools that allow AI agents to interact with your RemNote knowledge base. Tools are
 automatically available in any connected MCP client.
 
 ## Tool Summary
@@ -13,6 +13,7 @@ automatically available in any connected MCP client.
 |------|-------------|----------|
 | `remnote_create_note` | Create new notes | Adding new knowledge, ideas, references |
 | `remnote_search` | Search knowledge base | Finding existing notes, exploring topics |
+| `remnote_search_by_tag` | Search by tag | Finding ancestor context for tagged notes |
 | `remnote_read_note` | Read note content | Retrieving details, reading hierarchies |
 | `remnote_update_note` | Modify existing notes | Appending content, adding tags, renaming |
 | `remnote_append_journal` | Add to daily document | Journaling, logging, daily notes |
@@ -84,8 +85,9 @@ Search your RemNote knowledge base with full-text search.
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `query` | string | Yes | Search query text |
-| `limit` | number | No | Maximum results to return (1-100, default: 20) |
-| `includeContent` | boolean | No | Include child content in results (default: false) |
+| `limit` | number | No | Maximum results to return (1-150, default: 50) |
+| `includeContent` | string | No | Content mode: `none` (default), `markdown`, or `structured` |
+| `depth` | number | No | Max child depth for rendered content (0-10, default: 1) |
 
 ### Usage
 
@@ -114,15 +116,18 @@ Returns array of matching notes:
     {
       "remId": "abc123",
       "title": "Machine Learning Basics",
-      "score": 0.95
+      "headline": "Machine Learning Basics",
+      "parentRemId": "parent987",
+      "parentTitle": "AI Notes",
+      "remType": "document"
     },
     {
       "remId": "def456",
       "title": "Deep Learning Overview",
-      "score": 0.87
+      "headline": "Deep Learning Overview",
+      "remType": "text"
     }
-  ],
-  "count": 2
+  ]
 }
 ```
 
@@ -133,14 +138,13 @@ Returns array of matching notes:
     {
       "remId": "abc123",
       "title": "Machine Learning Basics",
-      "score": 0.95,
-      "content": [
-        "Supervised learning",
-        "Unsupervised learning"
-      ]
+      "headline": "Machine Learning Basics",
+      "parentRemId": "parent987",
+      "parentTitle": "AI Notes",
+      "remType": "document",
+      "content": "- Supervised learning\n- Unsupervised learning\n"
     }
-  ],
-  "count": 1
+  ]
 }
 ```
 
@@ -148,8 +152,43 @@ Returns array of matching notes:
 
 - Use specific terms for better results
 - Increase `limit` for comprehensive searches
-- Use `includeContent: false` (default) for faster searches when you only need titles
-- Use `includeContent: true` when you need to analyze note content
+- Use `includeContent: "none"` (default) for faster searches when you only need titles
+- Use `includeContent: "markdown"` when you need rendered child context
+- Use `includeContent: "structured"` when you need nested child `remId`s for follow-up reads/navigation
+- Use `parentRemId` and `parentTitle` to show where a result sits in your hierarchy.
+
+## remnote_search_by_tag
+
+Search by tag and return resolved ancestor context targets.
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `tag` | string | Yes | Tag name (with or without `#` prefix) |
+| `limit` | number | No | Maximum results to return (1-150, default: 50) |
+| `includeContent` | string | No | Content mode: `none` (default), `markdown`, or `structured` |
+| `depth` | number | No | Max child depth for rendered content (0-10, default: 1) |
+
+### Behavior
+
+- For each tagged match, the bridge resolves the returned target to:
+  1) nearest ancestor document/daily document,
+  2) otherwise nearest non-document ancestor,
+  3) otherwise the tagged note itself.
+- Output shape is the same as `remnote_search`.
+
+### Usage
+
+**Find daily notes by tag:**
+```text
+Search by tag "#daily"
+```
+
+**Find tagged results with content:**
+```text
+Search by tag "project-review" and include structured content
+```
 
 ## remnote_read_note
 
@@ -160,7 +199,8 @@ Read a specific note by its Rem ID, including child content.
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `remId` | string | Yes | The Rem ID to read |
-| `depth` | number | No | Depth of children to include (0-10, default: 3) |
+| `depth` | number | No | Depth of children to include in rendered content (0-10, default: 5) |
+| `includeContent` | string | No | Content mode: `markdown` (default) or `none` |
 
 ### Usage
 
@@ -181,34 +221,29 @@ Read note xyz789 with depth 0 (no children)
 
 ### Response
 
-Returns the note with hierarchical content:
+Returns note metadata plus optional rendered child content:
 
 ```json
 {
   "remId": "abc123",
   "title": "Project Overview",
-  "children": [
-    {
-      "remId": "child1",
-      "text": "Goals",
-      "children": [
-        {
-          "remId": "child1a",
-          "text": "Improve performance"
-        }
-      ]
-    },
-    {
-      "remId": "child2",
-      "text": "Timeline"
-    }
-  ]
+  "headline": "Project Overview",
+  "parentRemId": "folder001",
+  "parentTitle": "Work Projects",
+  "remType": "document",
+  "content": "- Goals\n  - Improve performance\n- Timeline\n",
+  "contentProperties": {
+    "childrenRendered": 3,
+    "childrenTotal": 3,
+    "contentTruncated": false
+  }
 }
 ```
 
 ### Tips
 
 - Use `depth: 0` for just the note title (no children)
+- Use `includeContent: "none"` when you only need metadata and parent context.
 - Use `depth: 1-3` for common hierarchies
 - Use `depth: 4-10` for deep nested structures
 - Higher depth may be slower for large hierarchies

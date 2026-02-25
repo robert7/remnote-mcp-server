@@ -4,7 +4,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Ensure Node.js is available (loads nvm default if needed).
-source "${SCRIPT_DIR}/node-check.sh"
+source "${SCRIPT_DIR}/node-check.sh" || exit 1
 
 BASE_URL="${REMNOTE_MCP_URL:-http://127.0.0.1:3001}"
 if [[ "${BASE_URL}" == */mcp ]]; then
