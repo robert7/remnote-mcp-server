@@ -12,6 +12,62 @@ import { WebSocket } from 'ws';
 import { getAvailablePort, wait } from '../helpers/test-server.js';
 import { createMockLogger } from '../setup.js';
 
+const TEST_WS_HOST = '127.0.0.1';
+const TEST_SERVER_VERSION = '0.5.1';
+const START_RETRIES = 5;
+const RETRY_DELAY_MS = 20;
+
+type MockLogger = ReturnType<typeof createMockLogger>;
+
+function isAddrInUseError(error: unknown): boolean {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    (error as { code?: string }).code === 'EADDRINUSE'
+  );
+}
+
+async function createStartedServer({
+  mockLogger,
+  requestLogger,
+  responseLogger,
+}: {
+  mockLogger: MockLogger;
+  requestLogger?: MockLogger;
+  responseLogger?: MockLogger;
+}): Promise<{ wsServer: WebSocketServer; port: number }> {
+  let lastError: unknown;
+
+  for (let attempt = 0; attempt < START_RETRIES; attempt++) {
+    const port = await getAvailablePort();
+    const wsServer = new WebSocketServer(
+      port,
+      TEST_WS_HOST,
+      mockLogger,
+      TEST_SERVER_VERSION,
+      requestLogger,
+      responseLogger
+    );
+
+    try {
+      await wsServer.start();
+      return { wsServer, port };
+    } catch (error) {
+      await wsServer.stop();
+
+      if (!isAddrInUseError(error)) {
+        throw error;
+      }
+
+      lastError = error;
+      await wait(RETRY_DELAY_MS);
+    }
+  }
+
+  throw lastError instanceof Error ? lastError : new Error('Failed to start WebSocket test server');
+}
+
 describe('WebSocketServer - Lifecycle', () => {
   let wsServer: WebSocketServer;
   let port: number;
@@ -20,7 +76,7 @@ describe('WebSocketServer - Lifecycle', () => {
   beforeEach(async () => {
     port = await getAvailablePort();
     mockLogger = createMockLogger();
-    wsServer = new WebSocketServer(port, '127.0.0.1', mockLogger, '0.5.1');
+    wsServer = new WebSocketServer(port, TEST_WS_HOST, mockLogger, TEST_SERVER_VERSION);
   });
 
   afterEach(async () => {
@@ -53,7 +109,12 @@ describe('WebSocketServer - Lifecycle', () => {
   it('should reject when port is already in use', async () => {
     await wsServer.start();
 
-    const duplicateServer = new WebSocketServer(port, '127.0.0.1', createMockLogger(), '0.5.1');
+    const duplicateServer = new WebSocketServer(
+      port,
+      TEST_WS_HOST,
+      createMockLogger(),
+      TEST_SERVER_VERSION
+    );
     await expect(duplicateServer.start()).rejects.toThrow();
     await duplicateServer.stop();
   });
@@ -66,10 +127,10 @@ describe('WebSocketServer - Connection State', () => {
   let mockLogger: ReturnType<typeof createMockLogger>;
 
   beforeEach(async () => {
-    port = await getAvailablePort();
     mockLogger = createMockLogger();
-    wsServer = new WebSocketServer(port, '127.0.0.1', mockLogger, '0.5.1');
-    await wsServer.start();
+    const started = await createStartedServer({ mockLogger });
+    wsServer = started.wsServer;
+    port = started.port;
   });
 
   afterEach(async () => {
@@ -146,10 +207,10 @@ describe('WebSocketServer - Single Client Model', () => {
   let mockLogger: ReturnType<typeof createMockLogger>;
 
   beforeEach(async () => {
-    port = await getAvailablePort();
     mockLogger = createMockLogger();
-    wsServer = new WebSocketServer(port, '127.0.0.1', mockLogger, '0.5.1');
-    await wsServer.start();
+    const started = await createStartedServer({ mockLogger });
+    wsServer = started.wsServer;
+    port = started.port;
   });
 
   afterEach(async () => {
@@ -206,10 +267,10 @@ describe('WebSocketServer - Request/Response', () => {
   let mockLogger: ReturnType<typeof createMockLogger>;
 
   beforeEach(async () => {
-    port = await getAvailablePort();
     mockLogger = createMockLogger();
-    wsServer = new WebSocketServer(port, '127.0.0.1', mockLogger, '0.5.1');
-    await wsServer.start();
+    const started = await createStartedServer({ mockLogger });
+    wsServer = started.wsServer;
+    port = started.port;
 
     client = new WebSocket(`ws://localhost:${port}`);
     await new Promise<void>((resolve) => {
@@ -333,10 +394,10 @@ describe('WebSocketServer - Heartbeat Protocol', () => {
   let mockLogger: ReturnType<typeof createMockLogger>;
 
   beforeEach(async () => {
-    port = await getAvailablePort();
     mockLogger = createMockLogger();
-    wsServer = new WebSocketServer(port, '127.0.0.1', mockLogger, '0.5.1');
-    await wsServer.start();
+    const started = await createStartedServer({ mockLogger });
+    wsServer = started.wsServer;
+    port = started.port;
 
     client = new WebSocket(`ws://localhost:${port}`);
     await wait(100);
@@ -381,10 +442,10 @@ describe('WebSocketServer - Hello Message', () => {
   let mockLogger: ReturnType<typeof createMockLogger>;
 
   beforeEach(async () => {
-    port = await getAvailablePort();
     mockLogger = createMockLogger();
-    wsServer = new WebSocketServer(port, '127.0.0.1', mockLogger, '0.5.1');
-    await wsServer.start();
+    const started = await createStartedServer({ mockLogger });
+    wsServer = started.wsServer;
+    port = started.port;
 
     client = new WebSocket(`ws://localhost:${port}`);
     await wait(100);
@@ -458,10 +519,10 @@ describe('WebSocketServer - Error Handling', () => {
   let mockLogger: ReturnType<typeof createMockLogger>;
 
   beforeEach(async () => {
-    port = await getAvailablePort();
     mockLogger = createMockLogger();
-    wsServer = new WebSocketServer(port, '127.0.0.1', mockLogger, '0.5.1');
-    await wsServer.start();
+    const started = await createStartedServer({ mockLogger });
+    wsServer = started.wsServer;
+    port = started.port;
   });
 
   afterEach(async () => {
@@ -515,10 +576,10 @@ describe('WebSocketServer - Logging', () => {
   let mockLogger: ReturnType<typeof createMockLogger>;
 
   beforeEach(async () => {
-    port = await getAvailablePort();
     mockLogger = createMockLogger();
-    wsServer = new WebSocketServer(port, '127.0.0.1', mockLogger, '0.5.1');
-    await wsServer.start();
+    const started = await createStartedServer({ mockLogger });
+    wsServer = started.wsServer;
+    port = started.port;
   });
 
   afterEach(async () => {
@@ -641,19 +702,16 @@ describe('WebSocketServer - Request/Response Logging', () => {
   let mockResponseLogger: ReturnType<typeof createMockLogger>;
 
   beforeEach(async () => {
-    port = await getAvailablePort();
     mockLogger = createMockLogger();
     mockRequestLogger = createMockLogger();
     mockResponseLogger = createMockLogger();
-    wsServer = new WebSocketServer(
-      port,
-      '127.0.0.1',
+    const started = await createStartedServer({
       mockLogger,
-      '0.5.1',
-      mockRequestLogger,
-      mockResponseLogger
-    );
-    await wsServer.start();
+      requestLogger: mockRequestLogger,
+      responseLogger: mockResponseLogger,
+    });
+    wsServer = started.wsServer;
+    port = started.port;
   });
 
   afterEach(async () => {

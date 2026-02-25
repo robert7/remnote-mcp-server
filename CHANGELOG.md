@@ -15,8 +15,8 @@ Versioning](https://semver.org/spec/v2.0.0.html).
   mode-specific response-shape assertions, and no longer use the legacy boolean `includeContent` value.
 - Integration `Read & Update` workflow now validates the current `remnote_read_note` response contract (`content` /
   `contentProperties`) and covers `includeContent` modes (`markdown`, `none`) instead of the removed `children` field.
-- Stabilized flaky unit quality runs by switching websocket tests to OS-assigned available ports and isolating logger
-  file-output tests to per-run temp directories.
+- Stabilized flaky unit quality runs by switching websocket tests to OS-assigned available ports, adding retry-on-`EADDRINUSE`
+  startup in websocket test setup, and isolating logger file-output tests to per-run temp directories.
 
 ### Added
 
