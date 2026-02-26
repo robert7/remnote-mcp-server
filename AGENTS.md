@@ -1,368 +1,114 @@
 # AGENTS.md
 
-This file provides guidance to AI agents when working with code in this repository.
+This file is a map for AI agents working in `remnote-mcp-server`.
 
-## CRITICAL: Companion Project Context
+## Start Here First (Mandatory)
 
-When additional context is needed, agents SHOULD inspect companion projects from this repo root (`$(pwd)`), where
-companions are sibling directories at `$(pwd)/../...`.
+Read these before changing code/docs:
 
-- `$(pwd)/../remnote-mcp-bridge` - RemNote plugin bridge layer; authoritative for WebSocket action names/payload
-  contracts and bridge-side behavior.
-- `$(pwd)/../remnote-cli` - CLI companion app using the same bridge; useful for daemon-based workflows and
-  contract-consistency checks.
+1. `.agents/dev-requirements.md`
+2. `.agents/dev-workflow.md`
+3. `.agents/dev-documentation.md` (required before docs edits)
+4. `.agents/dev-python-conventions.md` (if touching Python helper scripts)
+5. `.agents/PLANS.md` (required for complex work / major refactors)
 
-Agents should check companion repos every time it is useful for protocol, architecture, or integration context.
+## Repo Role
 
-Terminology aliases used across docs and discussions:
-
-- `remnote-mcp-server` = "MCP server" (this repository)
-- `remnote-mcp-bridge` = "MCP bridge" or "bridge plugin" (same project)
-- `remnote-cli` = "CLI companion app" (same project)
-
-## Project Overview
-
-This is an MCP (Model Context Protocol) server that bridges AI agents to RemNote via a WebSocket connection. The server
-acts as middleware between the agent's HTTP MCP transport and a RemNote browser plugin.
-
-**Architecture:**
+This repo exposes RemNote operations as MCP tools over Streamable HTTP and bridges those tool calls to the RemNote
+plugin over WebSocket.
 
 ```text
-AI agents (HTTP) ↔ MCP HTTP Server :3001 ↔ WebSocket Server :3002 ↔ RemNote Plugin ↔ RemNote
+AI agents (HTTP MCP) <-> HTTP server (:3001) <-> WebSocket bridge (:3002) <-> RemNote plugin
 ```
 
-## Core Architecture
+## Companion Repos (Sibling Dirs)
 
-### Three-Layer Bridge System
+Resolve from this repo root (`$(pwd)`):
 
-1. **MCP Server Layer** (`src/index.ts`, `src/http-server.ts`)
-   - Uses `@modelcontextprotocol/sdk` for MCP protocol implementation
-   - Communicates with AI agents (e.g., Claude Code) via Streamable HTTP transport (SSE)
-   - HTTP server listens on configurable port (default 3001)
-   - Supports multiple concurrent MCP sessions from different AI agents
-   - Each session gets independent MCP Server instance with shared WebSocket bridge
-   - Spawns WebSocket server on configurable port (default 3002)
-   - Handles graceful shutdown on SIGINT/SIGTERM
-2. **WebSocket Bridge Layer** (`src/websocket-server.ts`)
-   - Single-client connection model (rejects multiple connections with code 1008)
-   - Request/response correlation via UUID tracking
-   - 5-second timeout for pending requests
-   - Heartbeat support (ping/pong messages)
-   - Cleans up pending requests on disconnect
-   - Message protocol defined in `src/types/bridge.ts`:
-     - Requests: `{ id: string, action: string, payload: Record<string, unknown> }`
-     - Responses: `{ id: string, result?: unknown, error?: string }`
-     - Heartbeats: `{ type: 'ping' | 'pong' }`
-3. **Tool Registration Layer** (`src/tools/index.ts`)
-   - Defines 6 MCP tools exposed to AI agents
-   - Validates inputs via Zod schemas (`src/schemas/remnote-schemas.ts`)
-   - Single unified handler dispatches by tool name
-   - Returns results as formatted JSON text
+- `$(pwd)/../remnote-mcp-bridge` - source of bridge action contracts + plugin behavior
+- `$(pwd)/../remnote-cli` - parallel consumer of same bridge contract
 
-### Available MCP Tools
+When changing action names, payloads, or response semantics, validate all three repos.
 
-- `remnote_create_note` - Create notes with optional parent and tags
-- `remnote_search` - Search knowledge base (configurable limit, optional content)
-- `remnote_read_note` - Read note by ID (configurable depth)
-- `remnote_update_note` - Update title, append content, modify tags
-- `remnote_append_journal` - Append to today's daily document
-- `remnote_status` - Check connection status and statistics
+## Contract Map (Current)
 
-## MANDATORY: Code Change Requirements
+### External MCP Tool Surface (7)
 
-**ALL code changes MUST follow these requirements (non-negotiable):**
+- `remnote_create_note`
+- `remnote_search`
+- `remnote_search_by_tag`
+- `remnote_read_note`
+- `remnote_update_note`
+- `remnote_append_journal`
+- `remnote_status`
 
-1. **Tests** - Update/add tests for all code changes (no exceptions)
-2. **Documentation** - Update docstrings and docs where applicable
-3. **Code Quality** - Run linting and formatting checks
-4. **Test Execution** - Run test suite to verify changes
-5. **Full Code Quality Execution** - Run all code quality checks by executing `./code-quality.sh`
-6. **CHANGELOG.md** - Document all functional changes
+### Bridge Action Mapping and Compatibility
 
-See **.agents/dev-requirements.md** for detailed guidelines on:
+- Most tools map to same conceptual bridge actions (`create_note`, `search`, `search_by_tag`, `read_note`,
+  `update_note`, `append_journal`, `get_status`).
+- Bridge plugin sends WebSocket `hello` with plugin version.
+- `remnote_status` enriches output with server version + optional `version_warning` for compatibility drift.
 
-- Planning requirements (what to include in every plan)
-- Execution requirements (tests, docs, code quality, verification)
+Projects are still `0.x`; prefer same minor line across bridge/server/CLI:
 
-**If you skip any of these steps, the task is INCOMPLETE.**
+- `../remnote-mcp-bridge/docs/guides/bridge-consumer-version-compatibility.md`
 
-## CRITICAL: Integration Test Execution Policy
+## Code Map
 
-AI agents MUST NEVER run integration tests in this repository.
+- `src/index.ts` - process startup/shutdown wiring
+- `src/http-server.ts` - MCP HTTP transport/session lifecycle
+- `src/websocket-server.ts` - plugin connection, request correlation, timeouts, `hello` handling
+- `src/tools/index.ts` - MCP tool registration and dispatch
+- `src/schemas/remnote-schemas.ts` - Zod input/output schema contracts
+- `src/version-compat.ts` - 0.x compatibility checks
 
-- Do not run `./run-integration-test.sh`
-- Do not run `npm run test:integration`
-- Ask the human collaborator to run integration tests manually and share logs
-- Use unit/static checks (`typecheck`, `lint`, unit tests) for agent-side verification
+Primary docs for deeper context:
 
-## MANDATORY: Documentation Change Requirements
+- `docs/architecture.md`
+- `docs/guides/tools-reference.md`
+- `docs/guides/configuration.md`
+- `docs/guides/remote-access.md`
 
-**Before making ANY documentation change, you MUST read .agents/dev-documentation.md** for documentation standards and
-guidelines.
+## Development and Verification
 
-**ALL documentation changes MUST be documented in CHANGELOG.md** - this includes updates to:
-
-- Documentation files in `docs/` and `.agents/`
-- README.md and other markdown files
-- Docstrings and code comments (when updated without functional changes)
-
-**No exceptions** - if you update documentation, you update CHANGELOG.md.
-
-## CRITICAL: ExecPlans
-
-When writing complex features or significant refactors, use an ExecPlan (as described in .agents/PLANS.md) from design
-to implementation.
-
-## CRITICAL: Git Commit Policy
-
-**DO NOT create git commits unless explicitly requested by the user.**
-
-- You may use `git add`, `git rm`, `git mv`, and other git commands
-- You may stage changes and prepare them for commit
-- **DO NOT** run `git commit` - the user handles commits manually
-- When changes are ready, inform the user: "Changes are staged and ready for you to commit"
-
-**Exceptions - commits ARE allowed ONLY when:**
-
-1. User explicitly requests: "create a commit" or "commit these changes"
-2. Using `/create-commit` slash command
-3. Using `/create-release` slash command
-
-**IMPORTANT:** Even when exceptions apply:
-
-- Commit messages must NOT include co-authorship attribution
-- No "Co-Authored-By: <agent name>" or similar text
-- These are the user's commits, not the agent's
-
-See **.agents/dev-workflow.md** for complete Git Commit Policy details.
-
-## Development Environment
-
-**node-check.sh Script:**
-
-For development, use `node-check.sh` to activate nvm and ensure the correct Node.js environment:
+If Node/npm is unavailable in shell:
 
 ```bash
-# Activate environment and run commands
-source ./node-check.sh && npm install
-source ./node-check.sh && npm test
-source ./node-check.sh && npm run dev
+source ./node-check.sh
 ```
 
-This script ensures the correct Node.js version is available via nvm.
-
-## Development Commands
-
-**IMPORTANT:** The server must be started independently as a long-running process. It does not auto-start with Claude
-Code.
+Core commands:
 
 ```bash
-# Development with hot reload
 npm run dev
-
-# Type checking only
+npm run build
 npm run typecheck
-
-# Production build (compiles to dist/)
-npm run build
-
-# Run compiled binary (production)
-npm start
-```
-
-Expected output when starting:
-```
-[WebSocket Server] Listening on port 3002
-[HTTP Server] Listening on port 3001
-```
-
-**Note on Logging:**
-
-- Development environment (with `npm install`): Pretty-formatted colored logs
-- Global installation (via `npm link`): JSON logs to stderr (pino-pretty not included)
-- Both modes are fully functional - formatting is the only difference
-
-## Testing and Verification
-
-**Automated test suite with 95+ tests.**
-
-### Running Tests
-
-```bash
-# Run all tests
 npm test
-
-# Watch mode (re-run on changes)
-npm run test:watch
-
-# Coverage report
 npm run test:coverage
-
-# Interactive UI
-npm run test:ui
-```
-
-### Code Quality Checks
-
-```bash
-# Run all quality checks (type check, lint, format, test, coverage)
 ./code-quality.sh
-
-# Individual checks
-npm run typecheck    # TypeScript type checking
-npm run lint         # ESLint
-npm run lint:fix     # Auto-fix lint issues
-npm run format       # Auto-format code
-npm run format:check # Check formatting
 ```
 
-### Coverage Requirements
+## Integration and Live Validation Policy
 
-- Lines: 80%
-- Functions: 80%
-- Branches: 75%
-- Statements: 80%
+AI agents must not run integration tests in this repo.
 
-View detailed coverage: `open coverage/index.html`
+- Do not run `npm run test:integration`.
+- Do not run `./run-integration-test.sh`.
+- Ask the human collaborator to run integration tests and share logs.
+- Use unit/static checks for agent-side verification.
 
-### Manual Testing Prerequisites
+## Documentation and Changelog Rules
 
-- RemNote app running with RemNote Automation Bridge plugin installed and connected
-- Server configured in `~/.claude.json` under project's `mcpServers` key
+- Before docs edits, read `.agents/dev-documentation.md`.
+- Any functional or documentation change must be recorded in `CHANGELOG.md`.
+- Keep AGENTS/docs map-level: contracts, rationale, and navigation.
 
-## Configuration
+## Release and Publishing Map
 
-**Environment Variables:**
+- Publish workflow: `./publish-to-npm.sh`
+- Keep release notes aligned with `CHANGELOG.md`
+- For release prep, verify package version and changelog section alignment.
 
-- `REMNOTE_WS_PORT` - WebSocket server port (default: 3002)
-- `REMNOTE_HTTP_PORT` - HTTP MCP server port (default: 3001)
+## Git Policy
 
-**Installation:**
-```bash
-npm install
-npm run build
-
-# CRITICAL: makes remnote-mcp-server command globally available
-npm link
-```
-
-**Starting the Server:**
-
-The server must be started independently before using with Claude Code:
-
-```bash
-# Development mode (with hot reload)
-npm run dev
-
-# Production mode
-npm start
-```
-
-**Claude Code Configuration:**
-
-MCP servers are configured in `~/.claude.json` under the `mcpServers` key. Configuration can be:
-
-1. **Global (for all projects):** Place under a home directory project entry
-2. **Project-specific:** Place under the specific project path
-
-**Configuration format:**
-```json
-{
-  "projects": {
-    "/Users/username/path/to/project": {
-      "mcpServers": {
-        "remnote": {
-          "type": "http",
-          "url": "http://127.0.0.1:3001/mcp"
-        }
-      }
-    }
-  }
-}
-```
-
-**Important:** The old separate `~/.claude/.mcp.json` file format is deprecated. Claude Code now uses a single
-`~/.claude.json` file with `mcpServers` configuration per project. The `enabledMcpjsonServers` setting
-in `~/.claude/settings.json` is also deprecated.
-
-## Key Technical Constraints
-
-1. **Single WebSocket client** - Only one RemNote plugin connection allowed
-2. **5-second request timeout** - Prevents indefinite pending promises
-3. **UUID-based request tracking** - Allows multiple in-flight requests
-4. **TypeScript strict mode** - All code must pass strict type checking
-5. **Zod runtime validation** - Input schemas validated at runtime
-6. **Independent server process** - Must be started separately from Claude Code
-
-## Code Patterns
-
-**Logging:** All logging goes to stderr:
-```typescript
-console.error('[INFO] Message');
-```
-
-**Zod Schemas:**
-
-- Schema definitions in `src/schemas/remnote-schemas.ts`
-- Runtime validation + TypeScript type inference from single source
-- Example: `RemNoteSearchParamsSchema.parse(params)`
-
-**Request/Response Flow:**
-```typescript
-// Tools layer validates input
-const params = RemNoteSearchParamsSchema.parse(input);
-
-// Dispatches to WebSocket bridge
-const result = await websocketServer.sendRequest('search', params);
-
-// Returns formatted response
-return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
-```
-
-## Project Structure
-
-```text
-src/
-├── index.ts                    # Main entry point, server startup
-├── http-server.ts              # HTTP MCP server with session management
-├── websocket-server.ts         # WebSocket bridge implementation
-├── tools/
-│   └── index.ts               # Tool registration and handlers
-├── types/
-│   └── bridge.ts              # TypeScript interfaces for messages
-└── schemas/
-    └── remnote-schemas.ts     # Zod validation schemas
-
-dist/                           # Compiled output (gitignored)
-test/unit/                      # Test suite (105+ tests)
-.agents/                        # Development guidelines
-docs/                           # Architecture documentation
-```
-
-For architectural design rationale (performance considerations, security model, error handling strategy), see
-[docs/architecture.md](./docs/architecture.md).
-
-## Dependencies
-
-## Common Issues
-
-**Port already in use:**
-```bash
-# Find process using port 3002
-lsof -i :3002
-# Kill if needed
-kill -9 <PID>
-```
-
-**RemNote plugin not connecting:**
-
-- Verify RemNote app is running
-- Check plugin is installed and enabled
-- Verify WebSocket URL in plugin matches server port
-- Check server logs (stderr) for connection messages
-
-**Configuration not working:**
-
-- Ensure configuration is in `~/.claude.json` under `mcpServers` key (NOT separate `~/.claude/.mcp.json`)
-- Restart Claude Code after configuration changes
-- Check logs: `~/.claude/debug/mcp-*.log`
+Do not create commits unless explicitly requested. Use `.agents/dev-workflow.md` as canonical policy.

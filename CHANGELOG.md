@@ -12,6 +12,12 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - Stabilized logger coverage runs in CI by enabling automatic directory creation for file logger destinations and
   hardening logger tests against async transport timing races.
 
+### Documentation
+
+- Rewrote `AGENTS.md` into a low-redundancy repo map and aligned it to the shared cross-repo section template,
+  including the current 7-tool surface, `search_by_tag` contract, version-warning handshake flow, and explicit
+  companion-repo contract navigation.
+
 ## [0.6.0] - 2026-02-25
 
 ### Added
