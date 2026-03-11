@@ -6,6 +6,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   CreateNoteSchema,
+  CreateNoteMdSchema,
   SearchSchema,
   SearchByTagSchema,
   ReadNoteSchema,
@@ -28,6 +29,9 @@ describe('CreateNoteSchema', () => {
       content: 'Content',
       parentId: 'parent-123',
       tags: ['tag1', 'tag2'],
+      backText: 'Back text',
+      isConcept: true,
+      isDescriptor: false,
     };
     const result = CreateNoteSchema.parse(input);
     expect(result).toEqual(input);
@@ -43,6 +47,31 @@ describe('CreateNoteSchema', () => {
 
   it('should reject non-array tags', () => {
     expect(() => CreateNoteSchema.parse({ title: 'Test', tags: 'not-array' })).toThrow();
+  });
+});
+
+describe('CreateNoteMdSchema', () => {
+  it('should validate with only required content field', () => {
+    const result = CreateNoteMdSchema.parse({ content: '- item1\n  - item2' });
+    expect(result.content).toBe('- item1\n  - item2');
+    expect(result.title).toBeUndefined();
+    expect(result.parentId).toBeUndefined();
+    expect(result.tags).toBeUndefined();
+  });
+
+  it('should validate with all fields', () => {
+    const input = {
+      content: '- item',
+      title: 'Root Title',
+      parentId: 'parent-123',
+      tags: ['tag1'],
+    };
+    const result = CreateNoteMdSchema.parse(input);
+    expect(result).toEqual(input);
+  });
+
+  it('should reject missing content', () => {
+    expect(() => CreateNoteMdSchema.parse({})).toThrow();
   });
 });
 
