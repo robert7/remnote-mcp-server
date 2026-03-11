@@ -7,6 +7,10 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+- Enhanced `remnote_create_note` with flashcard support (`backText`, `isConcept`, `isDescriptor`).
+- Added `remnote_create_note_md` tool to allow creating native hierarchical Rem structures (including flashcards via `::`) from indented markdown strings.
+
 ## [0.8.0] - 2026-03-04
 
 ### Added

@@ -32,6 +32,8 @@ export interface SharedState {
   searchByTagTag?: string;
   noteAId?: string;
   noteBId?: string;
+  noteCId?: string;
+  mdTreeIds?: string[];
   acceptWriteOperations?: boolean;
   acceptReplaceOperation?: boolean;
 }

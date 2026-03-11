@@ -7,6 +7,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import {
   registerAllTools,
   CREATE_NOTE_TOOL,
+  CREATE_NOTE_MD_TOOL,
   SEARCH_TOOL,
   SEARCH_BY_TAG_TOOL,
   READ_NOTE_TOOL,
@@ -59,6 +60,14 @@ describe('Tool Definitions', () => {
 
   it('should have required title field for CREATE_NOTE_TOOL', () => {
     expect(CREATE_NOTE_TOOL.inputSchema.required).toContain('title');
+  });
+
+  it('should have correct name for CREATE_NOTE_MD_TOOL', () => {
+    expect(CREATE_NOTE_MD_TOOL.name).toBe('remnote_create_note_md');
+  });
+
+  it('should have required content field for CREATE_NOTE_MD_TOOL', () => {
+    expect(CREATE_NOTE_MD_TOOL.inputSchema.required).toContain('content');
   });
 
   it('should have correct name for SEARCH_TOOL', () => {
@@ -196,14 +205,14 @@ describe('Tool Registration', () => {
     expect(mockServer.hasHandler(ListToolsRequestSchema)).toBe(true);
   });
 
-  it('should return all 8 tools in list', async () => {
+  it('should return all 9 tools in list', async () => {
     registerAllTools(mockServer as never, mockWsServer as never, createMockLogger());
 
     const result = (await mockServer.callHandler(ListToolsRequestSchema, {})) as {
       tools: unknown[];
     };
 
-    expect(result.tools).toHaveLength(8);
+    expect(result.tools).toHaveLength(9);
   });
 
   it('should include all tool names in list', async () => {
@@ -215,6 +224,7 @@ describe('Tool Registration', () => {
 
     const names = result.tools.map((t) => t.name);
     expect(names).toContain('remnote_create_note');
+    expect(names).toContain('remnote_create_note_md');
     expect(names).toContain('remnote_search');
     expect(names).toContain('remnote_search_by_tag');
     expect(names).toContain('remnote_read_note');

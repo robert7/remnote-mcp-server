@@ -5,6 +5,16 @@ export const CreateNoteSchema = z.object({
   content: z.string().optional().describe('Content as child bullets (newline-separated)'),
   parentId: z.string().optional().describe('Parent Rem ID'),
   tags: z.array(z.string()).optional().describe('Tags to apply'),
+  backText: z.string().optional().describe('Back text for flashcards'),
+  isConcept: z.boolean().optional().describe('Whether to create a Concept card (::)'),
+  isDescriptor: z.boolean().optional().describe('Whether to create a Descriptor card (;;)'),
+});
+
+export const CreateNoteMdSchema = z.object({
+  content: z.string().describe('Markdown text to convert into a hierarchical tree'),
+  title: z.string().optional().describe('Optional parent Rem title to enclose the tree'),
+  parentId: z.string().optional().describe('Parent Rem ID where the tree will be created'),
+  tags: z.array(z.string()).optional().describe('Tags to apply to the root/title Rem'),
 });
 
 export const SearchSchema = z.object({

@@ -22,19 +22,21 @@ When changing action names, payloads, or response semantics, validate all three 
 
 ## Contract Map (Current)
 
-### External MCP Tool Surface (7)
+### External MCP Tool Surface (8)
 
 - `remnote_create_note`
+- `remnote_create_note_md`
 - `remnote_search`
 - `remnote_search_by_tag`
 - `remnote_read_note`
 - `remnote_update_note`
 - `remnote_append_journal`
+- `remnote_get_playbook`
 - `remnote_status`
 
 ### Bridge Action Mapping and Compatibility
 
-- Most tools map to same conceptual bridge actions (`create_note`, `search`, `search_by_tag`, `read_note`,
+- Most tools map to same conceptual bridge actions (`create_note`, `create_note_md`, `search`, `search_by_tag`, `read_note`,
   `update_note`, `append_journal`, `get_status`).
 - Bridge plugin sends WebSocket `hello` with plugin version.
 - `remnote_status` enriches output with server version + optional `version_warning` for compatibility drift.
