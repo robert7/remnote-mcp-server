@@ -1,21 +1,15 @@
 import { z } from 'zod';
 
-export const CreateNoteSchema = z.object({
-  title: z.string().describe('The title of the note'),
-  content: z.string().optional().describe('Content as child bullets (newline-separated)'),
-  parentId: z.string().optional().describe('Parent Rem ID'),
-  tags: z.array(z.string()).optional().describe('Tags to apply'),
-  backText: z.string().optional().describe('Back text for flashcards'),
-  isConcept: z.boolean().optional().describe('Whether to create a Concept card (::)'),
-  isDescriptor: z.boolean().optional().describe('Whether to create a Descriptor card (;;)'),
-});
-
-export const CreateNoteMdSchema = z.object({
-  content: z.string().describe('Markdown text to convert into a hierarchical tree'),
-  title: z.string().optional().describe('Optional parent Rem title to enclose the tree'),
-  parentId: z.string().optional().describe('Parent Rem ID where the tree will be created'),
-  tags: z.array(z.string()).optional().describe('Tags to apply to the root/title Rem'),
-});
+export const CreateNoteSchema = z
+  .object({
+    title: z.string().optional().describe('The title of the note'),
+    content: z.string().optional().describe('Content as child bullets (markdown supported)'),
+    parentId: z.string().optional().describe('Parent Rem ID'),
+    tags: z.array(z.string()).optional().describe('Tags to apply'),
+  })
+  .refine((value) => value.title !== undefined || value.content !== undefined, {
+    message: 'create_note requires either title or content',
+  });
 
 export const SearchSchema = z.object({
   query: z.string().describe('Search query text'),

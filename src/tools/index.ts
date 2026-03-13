@@ -1,7 +1,7 @@
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
 import { WebSocketServer } from '../websocket-server.js';
-import { CreateNoteSchema, CreateNoteMdSchema } from '../schemas/remnote-schemas.js';
+import { CreateNoteSchema } from '../schemas/remnote-schemas.js';
 import { SearchSchema } from '../schemas/remnote-schemas.js';
 import { SearchByTagSchema } from '../schemas/remnote-schemas.js';
 import { ReadNoteSchema } from '../schemas/remnote-schemas.js';
@@ -19,54 +19,27 @@ const NAVIGATION_PRESET = {
 export const CREATE_NOTE_TOOL = {
   name: 'remnote_create_note',
   description:
-    'Create a new note (or flashcard if provided with backText) in RemNote with optional content, parent, tags, backText, and card type (default with concept card). Recommended preflight once per session: remnote_status.',
+    'Create a new note in RemNote with optional content, parent, and tags. Supports hierarchical markdown in content and flashcard syntax (e.g. "- Term :: Definition"). At least one of title or content must be provided. Recommended preflight once per session: remnote_status.',
   inputSchema: {
     type: 'object' as const,
     properties: {
-      title: { type: 'string', description: 'The title of the note (front text for cards)' },
-      content: { type: 'string', description: 'Content as child bullets (newline-separated)' },
+      title: { type: 'string', description: 'The title of the note (optional if content is provided)' },
+      content: { type: 'string', description: 'Content as plain text, child bullets or hierarchical markdown' },
       parentId: { type: 'string', description: 'Parent Rem ID' },
       tags: { type: 'array', items: { type: 'string' }, description: 'Tags to apply' },
-      backText: { type: 'string', description: 'Optional back text to create a flashcard' },
-      isConcept: { type: 'boolean', description: 'Whether to explicitly create a Concept card' },
-      isDescriptor: { type: 'boolean', description: 'Whether to explicitly create a Descriptor card' },
     },
-    required: ['title'],
+    required: [],
   },
   outputSchema: {
     type: 'object' as const,
     properties: {
-      remId: { type: 'string', description: 'Created note/card Rem ID' },
-      title: { type: 'string', description: 'Created note title (front text)' },
-      backText: { type: 'string', description: 'Back text if a card was created' },
+      remIds: { type: 'array', items: { type: 'string' }, description: 'IDs of created Rems (title at index 0, top-to-bottom)' },
+      titles: { type: 'array', items: { type: 'string' }, description: 'Extracted text for each created Rem (title Rem ID at index 0, top-to-bottom)' },
     },
-    required: ['remId', 'title'],
+    required: ['remIds', 'titles'],
   },
 };
 
-export const CREATE_NOTE_MD_TOOL = {
-  name: 'remnote_create_note_md',
-  description:
-    'Create a hierarchical note tree in RemNote from a markdown string (indented bullets). Automatically parses indentations (- or *) into parent-child Rem relationships.',
-  inputSchema: {
-    type: 'object' as const,
-    properties: {
-      content: { type: 'string', description: 'Markdown text to convert into a hierarchical tree' },
-      title: { type: 'string', description: 'Optional parent Rem title to enclose the tree' },
-      parentId: { type: 'string', description: 'Parent Rem ID where the tree will be created' },
-      tags: { type: 'array', items: { type: 'string' }, description: 'Tags to apply to the root/title Rem' },
-    },
-    required: ['content'],
-  },
-  outputSchema: {
-    type: 'object' as const,
-    properties: {
-      remIds: { type: 'array', items: { type: 'string' }, description: 'List of created Rem IDs (root first)' },
-      title: { type: 'string', description: 'Title of the root Rem, if provided' },
-    },
-    required: ['remIds'],
-  },
-};
 
 export const SEARCH_TOOL = {
   name: 'remnote_search',
@@ -567,12 +540,6 @@ export function registerAllTools(server: Server, wsServer: WebSocketServer, logg
           break;
         }
 
-        case 'remnote_create_note_md': {
-          const args = CreateNoteMdSchema.parse(request.params.arguments);
-          result = await wsServer.sendRequest('create_note_md', args);
-          break;
-        }
-
         case 'remnote_search': {
           const args = SearchSchema.parse(request.params.arguments);
           result = await wsServer.sendRequest('search', args);
@@ -705,7 +672,6 @@ export function registerAllTools(server: Server, wsServer: WebSocketServer, logg
     return {
       tools: [
         CREATE_NOTE_TOOL,
-        CREATE_NOTE_MD_TOOL,
         SEARCH_TOOL,
         SEARCH_BY_TAG_TOOL,
         READ_NOTE_TOOL,
