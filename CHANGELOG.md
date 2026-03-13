@@ -8,8 +8,12 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Added
-- Enhanced `remnote_create_note` with flashcard support (`backText`, `isConcept`, `isDescriptor`).
-- Added `remnote_create_note_md` tool to allow creating native hierarchical Rem structures (including flashcards via `::`) from indented markdown strings.
+- Enhanced `remnote_create_note` with direct hierarchical tree creation and flashcards via RemNote native markdown syntax.
+
+### Changed
+- Updated `remnote_create_note` input schema:
+  - Made `title` optional (at least one of `title` or `content` must be provided).
+- Updated `remnote_create_note` output schema to return plural `remIds` and `titles` arrays.
 
 ## [0.8.0] - 2026-03-04
 

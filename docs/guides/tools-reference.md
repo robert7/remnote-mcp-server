@@ -11,8 +11,7 @@ automatically available in any connected MCP client.
 
 | Tool | Description | Use Case |
 |------|-------------|----------|
-| `remnote_create_note` | Create new notes or flashcards | Adding new knowledge, ideas, references, or flashcards |
-| `remnote_create_note_md` | Create hierarchical markdown trees | Quickly importing bulleted outlines/trees |
+| `remnote_create_note` | Create new notes or flashcards | Adding new knowledge, ideas, references, or flashcards. Supports hierarchical markdown and flashcard syntax. |
 | `remnote_search` | Search knowledge base | Finding existing notes, exploring topics |
 | `remnote_search_by_tag` | Search by tag | Finding ancestor context for tagged notes |
 | `remnote_read_note` | Read note content | Retrieving details, reading hierarchies |
@@ -29,13 +28,10 @@ Create a new note/flashcard in RemNote with optional parent hierarchy and tags.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `title` | string | Yes | The title/name of the note, or the front text of a flashcard |
-| `content` | string | No | Child content as bullet points (newline-separated) |
+| `title` | string | No | The title of the note (optional if content is provided) |
+| `content` | string | No | Child content as bullet points or hierarchical markdown |
 | `parentId` | string | No | Parent Rem ID to nest this note under |
 | `tags` | string[] | No | Array of tag names to apply |
-| `backText` | string | No | The back text to create a flashcard |
-| `isConcept` | boolean | No | Explicitly create a Concept card (::) |
-| `isDescriptor`| boolean | No | Explicitly create a Descriptor card (;;) |
 
 ### Usage
 
@@ -64,43 +60,8 @@ Create a note "Important Meeting" with tags "work" and "urgent"
 
 **Create a flashcard:**
 ```
-Create a Concept card titled "Photosynthesis" with back text "Process by which plants make food"
+Create a Concept card titled "Photosynthesis" with content "Photosynthesis :: Process by which plants make food"
 ```
-
-### Response
-
-Returns the created note's Rem ID and confirmation:
-
-```json
-{
-  "remId": "abc123xyz",
-  "title": "Project Ideas",
-  "backText": "Optional back text returned if created as a card"
-}
-```
-
-### Tips
-
-- Use descriptive titles for better searchability
-- Structure content with bullets (`-` or `•`) for RemNote hierarchy
-- Use `parentId` to organize notes within existing hierarchies
-- Tags can be existing or new - new tags are created automatically
-- Provide `backText` to turn the note into a flashcard
-
-## remnote_create_note_md
-
-Create a hierarchical note tree in RemNote from a markdown string (indented bullets). Automatically parses indentations into parent-child Rem relationships using RemNote's native capabilities.
-
-### Parameters
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `content` | string | Yes | Markdown text containing the bulleted tree |
-| `title` | string | No | Optional root Rem title to enclose the entire tree. If not provided, parent Rem will be used as the title. |
-| `parentId` | string | No | Parent Rem ID where the tree will be created, if not provided, the tree will be created under defaultParentId under plugin settings. |
-| `tags` | string[] | No | Array of tags to apply to the root/title Rem |
-
-### Usage
 
 **Create from an outline or hierarchical note:**
 ```
@@ -127,21 +88,23 @@ Create a markdown tree of biology terms, titled as "Energy Flow in Biology":
 
 For more usage, refer to https://help.remnote.com/en/articles/9252072-how-to-import-flashcards-from-text#h_fc1588b3b7
 
-### Response
-
-Returns an array of remIds containing the title (if provided) and each generated markdown line, in top-to-bottom order:
+Returns an array of remIds containing the title (if provided) and each generated markdown line:
 
 ```json
 {
   "remIds": ["abc123xyz", "def456xyz"],
-  "title": "Title of the markdown tree"
+  "titles": ["Project Ideas", "Child 1"]
 }
 ```
 
 ### Tips
 
-- Provide a `title` if you want all items nested logically under a single new Rem
-- Use `- ` or `* ` for each bullet and use leading spaces for nesting levels
+- Use descriptive titles for better searchability
+- Structure content with bullets (`-` or `•`) for RemNote hierarchy
+- Use `parentId` to organize notes within existing hierarchies
+- Tags can be existing or new - new tags are created automatically
+- Provide `backText` to turn the note into a flashcard
+
 
 ## remnote_search
 
@@ -565,7 +528,6 @@ names.
 
 | User says | AI uses |
 |-----------|---------|
-| "Create a note about X" | `remnote_create_note` |
 | "Create a note about X" | `remnote_create_note` |
 | "Search for Y" | `remnote_search` |
 | "Show me note abc123" | `remnote_read_note` |
