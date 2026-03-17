@@ -12,8 +12,9 @@ Bridge plugin](https://github.com/robert7/remnote-mcp-bridge).
 ## What is This?
 
 The RemNote MCP Server enables AI assistants like Claude Code to interact directly with your RemNote knowledge base
-through the Model Context Protocol (MCP). Create notes, search your knowledge base, update existing notes, and maintain
-your daily journal—all through conversational commands.
+through the Model Context Protocol (MCP). Create notes, hierarchical markdown trees, and RemNote-native flashcards;
+search and read your knowledge base; update existing notes; and maintain your daily journal, all through
+conversational commands.
 
 For some agentic workflows or CLI-first automation, the companion app
 **[remnote-cli](https://github.com/robert7/remnote-cli)** may be a better fit than running a full MCP server.
@@ -55,11 +56,11 @@ connection always stays local for security. See [Remote Access Guide](docs/guide
 
 ## Features
 
-- **Create Notes** - Create new notes with optional parent hierarchy and tags
-- **Search Knowledge Base** - Full-text search with configurable result limits
-- **Read Notes** - Retrieve note content with configurable child depth
-- **Update Notes** - Modify titles, append/replace content, add/remove tags
-- **Journal Entries** - Append timestamped entries to daily documents
+- **Create Notes & Flashcards** - Create simple notes, hierarchical markdown trees, or RemNote-native flashcards
+- **Search Knowledge Base** - Run full-text searches or tag-based searches with ancestor context
+- **Read Notes** - Retrieve note content in markdown or structured form with configurable traversal depth
+- **Update Notes** - Modify titles, append or replace hierarchical content, and manage tags
+- **Journal Entries** - Append timestamped daily entries, including hierarchical markdown content
 - **Agent Playbook** - Return built-in navigation and safety guidance for MCP clients
 - **Connection Status** - Check server and plugin connection health
 
@@ -134,12 +135,12 @@ Keep this terminal running.
 
 | Tool                      | Description                                    |
 |---------------------------|------------------------------------------------|
-| `remnote_create_note`     | Create new notes with optional parent and tags |
+| `remnote_create_note`     | Create notes, markdown trees, or flashcards with title, content, parent, and tags |
 | `remnote_search`          | Search knowledge base with full-text search    |
 | `remnote_search_by_tag`   | Search by tag with ancestor-context resolution |
-| `remnote_read_note`       | Read note by ID with configurable depth        |
+| `remnote_read_note`       | Read note by ID in markdown or structured form |
 | `remnote_update_note`     | Update title, append/replace content, or modify tags |
-| `remnote_append_journal`  | Append to today's daily document               |
+| `remnote_append_journal`  | Append hierarchical content to today's daily document |
 | `remnote_get_playbook`    | Get recommended MCP usage/navigation playbook  |
 | `remnote_status`          | Check connection status and statistics         |
 
