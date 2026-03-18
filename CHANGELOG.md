@@ -7,6 +7,8 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-03-18
+
 ### Documentation
 
 - Updated `README.md` capability and MCP tool summaries to reflect hierarchical markdown and flashcard creation.
