@@ -62,8 +62,16 @@ export const sampleTableResult = {
     { propertyId: 'prop-3', name: 'Done', type: 'checkbox' },
   ],
   rows: [
-    { remId: 'row-1', name: 'Task 1', values: { 'prop-1': 'Task 1', 'prop-2': 'In Progress', 'prop-3': 'false' } },
-    { remId: 'row-2', name: 'Task 2', values: { 'prop-1': 'Task 2', 'prop-2': 'Done', 'prop-3': 'true' } },
+    {
+      remId: 'row-1',
+      name: 'Task 1',
+      values: { 'prop-1': 'Task 1', 'prop-2': 'In Progress', 'prop-3': 'false' },
+    },
+    {
+      remId: 'row-2',
+      name: 'Task 2',
+      values: { 'prop-1': 'Task 2', 'prop-2': 'Done', 'prop-3': 'true' },
+    },
   ],
   totalRows: 2,
   rowsReturned: 2,
