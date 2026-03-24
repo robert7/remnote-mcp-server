@@ -7,6 +7,12 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- Moved GitHub Actions CI to the shared reusable workflow in `robert7/workflows`, keeping local `main` push and pull
+  request triggers while centralizing the job definition.
+
+
 ## [0.10.0] - 2026-03-18
 
 ### Documentation
