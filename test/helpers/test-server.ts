@@ -104,7 +104,7 @@ export async function waitForHttpServer(
       });
 
       return; // Success!
-    } catch (err) {
+    } catch {
       if (attempt < maxAttempts - 1) {
         const delay = initialDelayMs * Math.pow(2, attempt);
         await wait(delay);
