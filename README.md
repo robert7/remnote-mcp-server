@@ -132,7 +132,7 @@ Keep this terminal running.
 ### Development
 
 - **[Development Setup](docs/guides/development-setup.md)** - Contributing guide for developers
-- **[Integration Testing](docs/guides/integration-testing.md)** - End-to-end validation against a live RemNote instance
+- **[Integration Testing](docs/guides/integration-testing.md)** - Canonical shared workflow for updating and running MCP server + CLI integration coverage against live RemNote
 - **[Publishing Guide](docs/npm-publishing.md)** - npm publishing process (maintainers only)
 
 ## Available MCP Tools
@@ -253,6 +253,8 @@ npm test             # Run test suite
 See the [Development Setup Guide](docs/guides/development-setup.md) for complete instructions.
 
 Pull requests that affect bridge-consumer behavior should follow the shared PR rules in the bridge repo: [Pull Request Guide](https://github.com/robert7/remnote-mcp-bridge/blob/main/docs/guides/pull-request-guide.md). In particular, keep bridge/server/CLI parity for shared functionality changes and link related PRs across the affected repos.
+
+For the canonical workflow for updating and running shared live integration coverage, see the [Integration Testing Guide](docs/guides/integration-testing.md).
 
 ## Related Projects
 

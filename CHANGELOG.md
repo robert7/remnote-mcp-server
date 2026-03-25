@@ -11,6 +11,7 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Added a README note pointing contributors to the shared bridge pull request guide for cross-repo parity and linked PR expectations.
 - Replaced the placeholder pull request template with a shorter repo-specific template that links to the shared bridge PR guide.
+- Expanded the integration testing guide into the canonical shared workflow for updating, running, and cleaning up MCP server + CLI live integration coverage, including screenshots and source-test links.
 
 ### Changed
 
