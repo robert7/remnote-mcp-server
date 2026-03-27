@@ -121,3 +121,23 @@ export const AppendJournalSchema = z.object({
   content: z.string().describe("Content to append to today's daily document"),
   timestamp: z.boolean().default(true).describe('Include timestamp'),
 });
+
+export const ReadTableSchema = z
+  .object({
+    tableRemId: z.string().min(1).optional().describe('Table Rem ID'),
+    tableTitle: z.string().min(1).optional().describe('Exact Advanced Table title'),
+    limit: z.number().int().min(1).max(150).default(50).describe('Maximum rows to return'),
+    offset: z.number().int().min(0).default(0).describe('0-based row offset for pagination'),
+    propertyFilter: z.array(z.string()).optional().describe('Only return these property names'),
+  })
+  .superRefine((value, ctx) => {
+    const provided = [value.tableRemId, value.tableTitle].filter(
+      (entry) => typeof entry === 'string' && entry.length > 0
+    );
+    if (provided.length !== 1) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Provide exactly one of tableRemId or tableTitle',
+      });
+    }
+  });

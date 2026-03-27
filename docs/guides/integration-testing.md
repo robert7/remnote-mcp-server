@@ -29,7 +29,8 @@ RemNote's bridge surface does not expose delete operations, so cleanup stays man
 ## Prerequisites
 
 1. RemNote running with the RemNote Automation Bridge plugin installed
-2. MCP server running (`npm run dev`, `npm start`, or `remnote-mcp-server`)
+2. MCP server available, either already running (`npm run dev`, `npm start`, or `remnote-mcp-server`) or started by
+   the agent wrapper
 3. Bridge connected to the WebSocket server
 4. CLI daemon running as well when you want to run the CLI integration suite
 
@@ -51,6 +52,10 @@ npm run test:integration -- --yes
 
 # Fast connection check only (no test data creation)
 ./run-status-check.sh
+
+# Agent-assisted — starts the server if needed, waits for bridge connection, then runs the suite
+./run-agent-integration-test.sh
+./run-agent-integration-test.sh --yes
 ```
 
 ### CLI Suite
@@ -64,9 +69,20 @@ From the `remnote-cli` repo:
 # Run the live CLI integration suite
 ./run-integration-test.sh
 ./run-integration-test.sh --yes
+
+# Agent-assisted — starts the daemon if needed, waits for bridge connection, then runs the suite
+./run-agent-integration-test.sh
+./run-agent-integration-test.sh --yes
 ```
 
 The MCP server and bridge should already be connected before running the CLI suite.
+The agent-assisted wrappers are the only approved live-test entrypoint for AI agents; they time out with a clear
+message when the RemNote bridge never connects.
+Agent-assisted flow still has one manual gate: the agent should ask the human collaborator to start the bridge first,
+and must ask for a bridge restart before reruns if bridge code changed since the current RemNote bridge session
+started.
+When switching from the CLI suite to the MCP server suite, stop the CLI daemon first so the MCP server can bind the
+shared WebSocket port.
 
 Successful runs print a workflow summary and remind you how to clean up the created artifacts.
 
@@ -106,6 +122,8 @@ Both suites follow the same shape:
 4. **Journal** — Appends entries to today's daily document with and without timestamps.
 5. **Error Cases** — Sends invalid inputs (nonexistent IDs, missing required fields) and verifies the server handles
    them gracefully.
+6. **Read Table** — Reads a pre-configured Advanced Table by name and Rem ID, then validates pagination, filtering,
+   and not-found behavior.
 
 ## Cleanup After A Run
 
@@ -118,5 +136,48 @@ To clean up:
 - search RemNote for `[CLI-TEST]` and delete the matching CLI-created artifacts
 - open Today's Note and remove the matching journal entries
 
+RemNote's bridge plugin does not support deleting notes, so test artifacts persist and must be cleaned up manually.
 The shared anchor note is reused across runs. If more than one exact anchor-title match exists, the integration setup
 fails early and prints the duplicate `remId`s so you can clean them up first.
+
+## Design Rationale
+
+The integration tests are deliberately separate from the unit test suite. They require external infrastructure (running
+server + connected plugin), create real content, and take seconds rather than milliseconds. They run via `tsx` with
+custom lightweight assertions rather than Vitest to stay independent from the mocked unit-test environment.
+
+## Read Table Configuration
+
+The `read_table` workflow requires a pre-existing Advanced Table in RemNote. This keeps the coverage read-only while
+still validating the shared bridge-consumer contract.
+
+### Setup
+
+1. Create an Advanced Table in RemNote with at least one row and one column.
+2. Record the table's exact name and `remId`.
+3. Create or edit the config file at:
+
+   **Windows:** `C:\Users\<your-username>\.remnote-mcp-bridge\remnote-mcp-bridge.json`
+
+   **macOS/Linux:** `~/.remnote-mcp-bridge/remnote-mcp-bridge.json`
+
+4. Add the integration test configuration:
+
+```json
+{
+  "integrationTest": {
+    "tableName": "Your Table Name",
+    "tableRemId": "abc123def"
+  }
+}
+```
+
+### Running
+
+Run the integration suite as usual:
+
+```bash
+npm run test:integration
+```
+
+The `read_table` workflow is skipped when either field is missing or the config is invalid.

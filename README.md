@@ -121,7 +121,7 @@ Keep this terminal running.
 ### Usage
 
 - **[CLI Options Reference](docs/guides/cli-options.md)** - Command-line options and environment variables
-- **[MCP Tools Reference](docs/guides/tools-reference.md)** - Detailed reference for all 8 RemNote tools
+- **[MCP Tools Reference](docs/guides/tools-reference.md)** - Detailed reference for all 9 RemNote tools
 - **[Remote Access Setup](docs/guides/remote-access.md)** - Expose server for Claude Cowork (ngrok, etc.)
 
 ### Help & Advanced
@@ -145,6 +145,7 @@ Keep this terminal running.
 | `remnote_read_note`       | Read note by ID in markdown or structured form |
 | `remnote_update_note`     | Update title, append/replace content, or modify tags |
 | `remnote_append_journal`  | Append hierarchical content to today's daily document |
+| `remnote_read_table`      | Read Advanced Table columns, rows, and typed property metadata |
 | `remnote_get_playbook`    | Get recommended MCP usage/navigation playbook  |
 | `remnote_status`          | Check connection status and statistics         |
 

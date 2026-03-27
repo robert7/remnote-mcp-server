@@ -4,7 +4,7 @@ Complete reference for all RemNote MCP tools available through the server.
 
 ## Overview
 
-The RemNote MCP Server exposes 8 tools that allow AI agents to interact with your RemNote knowledge base. Tools are
+The RemNote MCP Server exposes tools that allow AI agents to interact with your RemNote knowledge base. Tools are
 automatically available in any connected MCP client.
 
 ## Tool Summary
@@ -17,6 +17,7 @@ automatically available in any connected MCP client.
 | `remnote_read_note` | Read note content | Retrieving details, reading hierarchies |
 | `remnote_update_note` | Modify existing notes | Appending content, adding tags, renaming |
 | `remnote_append_journal` | Add to daily document | Journaling, logging, daily notes |
+| `remnote_read_table` | Read Advanced Tables | Fetching tabular rows, schema metadata, and filtered columns |
 | `remnote_get_playbook` | Get operating playbook | Session preflight, traversal defaults, write safety guidance |
 | `remnote_status` | Check connection health | Verifying setup, debugging |
 
@@ -417,6 +418,71 @@ Returns confirmation:
 - Use `timestamp: true` (default) for timestamped entries
 - Use `timestamp: false` for plain entries
 - Great for logging daily activities, thoughts, or progress notes
+
+## remnote_read_table
+
+Read an Advanced Table by exact title or Rem ID and return structured column and row data.
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `tableTitle` | string | Conditionally | Exact Advanced Table title |
+| `tableRemId` | string | Conditionally | Table Rem ID |
+| `limit` | number | No | Maximum rows to return (1-150, default: 50) |
+| `offset` | number | No | Zero-based row offset for pagination (default: 0) |
+| `propertyFilter` | string[] | No | Only include these property/column names |
+
+Provide exactly one of `tableTitle` or `tableRemId`.
+
+### Usage
+
+**Read a table by name:**
+```
+Read the RemNote table "Projects"
+```
+
+**Read a table by Rem ID:**
+```
+Use remnote_read_table with tableRemId "abc123def"
+```
+
+**Limit rows for a large table:**
+```
+Read the first 10 rows from table "Projects"
+```
+
+**Filter to selected columns:**
+```
+Read table "Projects" but only return the columns "Status" and "Owner"
+```
+
+Returns the table identity, column schema, row values keyed by `propertyId`, and pagination metadata:
+
+```json
+{
+  "tableId": "abc123def",
+  "tableName": "Projects",
+  "columns": [
+    { "propertyId": "prop1", "name": "Status", "type": "single_select" }
+  ],
+  "rows": [
+    {
+      "remId": "row1",
+      "name": "Project Alpha",
+      "values": { "prop1": "In Progress" }
+    }
+  ],
+  "totalRows": 12,
+  "rowsReturned": 1
+}
+```
+
+### Tips
+
+- Prefer table Rem IDs when you need deterministic lookup across renamed tables.
+- Use `propertyFilter` to reduce payload size for wide tables.
+- Use `limit` and `offset` together for incremental reads of large tables.
 
 ## remnote_get_playbook
 

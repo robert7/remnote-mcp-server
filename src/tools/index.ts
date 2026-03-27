@@ -7,6 +7,7 @@ import { SearchByTagSchema } from '../schemas/remnote-schemas.js';
 import { ReadNoteSchema } from '../schemas/remnote-schemas.js';
 import { UpdateNoteSchema } from '../schemas/remnote-schemas.js';
 import { AppendJournalSchema } from '../schemas/remnote-schemas.js';
+import { ReadTableSchema } from '../schemas/remnote-schemas.js';
 import { checkVersionCompatibility } from '../version-compat.js';
 import type { Logger } from '../logger.js';
 
@@ -464,6 +465,83 @@ export const STATUS_TOOL = {
   },
 };
 
+export const READ_TABLE_TOOL = {
+  name: 'remnote_read_table',
+  description:
+    'Read an Advanced Table from RemNote by exact title or Rem ID. Returns the table schema (columns with property types) and row data (cell values). Use this when you need structured tabular data. For simple tag-based queries without table structure, prefer remnote_search_by_tag.',
+  inputSchema: {
+    type: 'object' as const,
+    properties: {
+      tableRemId: {
+        type: 'string',
+        description: 'Table Rem ID',
+      },
+      tableTitle: {
+        type: 'string',
+        description: 'Exact Advanced Table title',
+      },
+      limit: {
+        type: 'number',
+        description: 'Maximum rows to return (1-150, default: 50)',
+      },
+      offset: {
+        type: 'number',
+        description: '0-based row offset for pagination (default: 0)',
+      },
+      propertyFilter: {
+        type: 'array',
+        items: { type: 'string' },
+        description: 'Only return these property/column names (all if omitted)',
+      },
+    },
+    description: 'Provide exactly one of tableRemId or tableTitle.',
+  },
+  outputSchema: {
+    type: 'object' as const,
+    properties: {
+      tableId: { type: 'string', description: 'Rem ID of the table/tag' },
+      tableName: { type: 'string', description: 'Display name of the table' },
+      columns: {
+        type: 'array',
+        description: 'Table columns (properties)',
+        items: {
+          type: 'object',
+          properties: {
+            propertyId: { type: 'string', description: 'Property Rem ID' },
+            name: { type: 'string', description: 'Column/property name' },
+            type: {
+              type: 'string',
+              description:
+                'Property type (text, number, date, checkbox, single_select, multi_select, url, etc.)',
+            },
+          },
+          required: ['propertyId', 'name', 'type'],
+        },
+      },
+      rows: {
+        type: 'array',
+        description: 'Table rows with cell values',
+        items: {
+          type: 'object',
+          properties: {
+            remId: { type: 'string', description: 'Row Rem ID' },
+            name: { type: 'string', description: 'Row name (first column / Rem text)' },
+            values: {
+              type: 'object',
+              description: 'Cell values keyed by propertyId',
+              additionalProperties: { type: 'string' },
+            },
+          },
+          required: ['remId', 'name', 'values'],
+        },
+      },
+      totalRows: { type: 'number', description: 'Total number of rows in the table' },
+      rowsReturned: { type: 'number', description: 'Number of rows returned in this response' },
+    },
+    required: ['tableId', 'tableName', 'columns', 'rows', 'totalRows', 'rowsReturned'],
+  },
+};
+
 export const PLAYBOOK_TOOL = {
   name: 'remnote_get_playbook',
   description:
@@ -632,6 +710,7 @@ export function registerAllTools(server: Server, wsServer: WebSocketServer, logg
               'Need connection/capability context? Call remnote_status first.',
               'Need to orient across the KB? Use remnote_search with includeContent="structured", depth=1, childLimit=500.',
               'Need to traverse a specific branch? Use remnote_read_note on a chosen remId with includeContent="structured", depth=1, childLimit=500, then recurse by child remIds.',
+              'Need tabular/structured data from an Advanced Table? Use remnote_read_table with either tableTitle or tableRemId. Use propertyFilter to limit columns for large tables.',
               'Need a human-readable summary? Switch to includeContent="markdown" on search/read results.',
               'Need to modify content? Check remnote_status: if acceptWriteOperations is false, stop; if using replaceContent, ensure acceptReplaceOperation is true.',
             ],
@@ -662,6 +741,12 @@ export function registerAllTools(server: Server, wsServer: WebSocketServer, logg
 
         case 'remnote_status': {
           result = await buildStatusResult();
+          break;
+        }
+
+        case 'remnote_read_table': {
+          const args = ReadTableSchema.parse(request.params.arguments);
+          result = await wsServer.sendRequest('read_table', args);
           break;
         }
 
@@ -715,6 +800,7 @@ export function registerAllTools(server: Server, wsServer: WebSocketServer, logg
         APPEND_JOURNAL_TOOL,
         PLAYBOOK_TOOL,
         STATUS_TOOL,
+        READ_TABLE_TOOL,
       ],
     };
   });

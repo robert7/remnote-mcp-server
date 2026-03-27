@@ -20,6 +20,7 @@ import { createSearchWorkflow } from './workflows/02-create-search.js';
 import { readUpdateWorkflow } from './workflows/03-read-update.js';
 import { journalWorkflow } from './workflows/04-journal.js';
 import { errorCasesWorkflow } from './workflows/05-error-cases.js';
+import { readTableWorkflow } from './workflows/06-read-table.js';
 import type { WorkflowResult, WorkflowFn, SharedState } from './types.js';
 
 const RESET = '\x1b[0m';
@@ -94,7 +95,8 @@ function printWorkflowResult(index: number, result: WorkflowResult): void {
 }
 
 function printSummary(results: WorkflowResult[], totalDurationMs: number): void {
-  const totalWorkflows = results.length;
+  const skippedWorkflows = results.filter((r) => r.skipped).length;
+  const totalWorkflows = results.length - skippedWorkflows;
   const passedWorkflows = results.filter(
     (r) => !r.skipped && r.steps.every((s) => s.passed)
   ).length;
@@ -106,7 +108,7 @@ function printSummary(results: WorkflowResult[], totalDurationMs: number): void 
 
   console.log(`\n${BOLD}═══ Summary ═══${RESET}`);
   console.log(
-    `${color}${passedWorkflows}/${totalWorkflows} workflows passed (${passedSteps}/${totalSteps} steps)${RESET}`
+    `${color}${passedWorkflows}/${totalWorkflows} workflows passed (${passedSteps}/${totalSteps} steps, ${skippedWorkflows} skipped)${RESET}`
   );
   console.log(`Duration: ${(totalDurationMs / 1000).toFixed(1)}s`);
 
@@ -298,6 +300,7 @@ async function main(): Promise<void> {
     { name: 'Read & Update', fn: readUpdateWorkflow },
     { name: 'Journal', fn: journalWorkflow },
     { name: 'Error Cases', fn: errorCasesWorkflow },
+    { name: 'Read Table', fn: readTableWorkflow },
   ];
 
   try {

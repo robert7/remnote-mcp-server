@@ -47,6 +47,36 @@ export const validAppendJournalInput = {
   timestamp: false,
 };
 
+export const validReadTableInput = {
+  tableRemId: 'table-rem-id-123',
+  limit: 50,
+  offset: 0,
+};
+
+export const sampleTableResult = {
+  tableId: 'table-rem-id-123',
+  tableName: 'Test Table',
+  columns: [
+    { propertyId: 'prop-1', name: 'Name', type: 'text' },
+    { propertyId: 'prop-2', name: 'Status', type: 'single_select' },
+    { propertyId: 'prop-3', name: 'Done', type: 'checkbox' },
+  ],
+  rows: [
+    {
+      remId: 'row-1',
+      name: 'Task 1',
+      values: { 'prop-1': 'Task 1', 'prop-2': 'In Progress', 'prop-3': 'false' },
+    },
+    {
+      remId: 'row-2',
+      name: 'Task 2',
+      values: { 'prop-1': 'Task 2', 'prop-2': 'Done', 'prop-3': 'true' },
+    },
+  ],
+  totalRows: 2,
+  rowsReturned: 2,
+};
+
 // Bridge message fixtures
 export const createBridgeRequest = (
   action: string,

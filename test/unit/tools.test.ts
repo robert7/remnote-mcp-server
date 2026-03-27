@@ -14,6 +14,7 @@ import {
   APPEND_JOURNAL_TOOL,
   PLAYBOOK_TOOL,
   STATUS_TOOL,
+  READ_TABLE_TOOL,
 } from '../../src/tools/index.js';
 import { WebSocketServer } from '../../src/websocket-server.js';
 import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
@@ -25,10 +26,12 @@ import {
   validUpdateNoteInput,
   validUpdateReplaceInput,
   validAppendJournalInput,
+  validReadTableInput,
   sampleMutatingResult,
   sampleNoteResult,
   sampleSearchResults,
   sampleStatusResult,
+  sampleTableResult,
 } from '../helpers/fixtures.js';
 import { createMockLogger } from '../setup.js';
 
@@ -188,6 +191,25 @@ describe('Tool Definitions', () => {
   it('should have no required fields for PLAYBOOK_TOOL', () => {
     expect(PLAYBOOK_TOOL.inputSchema.required || []).toHaveLength(0);
   });
+
+  it('should have correct name for READ_TABLE_TOOL', () => {
+    expect(READ_TABLE_TOOL.name).toBe('remnote_read_table');
+  });
+
+  it('should document explicit identifier fields for READ_TABLE_TOOL', () => {
+    expect(READ_TABLE_TOOL.inputSchema.properties.tableRemId).toBeDefined();
+    expect(READ_TABLE_TOOL.inputSchema.properties.tableTitle).toBeDefined();
+  });
+
+  it('should have correct output schema for READ_TABLE_TOOL', () => {
+    const properties = READ_TABLE_TOOL.outputSchema.properties as Record<string, unknown>;
+    expect(properties.tableId).toBeDefined();
+    expect(properties.tableName).toBeDefined();
+    expect(properties.columns).toBeDefined();
+    expect(properties.rows).toBeDefined();
+    expect(properties.totalRows).toBeDefined();
+    expect(properties.rowsReturned).toBeDefined();
+  });
 });
 
 describe('Tool Registration', () => {
@@ -216,7 +238,7 @@ describe('Tool Registration', () => {
       tools: unknown[];
     };
 
-    expect(result.tools).toHaveLength(8);
+    expect(result.tools).toHaveLength(9);
   });
 
   it('should include all tool names in list', async () => {
@@ -235,6 +257,7 @@ describe('Tool Registration', () => {
     expect(names).toContain('remnote_append_journal');
     expect(names).toContain('remnote_get_playbook');
     expect(names).toContain('remnote_status');
+    expect(names).toContain('remnote_read_table');
   });
 });
 
@@ -551,6 +574,68 @@ describe('Tool Handlers - append_journal', () => {
 
     const parsed = JSON.parse(result.content[0].text);
     expect(parsed).toEqual(sampleMutatingResult);
+  });
+});
+
+describe('Tool Handlers - read_table', () => {
+  let mockServer: MockMCPServer;
+  let mockWsServer: { sendRequest: ReturnType<typeof vi.fn> };
+
+  beforeEach(() => {
+    mockServer = new MockMCPServer();
+    mockWsServer = {
+      sendRequest: vi.fn().mockResolvedValue(sampleTableResult),
+    };
+    registerAllTools(mockServer as never, mockWsServer as never, createMockLogger() as never);
+  });
+
+  it('should call wsServer.sendRequest with read_table action', async () => {
+    await mockServer.callHandler(CallToolRequestSchema, {
+      params: { name: 'remnote_read_table', arguments: validReadTableInput },
+    });
+
+    expect(mockWsServer.sendRequest).toHaveBeenCalledWith('read_table', {
+      ...validReadTableInput,
+      limit: 50,
+      offset: 0,
+    });
+  });
+
+  it('should apply default values from schema', async () => {
+    await mockServer.callHandler(CallToolRequestSchema, {
+      params: { name: 'remnote_read_table', arguments: { tableTitle: 'My Table' } },
+    });
+
+    expect(mockWsServer.sendRequest).toHaveBeenCalledWith('read_table', {
+      tableTitle: 'My Table',
+      limit: 50, // default
+      offset: 0, // default
+    });
+  });
+
+  it('should return formatted JSON result', async () => {
+    const result = (await mockServer.callHandler(CallToolRequestSchema, {
+      params: { name: 'remnote_read_table', arguments: validReadTableInput },
+    })) as { content: { type: string; text: string }[] };
+
+    const parsed = JSON.parse(result.content[0].text);
+    expect(parsed).toEqual(sampleTableResult);
+  });
+
+  it('should pass through propertyFilter', async () => {
+    await mockServer.callHandler(CallToolRequestSchema, {
+      params: {
+        name: 'remnote_read_table',
+        arguments: { tableTitle: 'My Table', propertyFilter: ['Name', 'Status'] },
+      },
+    });
+
+    expect(mockWsServer.sendRequest).toHaveBeenCalledWith('read_table', {
+      tableTitle: 'My Table',
+      limit: 50,
+      offset: 0,
+      propertyFilter: ['Name', 'Status'],
+    });
   });
 });
 

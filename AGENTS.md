@@ -81,12 +81,21 @@ npm run test:coverage
 
 ## Integration and Live Validation Policy
 
-AI agents must not run integration tests in this repo.
+AI agents may run live integration tests in this repo only on explicit human request and only through the guarded
+wrapper.
 
-- Do not run `npm run test:integration`.
-- Do not run `./run-integration-test.sh`.
-- Ask the human collaborator to run integration tests and share logs.
-- Use unit/static checks for agent-side verification.
+- Default: do not run `npm run test:integration` or `./run-integration-test.sh` directly.
+- Allowed path for AI agents: `./run-agent-integration-test.sh [--yes]`
+- Before invoking the wrapper, the agent must ask the human collaborator to start the bridge in RemNote.
+- If bridge code changed after the currently running RemNote bridge session started, the agent must ask the human
+  collaborator to restart the bridge before rerunning the suite.
+- When switching from CLI live integration tests to MCP server live integration tests, the agent must ensure the CLI
+  daemon is stopped before starting the MCP server.
+- The wrapper may build and start the local MCP server if it is not already running, then waits for
+  `remnote_status.connected === true` before launching the suite.
+- If the bridge never connects, the wrapper must stop and tell the human collaborator to verify the RemNote bridge
+  session.
+- Use unit/static checks for routine agent-side verification when explicit live validation is not requested.
 
 ## Documentation and Changelog Rules
 
