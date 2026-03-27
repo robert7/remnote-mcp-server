@@ -78,6 +78,9 @@ From the `remnote-cli` repo:
 The MCP server and bridge should already be connected before running the CLI suite.
 The agent-assisted wrappers are the only approved live-test entrypoint for AI agents; they time out with a clear
 message when the RemNote bridge never connects.
+Agent-assisted flow still has one manual gate: the agent should ask the human collaborator to start the bridge first,
+and must ask for a bridge restart before reruns if bridge code changed since the current RemNote bridge session
+started.
 
 Successful runs print a workflow summary and remind you how to clean up the created artifacts.
 

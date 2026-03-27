@@ -20,6 +20,8 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - Replaced the placeholder pull request template with a shorter repo-specific template that links to the shared bridge PR guide.
 - Expanded the integration testing guide into the canonical shared workflow for updating, running, and cleaning up MCP server + CLI live integration coverage, including screenshots and source-test links.
 - Replaced the blanket agent ban in integration-test policy docs with the guarded wrapper flow for explicit human-requested live runs.
+- Clarified that agent-assisted live runs still require the human collaborator to start the bridge first and restart it
+  after bridge-code changes before reruns.
 
 ### Changed
 - Moved GitHub Actions CI to the shared reusable workflow in `robert7/workflows`, keeping local `main` push and pull
