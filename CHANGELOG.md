@@ -7,44 +7,20 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-03-27
+
 ### Added
 - Added the `remnote_read_table` tool for reading Advanced Table data with pagination and column filtering.
-- Added `./run-agent-integration-test.sh` for explicit agent-assisted live integration runs that wait for a connected
-  RemNote bridge before launching the suite.
 - Added a `companion_info` WebSocket handshake so the bridge sidebar can identify a connected MCP server instance and
   show its version.
 
-### Documentation
-- Updated README and integration docs to document `remnote_read_table` and the strict table test config.
-- Added a README note pointing contributors to the shared bridge pull request guide for cross-repo parity and linked PR expectations.
-- Replaced the placeholder pull request template with a shorter repo-specific template that links to the shared bridge PR guide.
-- Expanded the integration testing guide into the canonical shared workflow for updating, running, and cleaning up MCP server + CLI live integration coverage, including screenshots and source-test links.
-- Replaced the blanket agent ban in integration-test policy docs with the guarded wrapper flow for explicit human-requested live runs.
-- Clarified that agent-assisted live runs still require the human collaborator to start the bridge first and restart it
-  after bridge-code changes before reruns.
-- Clarified that switching from CLI live integration tests to MCP server live integration tests requires the CLI daemon
-  to be stopped first.
-
 ### Changed
-- Moved GitHub Actions CI to the shared reusable workflow in `robert7/workflows`, keeping local `main` push and pull
-  request triggers while centralizing the job definition.
-- Upgraded the lint toolchain to ESLint 9.x and `typescript-eslint` 8.x while keeping the existing `.eslintrc` flow
-  enabled for current scripts.
-- Migrated the repo to `eslint.config.mjs` flat config and aligned runtime and local tooling on Node 20.19.0 via
-  package metadata, `.nvmrc`, and `node-check.sh`.
-- Pinned the shared GitHub Actions CI workflow to `robert7/workflows/.github/workflows/node-ci.yml@v0.2.0`.
 - Changed `remnote_read_table` input validation to require exactly one explicit identifier: `tableRemId` or
   `tableTitle`.
 
 ### Fixed
 - Hardened `run-agent-integration-test.sh` to build the MCP server before startup, stop the CLI daemon before MCP
-  startup, and reuse server-log context on timeouts.
-- Updated `run-agent-integration-test.sh` to stop the MCP server it started after agent-assisted integration runs,
-  including successful, failed, and interrupted runs.
-
-### Attribution
-
-- Most of the cross-repo `read-table` work in this release was implemented by @timbeckss.
+  startup, reuse server-log context on timeouts, and stop the MCP server it started after runs.
 
 ## [0.10.0] - 2026-03-18
 
