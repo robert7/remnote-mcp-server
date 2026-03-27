@@ -11,12 +11,15 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - New `remnote_read_table` tool for reading Advanced Table data (columns, rows, cell values)
 - `ReadTableSchema` Zod validation schema with pagination (limit/offset) and propertyFilter support
 - Playbook decision tree updated with table-reading guidance
+- Added `./run-agent-integration-test.sh` for explicit agent-assisted live integration runs that wait for a connected
+  RemNote bridge before launching the suite.
 
 ### Documentation
 - Updated README and integration docs to document `remnote_read_table` and the strict table test config.
 - Added a README note pointing contributors to the shared bridge pull request guide for cross-repo parity and linked PR expectations.
 - Replaced the placeholder pull request template with a shorter repo-specific template that links to the shared bridge PR guide.
 - Expanded the integration testing guide into the canonical shared workflow for updating, running, and cleaning up MCP server + CLI live integration coverage, including screenshots and source-test links.
+- Replaced the blanket agent ban in integration-test policy docs with the guarded wrapper flow for explicit human-requested live runs.
 
 ### Changed
 - Moved GitHub Actions CI to the shared reusable workflow in `robert7/workflows`, keeping local `main` push and pull

@@ -29,7 +29,8 @@ RemNote's bridge surface does not expose delete operations, so cleanup stays man
 ## Prerequisites
 
 1. RemNote running with the RemNote Automation Bridge plugin installed
-2. MCP server running (`npm run dev`, `npm start`, or `remnote-mcp-server`)
+2. MCP server available, either already running (`npm run dev`, `npm start`, or `remnote-mcp-server`) or started by
+   the agent wrapper
 3. Bridge connected to the WebSocket server
 4. CLI daemon running as well when you want to run the CLI integration suite
 
@@ -51,6 +52,10 @@ npm run test:integration -- --yes
 
 # Fast connection check only (no test data creation)
 ./run-status-check.sh
+
+# Agent-assisted — starts the server if needed, waits for bridge connection, then runs the suite
+./run-agent-integration-test.sh
+./run-agent-integration-test.sh --yes
 ```
 
 ### CLI Suite
@@ -64,9 +69,15 @@ From the `remnote-cli` repo:
 # Run the live CLI integration suite
 ./run-integration-test.sh
 ./run-integration-test.sh --yes
+
+# Agent-assisted — starts the daemon if needed, waits for bridge connection, then runs the suite
+./run-agent-integration-test.sh
+./run-agent-integration-test.sh --yes
 ```
 
 The MCP server and bridge should already be connected before running the CLI suite.
+The agent-assisted wrappers are the only approved live-test entrypoint for AI agents; they time out with a clear
+message when the RemNote bridge never connects.
 
 Successful runs print a workflow summary and remind you how to clean up the created artifacts.
 
