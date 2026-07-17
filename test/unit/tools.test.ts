@@ -166,6 +166,31 @@ describe('Tool Definitions', () => {
     expect(searchResultProps.contentStructured).toBeDefined();
   });
 
+  it('should advertise structured child nodes with optional children arrays', () => {
+    const searchResultProps = ((
+      SEARCH_TOOL.outputSchema.properties.results as {
+        items?: { properties?: Record<string, unknown> };
+      }
+    ).items?.properties ?? {}) as Record<string, unknown>;
+    const searchChildSchema = (
+      searchResultProps.contentStructured as {
+        items?: { properties?: Record<string, unknown>; required?: string[] };
+      }
+    ).items;
+    const readProps = (READ_NOTE_TOOL.outputSchema.properties ?? {}) as Record<string, unknown>;
+    const readChildSchema = (
+      readProps.contentStructured as {
+        items?: { properties?: Record<string, unknown>; required?: string[] };
+      }
+    ).items;
+
+    for (const schema of [searchChildSchema, readChildSchema]) {
+      expect(schema?.properties).toHaveProperty('children');
+      expect(schema?.required).toEqual(['remId', 'title', 'headline', 'remType']);
+      expect(schema?.required).not.toContain('children');
+    }
+  });
+
   it('should advertise cursor paging for SEARCH_TOOL and SEARCH_BY_TAG_TOOL', () => {
     const outputProps = SEARCH_TOOL.outputSchema.properties as Record<string, unknown>;
     const searchByTagOutputProps = SEARCH_BY_TAG_TOOL.outputSchema.properties as Record<
