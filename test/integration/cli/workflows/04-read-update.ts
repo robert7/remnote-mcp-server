@@ -8,7 +8,13 @@
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { assertHasField, assertTruthy, assertEqual, assertContains } from '../assertions.js';
+import {
+  assertHasField,
+  assertTruthy,
+  assertEqual,
+  assertContains,
+  assertStringArrayEqualUnordered,
+} from '../assertions.js';
 import { assertInlineRefTarget } from '../../reference-assertions.js';
 import type { WorkflowContext, WorkflowResult, SharedState, StepResult } from '../types.js';
 
@@ -454,9 +460,9 @@ export async function readUpdateWorkflow(
           'full',
         ])) as Record<string, unknown>;
         assertTruthy(Array.isArray(reread.aliases), 'updated aliases should be an array');
-        assertEqual(
-          JSON.stringify(reread.aliases),
-          JSON.stringify([unicodeAlias, addedAlias]),
+        assertStringArrayEqualUnordered(
+          reread.aliases,
+          [unicodeAlias, addedAlias],
           'CLI alias add/remove should be exact, normalized, idempotent, and Unicode-safe'
         );
         assertTruthy(

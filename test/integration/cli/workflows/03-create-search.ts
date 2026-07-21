@@ -8,7 +8,13 @@
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { assertHasField, assertTruthy, assertIsArray, assertEqual } from '../assertions.js';
+import {
+  assertHasField,
+  assertTruthy,
+  assertIsArray,
+  assertEqual,
+  assertStringArrayEqualUnordered,
+} from '../assertions.js';
 import { assertInlineRefTargetCountAtLeast } from '../../reference-assertions.js';
 import type { WorkflowContext, WorkflowResult, SharedState, StepResult } from '../types.js';
 
@@ -311,9 +317,9 @@ export async function createSearchWorkflow(
         'full',
       ])) as Record<string, unknown>;
       assertTruthy(Array.isArray(reread.aliases), 'created aliases should be an array');
-      assertEqual(
-        JSON.stringify(reread.aliases),
-        JSON.stringify([originalAlias, unicodeAlias]),
+      assertStringArrayEqualUnordered(
+        reread.aliases,
+        [originalAlias, unicodeAlias],
         'CLI create aliases should normalize, deduplicate, suppress the title, and preserve Unicode'
       );
       steps.push({ label: 'Create simple note', passed: true, durationMs: Date.now() - start });

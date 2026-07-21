@@ -45,3 +45,23 @@ export function assertIsArray(value: unknown, label: string): void {
     throw new AssertionError(`${label}: expected array, got ${typeof value}`);
   }
 }
+
+export function assertStringArrayEqualUnordered(
+  actual: unknown,
+  expected: string[],
+  label: string
+): void {
+  if (!Array.isArray(actual) || actual.some((value) => typeof value !== 'string')) {
+    throw new AssertionError(
+      `${label}: expected an array of strings, got ${JSON.stringify(actual)}`
+    );
+  }
+
+  const sortedActual = [...actual].sort();
+  const sortedExpected = [...expected].sort();
+  if (JSON.stringify(sortedActual) !== JSON.stringify(sortedExpected)) {
+    throw new AssertionError(
+      `${label}: expected unordered ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`
+    );
+  }
+}

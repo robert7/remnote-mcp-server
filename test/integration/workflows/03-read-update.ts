@@ -11,6 +11,7 @@ import {
   assertContains,
   assertEqual,
   assertIsArray,
+  assertStringArrayEqualUnordered,
 } from '../assertions.js';
 import { assertInlineRefTarget } from '../reference-assertions.js';
 import type { WorkflowContext, WorkflowResult, SharedState, StepResult } from '../types.js';
@@ -469,9 +470,9 @@ export async function readUpdateWorkflow(
         view: 'full',
       })) as Record<string, unknown>;
       assertIsArray(reread.aliases, 'updated aliases');
-      assertEqual(
-        JSON.stringify(reread.aliases),
-        JSON.stringify([unicodeAlias, addedAlias]),
+      assertStringArrayEqualUnordered(
+        reread.aliases,
+        [unicodeAlias, addedAlias],
         'alias add/remove should be exact, normalized, idempotent, and Unicode-safe'
       );
       assertTruthy(

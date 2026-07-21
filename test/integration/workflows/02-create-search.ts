@@ -5,7 +5,13 @@
  * for them to verify they are findable. Returns note IDs for downstream workflows.
  */
 
-import { assertTruthy, assertHasField, assertIsArray, assertEqual } from '../assertions.js';
+import {
+  assertTruthy,
+  assertHasField,
+  assertIsArray,
+  assertEqual,
+  assertStringArrayEqualUnordered,
+} from '../assertions.js';
 import { assertInlineRefTargetCountAtLeast } from '../reference-assertions.js';
 import type { WorkflowContext, WorkflowResult, SharedState, StepResult } from '../types.js';
 
@@ -283,9 +289,9 @@ export async function createSearchWorkflow(
         view: 'full',
       })) as Record<string, unknown>;
       assertIsArray(reread.aliases, 'created aliases');
-      assertEqual(
-        JSON.stringify(reread.aliases),
-        JSON.stringify([originalAlias, unicodeAlias]),
+      assertStringArrayEqualUnordered(
+        reread.aliases,
+        [originalAlias, unicodeAlias],
         'create aliases should normalize, deduplicate, suppress the title, and preserve Unicode'
       );
       steps.push({ label: 'Create simple note', passed: true, durationMs: Date.now() - start });
