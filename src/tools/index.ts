@@ -20,8 +20,6 @@ import { checkVersionCompatibility } from '../version-compat.js';
 import type { Logger } from '../logger.js';
 import { parseMediaLocator, resolveManagedImage } from '../media.js';
 
-const MEDIA_CAPABILITY = 'media.images.v1';
-
 const NAVIGATION_PRESET = {
   contentMode: 'structured',
   view: 'compact',
@@ -110,7 +108,7 @@ const MATCHED_REM_SCHEMA = {
 export const CREATE_NOTE_TOOL = {
   name: 'remnote_create_note',
   description:
-    'Create a new note in RemNote with optional content, parent, and exact tag Rem IDs. Supports hierarchical markdown, flashcard syntax (e.g. "- Term :: Definition"), and exact inline Rem references as [[id:<remId>]]. At least one of title or content must be provided. Recommended preflight once per session: remnote_status.',
+    'Create a new note in RemNote with optional content, parent, exact tag Rem IDs, and real aliases on an explicit title/root Rem. Supports hierarchical markdown, flashcard syntax (e.g. "- Term :: Definition"), and exact inline Rem references as [[id:<remId>]]. At least one of title or content must be provided. Recommended preflight once per session: remnote_status.',
   inputSchema: {
     type: 'object' as const,
     properties: {
@@ -134,6 +132,12 @@ export const CREATE_NOTE_TOOL = {
         type: 'boolean',
         description:
           'Mark the created title/root Rem as a document while preserving any concept/card status',
+      },
+      aliases: {
+        type: 'array',
+        items: { type: 'string' },
+        description:
+          'Alternate names for the explicit title/root Rem; normalized, deduplicated, and ignored when equal to the primary title',
       },
     },
     required: [],
@@ -657,7 +661,7 @@ export const READ_NOTE_TOOL = {
 export const GET_MEDIA_TOOL = {
   name: 'remnote_get_media',
   description:
-    'Retrieve a RemNote-managed local image as MCP-native image content. First call remnote_read_note with includeMediaMetadata=true, then pass the returned remId, field, and mediaId. Requires bridge capability media.images.v1. External URL retrieval is not supported.',
+    'Retrieve a RemNote-managed local image as MCP-native image content. First call remnote_read_note with includeMediaMetadata=true, then pass the returned remId, field, and mediaId. External URL retrieval is not supported.',
   inputSchema: {
     type: 'object' as const,
     properties: {
@@ -812,7 +816,7 @@ export const MOVE_NOTE_TOOL = {
 export const UPDATE_NOTE_TOOL = {
   name: 'remnote_update_note',
   description:
-    'Update note metadata in RemNote. Use this tool for title changes only. The title supports exact Rem references as [[id:<remId>]].',
+    'Update note metadata in RemNote with an optional title change and exact additive/removal alias operations. The title supports exact Rem references as [[id:<remId>]].',
   inputSchema: {
     type: 'object' as const,
     properties: {
@@ -821,8 +825,18 @@ export const UPDATE_NOTE_TOOL = {
         type: 'string',
         description: 'New title. Use [[id:<remId>]] for exact Rem references.',
       },
+      addAliases: {
+        type: 'array',
+        items: { type: 'string' },
+        description: 'Aliases to add if their normalized text is not already present',
+      },
+      removeAliases: {
+        type: 'array',
+        items: { type: 'string' },
+        description: 'Aliases to remove by exact whitespace-normalized, case-sensitive match',
+      },
     },
-    required: ['remId', 'title'],
+    required: ['remId'],
     additionalProperties: false,
   },
   outputSchema: {
@@ -1140,7 +1154,7 @@ export const APPEND_JOURNAL_TOOL = {
 export const STATUS_TOOL = {
   name: 'remnote_status',
   description:
-    'Check bridge connection health, compatibility warnings, and write-policy capabilities. Recommended once per session before write operations.',
+    'Check bridge connection health, compatibility warnings, and write-policy settings. Recommended once per session before write operations.',
   inputSchema: {
     type: 'object' as const,
     properties: {},
@@ -1151,11 +1165,6 @@ export const STATUS_TOOL = {
       connected: { type: 'boolean', description: 'Whether bridge plugin is currently connected' },
       serverVersion: { type: 'string', description: 'MCP server version' },
       pluginVersion: { type: 'string', description: 'Connected bridge plugin version' },
-      capabilities: {
-        type: 'array',
-        items: { type: 'string' },
-        description: 'Bridge protocol capabilities advertised during handshake',
-      },
       version_warning: {
         type: 'string',
         description: 'Compatibility warning when server/bridge versions differ',
@@ -1350,7 +1359,6 @@ export function registerAllTools(
     const connected = wsServer.isConnected();
     const serverVersion = wsServer.getServerVersion();
     const bridgeVersion = wsServer.getBridgeVersion();
-    const bridgeCapabilities = wsServer.getBridgeCapabilities?.() ?? [];
 
     if (!connected) {
       return { connected: false, serverVersion, message: 'RemNote plugin not connected' };
@@ -1372,7 +1380,6 @@ export function registerAllTools(
       connected: true,
       serverVersion,
       ...statusObj,
-      capabilities: bridgeCapabilities,
       ...(versionWarning ? { version_warning: versionWarning } : {}),
     };
   }
@@ -1423,11 +1430,6 @@ export function registerAllTools(
 
         case 'remnote_get_media': {
           const args = GetMediaSchema.parse(request.params.arguments);
-          if (!wsServer.hasBridgeCapability(MEDIA_CAPABILITY)) {
-            throw new Error(
-              `Bridge capability/version mismatch: connected bridge does not advertise ${MEDIA_CAPABILITY}`
-            );
-          }
           const locator = parseMediaLocator(
             await wsServer.sendRequest('get_media_locator', {
               remId: args.remId,
@@ -1528,18 +1530,18 @@ export function registerAllTools(
           }
 
           result = {
-            playbookVersion: '1.8.0',
+            playbookVersion: '1.9.0',
             summary:
-              'Use this playbook to check RemNote connection and write gates, navigate by remId with paged search/read/list workflows, retrieve managed images through capability-gated metadata, choose compact/full output views, and apply safe exact-ID writes including inline [[id:<remId>]] references, tag property values, and dry-run-first document status changes.',
+              'Use this playbook to check RemNote connection and write gates, navigate by remId with paged search/read/list workflows, retrieve managed images, choose compact/full output views, and apply safe metadata writes including real aliases, exact inline [[id:<remId>]] references, tag property values, and dry-run-first document status changes.',
             recommendedStatusCheck: {
               tool: 'remnote_status',
               cadence: 'recommended once per session and before risky writes',
               rationale:
-                'status exposes connection health, version compatibility warnings, write-policy gates, and bridge capabilities',
+                'status exposes connection health, version compatibility warnings, and write-policy gates',
             },
             decisionTree: [
-              'Need connection/capability context? Call remnote_status first.',
-              'Need an embedded RemNote-managed image? Confirm media.images.v1, call remnote_read_note with includeMediaMetadata=true, then call remnote_get_media with the returned remId, field, and mediaId.',
+              'Need connection and write-policy context? Call remnote_status first.',
+              'Need an embedded RemNote-managed image? Call remnote_read_note with includeMediaMetadata=true, then call remnote_get_media with the returned remId, field, and mediaId.',
               'Need to orient across the KB? Use remnote_search with contentMode="structured", view="compact", depth=1, childLimit=500.',
               'Need broad search enumeration? Continue remnote_search or remnote_search_by_tag with nextCursor while hasMore is true.',
               'Need to search within a specific branch? Use remnote_search with parentRemId; keep the same parentRemId when continuing with nextCursor.',
@@ -1552,8 +1554,8 @@ export function registerAllTools(
               'Need to follow inline graph references? Inspect inlineRefs on search/read results and structured child nodes for exact target Rem IDs.',
               'Need tabular/structured data from an Advanced Table? Use remnote_read_table with either tableTitle or tableRemId. Use propertyFilter to limit columns for large tables.',
               'Need a human-readable summary? Switch to contentMode="markdown" on search/read results.',
-              'Need to rename a note? Use remnote_update_note with remId and title only; use [[id:<remId>]] inside the title for exact inline Rem references.',
-              'Need to create a note? Use remnote_create_note; pass tagRemIds for exact-ID tag assignment, [[id:<remId>]] for exact inline Rem references, and asDocument=true when the title/root Rem should be a document.',
+              'Need to rename a note or add/remove real aliases? Use remnote_update_note with remId plus title and/or addAliases/removeAliases; use [[id:<remId>]] inside the title for exact inline Rem references.',
+              'Need to create a note? Use remnote_create_note; pass aliases for real alternate names on an explicit title/root Rem, tagRemIds for exact-ID tag assignment, [[id:<remId>]] for exact inline Rem references, and asDocument=true when the title/root Rem should be a document.',
               'Need to mark an existing Rem as a document? Use remnote_set_document_status dryRun first, include expectedOldRemType for stale-context protection, then rerun with dryRun=false after approval.',
               'Need to append to today journal? Use remnote_append_journal; pass tagRemIds when the journal entry should be tagged and [[id:<remId>]] for exact inline Rem references.',
               'Need to insert children? Use remnote_insert_children with an explicit position; use [[id:<remId>]] for exact inline Rem references.',
@@ -1584,7 +1586,7 @@ export function registerAllTools(
               requiredFields: ['acceptWriteOperations', 'acceptReplaceOperation'],
               guidance: [
                 'Create/update/insert/replace/tag/journal writes require acceptWriteOperations=true.',
-                'remnote_update_note is metadata-only; use insert_children, replace_children, and update_tags for structural or tag writes.',
+                'remnote_update_note is metadata-only for title and alias changes; use insert_children, replace_children, and update_tags for structural or tag writes.',
                 'remnote_set_document_status changes only document status; it preserves concept/card status and defaults to dryRun=true.',
                 'remnote_replace_children requires acceptReplaceOperation=true.',
                 'remnote_insert_children preserves existing child Rem IDs; remnote_replace_children removes them.',

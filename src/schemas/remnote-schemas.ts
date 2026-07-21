@@ -47,6 +47,15 @@ const SearchContentShape = {
     .describe('Maximum character length for rendered content'),
 };
 
+const normalizeAliasText = (value: string): string => value.trim().replace(/\s+/g, ' ');
+const AliasArraySchema = z
+  .array(
+    z.string().refine((value) => normalizeAliasText(value).length > 0, {
+      message: 'Aliases must not be empty after whitespace normalization',
+    })
+  )
+  .optional();
+
 export const CreateNoteSchema = z
   .object({
     title: z.string().optional().describe('The title of the note'),
@@ -62,10 +71,23 @@ export const CreateNoteSchema = z
       .boolean()
       .optional()
       .describe('Mark the created title/root Rem as a document without changing card status'),
+    aliases: AliasArraySchema.describe('Alternate names to create on the explicit title/root Rem'),
   })
   .strict()
-  .refine((value) => value.title !== undefined || value.content !== undefined, {
-    message: 'create_note requires either title or content',
+  .superRefine((value, ctx) => {
+    if (value.title === undefined && value.content === undefined) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'create_note requires either title or content',
+      });
+    }
+    if (value.title === undefined && (value.aliases?.length ?? 0) > 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'create_note aliases requires title so the alias target is unambiguous',
+        path: ['aliases'],
+      });
+    }
   });
 
 export const SearchSchema = z
@@ -222,11 +244,33 @@ export const UpdateNoteSchema = z
       .string()
       .optional()
       .describe('New title (markdown supported, including exact references as [[id:<remId>]])'),
+    addAliases: AliasArraySchema.describe('Aliases to add if not already present'),
+    removeAliases: AliasArraySchema.describe('Aliases to remove by exact normalized match'),
   })
   .strict()
-  .refine((value) => value.title !== undefined, {
-    message: 'remnote_update_note requires title',
-    path: ['title'],
+  .superRefine((value, ctx) => {
+    if (
+      value.title === undefined &&
+      (value.addAliases?.length ?? 0) === 0 &&
+      (value.removeAliases?.length ?? 0) === 0
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'remnote_update_note requires title, addAliases, or removeAliases',
+      });
+    }
+
+    const additions = new Set((value.addAliases ?? []).map(normalizeAliasText));
+    const overlap = (value.removeAliases ?? [])
+      .map(normalizeAliasText)
+      .find((alias) => additions.has(alias));
+    if (overlap !== undefined) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `Alias cannot be both added and removed: ${overlap}`,
+        path: ['removeAliases'],
+      });
+    }
   });
 
 export const SetDocumentStatusSchema = z

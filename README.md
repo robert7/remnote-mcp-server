@@ -194,12 +194,12 @@ After installing the LaunchAgent, `remnote-mcp-server daemon status|start|stop|r
 
 | Tool                      | Description                                                                 |
 |---------------------------|-----------------------------------------------------------------------------|
-| `remnote_create_note`     | Create notes, markdown trees, or flashcards with optional exact tag Rem IDs and root document status |
+| `remnote_create_note`     | Create notes, markdown trees, or flashcards with real aliases, optional exact tag Rem IDs, and root document status |
 | `remnote_search`          | Search knowledge base with full-text search, parent context, and optional tag IDs/names |
 | `remnote_search_by_tag`   | Search by exact tag Rem ID with ancestor-context resolution |
 | `remnote_read_note`       | Read note by ID with metadata, optional tag IDs/names, and markdown or structured content |
 | `remnote_get_media`       | Retrieve one validated RemNote-managed image as MCP-native image content |
-| `remnote_update_note`     | Update title |
+| `remnote_update_note`     | Update title and add/remove real aliases |
 | `remnote_set_document_status` | Preview or set document status while preserving concept/card status |
 | `remnote_insert_children` | Insert child Rems at deterministic positions |
 | `remnote_replace_children` | Replace direct children when destructive replacement is enabled |

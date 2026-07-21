@@ -41,7 +41,7 @@ Ask ChatGPT to run discovery and verify it can list and call RemNote tools (incl
 
 ## Step 6: Run a status preflight
 
-Ask ChatGPT to check the MCP bridge status and verify connection plus capability flags.
+Ask ChatGPT to check the MCP bridge status and verify connection plus write-policy settings.
 
 ![ChatGPT MCP Status Check](../images/remnote-mcp-server-demo-chatgpt-status-check.jpg)
 

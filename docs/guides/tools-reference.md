@@ -15,13 +15,13 @@ JSON in a top-level `content` text block for compatibility with older clients an
 
 | Tool | Description | Use Case |
 |------|-------------|----------|
-| `remnote_create_note` | Create new notes or flashcards | Adding new knowledge, ideas, references, or flashcards. Supports hierarchical markdown, flashcard syntax, exact tag Rem IDs, and optional root document status. |
+| `remnote_create_note` | Create new notes or flashcards | Adding new knowledge, ideas, references, or flashcards. Supports hierarchical markdown, real aliases, exact tag Rem IDs, and optional root document status. |
 | `remnote_search` | Search knowledge base | Finding existing notes, exploring topics |
 | `remnote_search_by_tag` | Search by exact tag Rem ID | Finding ancestor context for tagged notes |
 | `remnote_read_note` | Read note content | Retrieving details, reading hierarchies |
 | `remnote_get_media` | Retrieve managed image content | Fetching an embedded RemNote image by stable metadata ID |
 | `remnote_list_children` | List direct child Rems | Cheap branch traversal without subtree rendering |
-| `remnote_update_note` | Update note metadata | Renaming |
+| `remnote_update_note` | Update note metadata | Renaming and additive/removal alias changes |
 | `remnote_set_document_status` | Set document status | Dry-run-first document marking without removing concept/card status |
 | `remnote_move_note` | Move a Rem safely | Dry-run-first hierarchy reorganization |
 | `remnote_insert_children` | Insert child Rems | Ordered hierarchy maintenance, tag descriptions |
@@ -35,7 +35,7 @@ JSON in a top-level `content` text block for compatibility with older clients an
 
 ## remnote_create_note
 
-Create a new note/flashcard in RemNote with optional parent hierarchy and exact tag Rem IDs.
+Create a new note/flashcard in RemNote with optional parent hierarchy, exact tag Rem IDs, and real aliases.
 
 ### Parameters
 
@@ -46,6 +46,10 @@ Create a new note/flashcard in RemNote with optional parent hierarchy and exact 
 | `parentId` | string | No | Parent Rem ID to nest this note under |
 | `tagRemIds` | string[] | No | Exact tag Rem IDs to apply |
 | `asDocument` | boolean | No | Mark the created title/root Rem as a document while preserving flashcard/concept status |
+| `aliases` | string[] | No | Alternate names on the explicit title/root Rem; requires `title` |
+
+Aliases are trimmed, internal whitespace runs collapse to one space, and normalized duplicates or aliases equal to the
+primary title are ignored. Comparison is case-sensitive and Unicode is preserved.
 
 ### Usage
 
@@ -70,6 +74,11 @@ Create a note "Chapter 1" under the note with ID abc123
 **Create with tag Rem IDs:**
 ```
 Create a note "Important Meeting" with tagRemIds ["workTagRemId", "urgentTagRemId"]
+```
+
+**Create with aliases:**
+```
+Create a note "The Shop on Main Street" with aliases ["Obchod na korze"]
 ```
 
 **Create with an exact inline Rem reference:**
@@ -371,7 +380,7 @@ instead of markdown `content`. Leaf nodes omit `children` rather than returning 
 
 Retrieve one RemNote-managed PNG, JPEG, GIF, or WebP image as MCP-native image content. External URLs are deliberately
 excluded. First call `remnote_read_note` with `includeMediaMetadata: true`, then pass the returned `remId`, `field`, and
-`mediaId`. The connected bridge must advertise `media.images.v1`.
+`mediaId`. Media support is part of the complete matching bridge/server minor-version contract.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -385,14 +394,19 @@ IDs, ambiguous files, unsafe paths, unsupported formats, and files that change d
 
 ## remnote_update_note
 
-Update note metadata. This tool is intentionally limited to title changes.
+Update note metadata through title and exact additive/removal alias operations.
 
 ### Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `remId` | string | Yes | The Rem ID to update |
-| `title` | string | Yes | New title for the note |
+| `title` | string | No | New title for the note |
+| `addAliases` | string[] | No | Aliases to add if not already present after whitespace normalization |
+| `removeAliases` | string[] | No | Aliases to remove by exact normalized, case-sensitive match |
+
+At least one of `title`, `addAliases`, or `removeAliases` is required. Adding an existing alias and removing a missing
+alias are idempotent. The same normalized alias cannot appear in both operations.
 
 **Notes:**
 
@@ -407,6 +421,11 @@ Update note metadata. This tool is intentionally limited to title changes.
 **Rename a note:**
 ```
 Rename note abc123 to "Updated Project Name"
+```
+
+**Update aliases without renaming:**
+```
+Add alias "Original Title" and remove alias "Old Title" from note abc123
 ```
 
 ## remnote_set_document_status
@@ -724,7 +743,7 @@ Returns a structured playbook object, including:
 
 ## remnote_status
 
-Check connection status, compatibility warnings, and write-policy capabilities.
+Check connection status, compatibility warnings, and write-policy settings.
 
 ### Parameters
 
@@ -743,7 +762,7 @@ Use remnote_status to verify the bridge is working
 
 ### Response
 
-Returns connection health and policy capabilities:
+Returns connection health and write-policy settings:
 
 ```json
 {
@@ -774,7 +793,7 @@ Returns connection health and policy capabilities:
 - Use this to verify your setup after installation
 - Call once per session before normal operations (recommended)
 - Check after configuration changes
-- Check before write operations when safety/capability matters
+- Check before write operations when safety settings matter
 - Useful for debugging connection and compatibility issues
 - See [Troubleshooting Guide](troubleshooting.md) if status shows disconnected
 

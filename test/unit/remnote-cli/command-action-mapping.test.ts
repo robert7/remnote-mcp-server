@@ -86,6 +86,21 @@ describe('command bridge action mapping', () => {
     executeSpy.mockRestore();
   });
 
+  it('maps create --aliases to create_note aliases', async () => {
+    const executeSpy = await runCommand([
+      'create',
+      'Original Title',
+      '--aliases',
+      'Pôvodný názov',
+      '원래 제목',
+    ]);
+    expect(executeSpy).toHaveBeenCalledWith('create_note', {
+      title: 'Original Title',
+      aliases: ['Pôvodný názov', '원래 제목'],
+    });
+    executeSpy.mockRestore();
+  });
+
   it('maps create command with title-only positional args', async () => {
     const executeSpy = await runCommand(['create', 'Title']);
     expect(executeSpy).toHaveBeenCalledWith('create_note', {
@@ -338,6 +353,24 @@ describe('command bridge action mapping', () => {
     expect(executeSpy).toHaveBeenCalledWith('update_note', {
       remId: 'abc123',
       title: 'New Title',
+    });
+    executeSpy.mockRestore();
+  });
+
+  it('maps update alias flags without requiring a title', async () => {
+    const executeSpy = await runCommand([
+      'update',
+      'abc123',
+      '--add-aliases',
+      'New Alias',
+      '日本語',
+      '--remove-aliases',
+      'Old Alias',
+    ]);
+    expect(executeSpy).toHaveBeenCalledWith('update_note', {
+      remId: 'abc123',
+      addAliases: ['New Alias', '日本語'],
+      removeAliases: ['Old Alias'],
     });
     executeSpy.mockRestore();
   });

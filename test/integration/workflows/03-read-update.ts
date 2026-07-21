@@ -453,6 +453,47 @@ export async function readUpdateWorkflow(
   {
     const start = Date.now();
     try {
+      const originalAlias = `Pôvodný názov ${ctx.runId}`;
+      const unicodeAlias = `日本語 ${ctx.runId}`;
+      const addedAlias = `İstanbul ${ctx.runId}`;
+      const result = (await ctx.client.callTool('remnote_update_note', {
+        remId: state.noteAId,
+        addAliases: [` ${unicodeAlias} `, addedAlias, addedAlias],
+        removeAliases: [` Pôvodný   názov ${ctx.runId} `, 'Missing Alias'],
+      })) as { remIds: string[] };
+      assertIsArray(result.remIds, 'update aliases remIds');
+
+      const reread = (await ctx.client.callTool('remnote_read_note', {
+        remId: state.noteAId,
+        contentMode: 'none',
+        view: 'full',
+      })) as Record<string, unknown>;
+      assertIsArray(reread.aliases, 'updated aliases');
+      assertEqual(
+        JSON.stringify(reread.aliases),
+        JSON.stringify([unicodeAlias, addedAlias]),
+        'alias add/remove should be exact, normalized, idempotent, and Unicode-safe'
+      );
+      assertTruthy(
+        !(reread.aliases as string[]).includes(originalAlias),
+        'removed alias should be absent'
+      );
+
+      steps.push({ label: 'Update aliases', passed: true, durationMs: Date.now() - start });
+    } catch (e) {
+      steps.push({
+        label: 'Update aliases',
+        passed: false,
+        durationMs: Date.now() - start,
+        error: (e as Error).message,
+      });
+    }
+  }
+
+  // Step 4: Insert content
+  {
+    const start = Date.now();
+    try {
       assertTruthy(typeof state.noteBId === 'string', 'insert content reference target remId');
       const result = (await ctx.client.callTool('remnote_insert_children', {
         parentRemId: state.noteAId,

@@ -10,6 +10,7 @@ export const validCreateNoteInput = {
   content: 'Line 1\nLine 2',
   parentId: 'parent-id-123',
   tagRemIds: ['tag-rem-id-1', 'tag-rem-id-2'],
+  aliases: ['Test Alias'],
 };
 
 export const validSearchInput = {
@@ -33,6 +34,8 @@ export const validReadNoteInput = {
 export const validUpdateNoteInput = {
   remId: 'rem-id-456',
   title: 'Updated Title',
+  addAliases: ['New Alias'],
+  removeAliases: ['Old Alias'],
 };
 
 export const validSetDocumentStatusInput = {

@@ -89,14 +89,13 @@ async function openWebSocket(port: number): Promise<WebSocket> {
 async function connectAcceptedClient(
   wsServer: WebSocketServer,
   port: number,
-  bridgeVersion = TEST_BRIDGE_VERSION,
-  capabilities?: string[]
+  bridgeVersion = TEST_BRIDGE_VERSION
 ): Promise<WebSocket> {
   const connectPromise = new Promise<void>((resolve) => {
     wsServer.onClientConnect(() => resolve());
   });
   const client = await openWebSocket(port);
-  client.send(JSON.stringify({ type: 'hello', version: bridgeVersion, capabilities }));
+  client.send(JSON.stringify({ type: 'hello', version: bridgeVersion }));
   await connectPromise;
   return client;
 }
@@ -177,13 +176,6 @@ describe('WebSocketServer - Connection State', () => {
     client = await connectAcceptedClient(wsServer, port);
 
     expect(wsServer.isConnected()).toBe(true);
-  });
-
-  it('records optional bridge capabilities without requiring them from existing clients', async () => {
-    client = await connectAcceptedClient(wsServer, port, TEST_BRIDGE_VERSION, ['media.images.v1']);
-
-    expect(wsServer.getBridgeCapabilities()).toEqual(['media.images.v1']);
-    expect(wsServer.hasBridgeCapability('media.images.v1')).toBe(true);
   });
 
   it('should report disconnected after client closes', async () => {

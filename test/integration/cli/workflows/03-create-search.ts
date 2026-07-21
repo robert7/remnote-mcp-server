@@ -285,15 +285,37 @@ export async function createSearchWorkflow(
   {
     const start = Date.now();
     try {
+      const title = `[CLI-TEST] Simple Note ${simpleSearchToken}`;
+      const originalAlias = `Pôvodný názov ${ctx.runId}`;
+      const unicodeAlias = `한국어 ${ctx.runId}`;
       const result = (await ctx.cli.runExpectSuccess([
         'create',
-        `[CLI-TEST] Simple Note ${simpleSearchToken}`,
+        title,
         '--parent-id',
         state.integrationParentRemId,
+        '--aliases',
+        ` Pôvodný   názov ${ctx.runId} `,
+        originalAlias,
+        unicodeAlias,
+        ` ${title.replaceAll(' ', '   ')} `,
       ])) as Record<string, unknown>;
       assertHasField(result, 'remIds', 'create simple note');
       assertIsArray(result.remIds, 'remIds should be an array');
       state.noteAId = (result.remIds as string[])[0];
+      const reread = (await ctx.cli.runExpectSuccess([
+        'read',
+        state.noteAId,
+        '--content-mode',
+        'none',
+        '--view',
+        'full',
+      ])) as Record<string, unknown>;
+      assertTruthy(Array.isArray(reread.aliases), 'created aliases should be an array');
+      assertEqual(
+        JSON.stringify(reread.aliases),
+        JSON.stringify([originalAlias, unicodeAlias]),
+        'CLI create aliases should normalize, deduplicate, suppress the title, and preserve Unicode'
+      );
       steps.push({ label: 'Create simple note', passed: true, durationMs: Date.now() - start });
     } catch (e) {
       steps.push({

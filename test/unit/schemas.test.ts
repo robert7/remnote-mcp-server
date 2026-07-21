@@ -51,6 +51,7 @@ describe('CreateNoteSchema', () => {
       parentId: 'parent-123',
       tagRemIds: ['tag-rem-id-1', 'tag-rem-id-2'],
       asDocument: true,
+      aliases: ['Pôvodný názov', '원래 제목'],
     };
     const result = CreateNoteSchema.parse(input);
     expect(result).toEqual(input);
@@ -72,6 +73,19 @@ describe('CreateNoteSchema', () => {
 
   it('should reject old name-based tags field', () => {
     expect(() => CreateNoteSchema.parse({ title: 'Test', tags: ['tag-name'] })).toThrow();
+  });
+
+  it('should reject aliases without an explicit title', () => {
+    expect(() =>
+      CreateNoteSchema.parse({ content: '- item', aliases: ['Ambiguous Alias'] })
+    ).toThrow('create_note aliases requires title so the alias target is unambiguous');
+  });
+
+  it('should reject invalid or whitespace-only aliases', () => {
+    expect(() => CreateNoteSchema.parse({ title: 'Test', aliases: 'Alias' })).toThrow();
+    expect(() => CreateNoteSchema.parse({ title: 'Test', aliases: ['   '] })).toThrow(
+      'Aliases must not be empty after whitespace normalization'
+    );
   });
 });
 
@@ -281,10 +295,38 @@ describe('UpdateNoteSchema', () => {
     expect(result.title).toBe('New [[id:target-rem-id]]');
   });
 
-  it('should reject missing title', () => {
+  it('should accept alias-only updates with Unicode values', () => {
+    const result = UpdateNoteSchema.parse({
+      remId: 'rem-456',
+      addAliases: ['İstanbul', '日本語'],
+      removeAliases: ['Old Alias'],
+    });
+
+    expect(result.addAliases).toEqual(['İstanbul', '日本語']);
+    expect(result.removeAliases).toEqual(['Old Alias']);
+  });
+
+  it('should reject missing update operations', () => {
     expect(() => UpdateNoteSchema.parse({ remId: 'rem-456' })).toThrow(
-      'remnote_update_note requires title'
+      'remnote_update_note requires title, addAliases, or removeAliases'
     );
+  });
+
+  it('should reject overlapping normalized alias operations', () => {
+    expect(() =>
+      UpdateNoteSchema.parse({
+        remId: 'rem-456',
+        addAliases: ['Same   Alias'],
+        removeAliases: [' Same Alias '],
+      })
+    ).toThrow('Alias cannot be both added and removed: Same Alias');
+  });
+
+  it('should reject invalid alias update payloads', () => {
+    expect(() => UpdateNoteSchema.parse({ remId: 'rem-456', addAliases: [''] })).toThrow(
+      'Aliases must not be empty after whitespace normalization'
+    );
+    expect(() => UpdateNoteSchema.parse({ remId: 'rem-456', removeAliases: [1] })).toThrow();
   });
 
   it('should reject old mixed update fields', () => {

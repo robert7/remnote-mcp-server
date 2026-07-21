@@ -123,6 +123,15 @@ describe('Tool Definitions', () => {
     expect(properties.asDocument).toBeDefined();
   });
 
+  it('should advertise alias writes for create and update tools', () => {
+    const createProperties = CREATE_NOTE_TOOL.inputSchema.properties as Record<string, unknown>;
+    const updateProperties = UPDATE_NOTE_TOOL.inputSchema.properties as Record<string, unknown>;
+    expect(createProperties.aliases).toBeDefined();
+    expect(updateProperties.addAliases).toBeDefined();
+    expect(updateProperties.removeAliases).toBeDefined();
+    expect(UPDATE_NOTE_TOOL.inputSchema.required).toEqual(['remId']);
+  });
+
   it('should have correct name for SEARCH_TOOL', () => {
     expect(SEARCH_TOOL.name).toBe('remnote_search');
   });
@@ -359,7 +368,7 @@ describe('Tool Definitions', () => {
 
   it('should have required remId field for UPDATE_NOTE_TOOL', () => {
     expect(UPDATE_NOTE_TOOL.inputSchema.required).toContain('remId');
-    expect(UPDATE_NOTE_TOOL.inputSchema.required).toContain('title');
+    expect(UPDATE_NOTE_TOOL.inputSchema.required).not.toContain('title');
   });
 
   it('should not advertise old mixed update fields in UPDATE_NOTE_TOOL input schema', () => {
@@ -534,7 +543,6 @@ describe('Tool Handlers - get_media', () => {
     const base64 = imageBytes.toString('base64');
     const mockServer = new MockMCPServer();
     const mockWsServer = {
-      hasBridgeCapability: vi.fn().mockReturnValue(true),
       sendRequest: vi.fn().mockResolvedValue({
         remId: 'rem-1',
         mediaId: 'media_1234',
@@ -577,30 +585,9 @@ describe('Tool Handlers - get_media', () => {
     }
   });
 
-  it('fails loudly when the bridge lacks the image capability', async () => {
-    const mockServer = new MockMCPServer();
-    const mockWsServer = {
-      hasBridgeCapability: vi.fn().mockReturnValue(false),
-      sendRequest: vi.fn(),
-    };
-    registerAllTools(mockServer as never, mockWsServer as never, createMockLogger() as never);
-
-    const result = (await mockServer.callHandler(CallToolRequestSchema, {
-      params: {
-        name: 'remnote_get_media',
-        arguments: { remId: 'rem-1', field: 'text', mediaId: 'media_1234' },
-      },
-    })) as { content: Array<{ text: string }>; isError: boolean };
-
-    expect(result.isError).toBe(true);
-    expect(result.content[0].text).toContain('Bridge capability/version mismatch');
-    expect(mockWsServer.sendRequest).not.toHaveBeenCalled();
-  });
-
   it('rejects a locator whose identity does not match the request', async () => {
     const mockServer = new MockMCPServer();
     const mockWsServer = {
-      hasBridgeCapability: vi.fn().mockReturnValue(true),
       sendRequest: vi.fn().mockResolvedValue({
         remId: 'different-rem',
         mediaId: 'media_1234',
@@ -674,6 +661,20 @@ describe('Tool Handlers - create_note', () => {
     expect(mockWsServer.sendRequest).toHaveBeenCalledWith('create_note', {
       ...validCreateNoteInput,
       asDocument: true,
+    });
+  });
+
+  it('should forward create aliases to the bridge', async () => {
+    await mockServer.callHandler(CallToolRequestSchema, {
+      params: {
+        name: 'remnote_create_note',
+        arguments: { title: 'Original Title', aliases: ['Pôvodný názov', '원래 제목'] },
+      },
+    });
+
+    expect(mockWsServer.sendRequest).toHaveBeenCalledWith('create_note', {
+      title: 'Original Title',
+      aliases: ['Pôvodný názov', '원래 제목'],
     });
   });
 });
@@ -1025,6 +1026,25 @@ describe('Tool Handlers - update_note', () => {
     })) as ToolSuccessResult;
 
     expectStructuredToolResult(result, sampleMutatingResult);
+  });
+
+  it('should forward alias-only updates to the bridge', async () => {
+    await mockServer.callHandler(CallToolRequestSchema, {
+      params: {
+        name: 'remnote_update_note',
+        arguments: {
+          remId: 'rem-456',
+          addAliases: ['New Alias'],
+          removeAliases: ['Old Alias'],
+        },
+      },
+    });
+
+    expect(mockWsServer.sendRequest).toHaveBeenCalledWith('update_note', {
+      remId: 'rem-456',
+      addAliases: ['New Alias'],
+      removeAliases: ['Old Alias'],
+    });
   });
 
   it('should reject old mixed update fields', async () => {
@@ -1406,7 +1426,6 @@ describe('Tool Handlers - status', () => {
       connected: true,
       serverVersion: '0.5.1',
       ...sampleStatusResult,
-      capabilities: [],
     });
   });
 
@@ -1476,14 +1495,14 @@ describe('Tool Handlers - get_playbook', () => {
       params: { name: 'remnote_get_playbook', arguments: {} },
     })) as ToolSuccessResult;
 
-    expect(result.structuredContent?.playbookVersion).toBe('1.8.0');
+    expect(result.structuredContent?.playbookVersion).toBe('1.9.0');
     expect(Array.isArray(result.structuredContent?.decisionTree)).toBe(true);
     expect((result.structuredContent?.decisionTree as unknown[])?.length).toBeGreaterThan(0);
     expect(result.structuredContent?.decisionTree).toContain(
-      'Need to rename a note? Use remnote_update_note with remId and title only; use [[id:<remId>]] inside the title for exact inline Rem references.'
+      'Need to rename a note or add/remove real aliases? Use remnote_update_note with remId plus title and/or addAliases/removeAliases; use [[id:<remId>]] inside the title for exact inline Rem references.'
     );
     expect(result.structuredContent?.decisionTree).toContain(
-      'Need to create a note? Use remnote_create_note; pass tagRemIds for exact-ID tag assignment, [[id:<remId>]] for exact inline Rem references, and asDocument=true when the title/root Rem should be a document.'
+      'Need to create a note? Use remnote_create_note; pass aliases for real alternate names on an explicit title/root Rem, tagRemIds for exact-ID tag assignment, [[id:<remId>]] for exact inline Rem references, and asDocument=true when the title/root Rem should be a document.'
     );
     expect(result.structuredContent?.decisionTree).toContain(
       'Need to mark an existing Rem as a document? Use remnote_set_document_status dryRun first, include expectedOldRemType for stale-context protection, then rerun with dryRun=false after approval.'
@@ -1501,7 +1520,7 @@ describe('Tool Handlers - get_playbook', () => {
       'Need to search within a specific branch? Use remnote_search with parentRemId; keep the same parentRemId when continuing with nextCursor.'
     );
     expect(result.structuredContent?.decisionTree).toContain(
-      'Need an embedded RemNote-managed image? Confirm media.images.v1, call remnote_read_note with includeMediaMetadata=true, then call remnote_get_media with the returned remId, field, and mediaId.'
+      'Need an embedded RemNote-managed image? Call remnote_read_note with includeMediaMetadata=true, then call remnote_get_media with the returned remId, field, and mediaId.'
     );
     expect(result.structuredContent?.decisionTree).toContain(
       'Need hierarchy placement context? Add ancestorDepth, typically 5, to search/read/search_by_tag/list_children; ancestors are direct-parent first.'
@@ -1523,6 +1542,7 @@ describe('Tool Handlers - get_playbook', () => {
     expect(result.structuredContent?.writePolicy).toMatchObject({
       guidance: expect.arrayContaining([
         'All production tag writes use exact tag Rem IDs: create_note.tagRemIds, append_journal.tagRemIds, and update_tags add/remove arrays.',
+        'remnote_update_note is metadata-only for title and alias changes; use insert_children, replace_children, and update_tags for structural or tag writes.',
         'Markdown-capable write fields support [[id:<remId>]] to create real inline references to existing Rems without name lookup.',
         'remnote_set_property writes exact-ID tag/table property values and requires acceptWriteOperations=true.',
         'remnote_set_document_status changes only document status; it preserves concept/card status and defaults to dryRun=true.',

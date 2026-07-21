@@ -69,11 +69,14 @@ describe('RemNoteLocalProxy', () => {
     const journalProps = appendJournal?.inputSchema.properties ?? {};
 
     expect(createProps.tagRemIds).toBeDefined();
+    expect(createProps.aliases).toBeDefined();
     expect(createProps.tags).toBeUndefined();
     expect(updateProps.appendContent).toBeUndefined();
     expect(updateProps.replaceContent).toBeUndefined();
     expect(updateProps.addTags).toBeUndefined();
     expect(updateProps.removeTags).toBeUndefined();
+    expect(updateProps.addAliases).toBeDefined();
+    expect(updateProps.removeAliases).toBeDefined();
     expect(journalProps.tagRemIds).toBeDefined();
   });
 

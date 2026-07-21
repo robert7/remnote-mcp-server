@@ -22,7 +22,7 @@
   "tools": [
     {
       "name": "remnote_create_note",
-      "description": "Create a new note in RemNote with optional content, parent, and exact tag Rem IDs. Supports hierarchical markdown, flashcard syntax (e.g. \"- Term :: Definition\"), and exact inline Rem references as [[id:<remId>]]. At least one of title or content must be provided. Recommended preflight once per session: remnote_status."
+      "description": "Create a new note in RemNote with optional content, parent, exact tag Rem IDs, and real aliases on an explicit title/root Rem. Supports hierarchical markdown, flashcard syntax (e.g. \"- Term :: Definition\"), and exact inline Rem references as [[id:<remId>]]. At least one of title or content must be provided. Recommended preflight once per session: remnote_status."
     },
     {
       "name": "remnote_search",
@@ -38,7 +38,7 @@
     },
     {
       "name": "remnote_get_media",
-      "description": "Retrieve a RemNote-managed local image as MCP-native image content. First call remnote_read_note with includeMediaMetadata=true, then pass the returned remId, field, and mediaId. Requires bridge capability media.images.v1. External URL retrieval is not supported."
+      "description": "Retrieve a RemNote-managed local image as MCP-native image content. First call remnote_read_note with includeMediaMetadata=true, then pass the returned remId, field, and mediaId. External URL retrieval is not supported."
     },
     {
       "name": "remnote_list_children",
@@ -46,7 +46,7 @@
     },
     {
       "name": "remnote_update_note",
-      "description": "Update note metadata in RemNote. Use this tool for title changes only. The title supports exact Rem references as [[id:<remId>]]."
+      "description": "Update note metadata in RemNote with an optional title change and exact additive/removal alias operations. The title supports exact Rem references as [[id:<remId>]]."
     },
     {
       "name": "remnote_set_document_status",
@@ -82,7 +82,7 @@
     },
     {
       "name": "remnote_status",
-      "description": "Check bridge connection health, compatibility warnings, and write-policy capabilities. Recommended once per session before write operations."
+      "description": "Check bridge connection health, compatibility warnings, and write-policy settings. Recommended once per session before write operations."
     },
     {
       "name": "remnote_read_table",

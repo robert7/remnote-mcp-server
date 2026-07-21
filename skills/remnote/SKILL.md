@@ -159,8 +159,13 @@ If any precondition is missing, stop and fix setup first.
   - `remnote-cli create "Title" --content-file /tmp/body.md --as-document --text`
   - `--as-document` requires an explicit title/root Rem and preserves any concept/card status created by markdown
     syntax.
+- Create real aliases on the explicit title/root Rem:
+  - `remnote-cli create "Title" --aliases "Original Title" "Alternate Title" --text`
 - Update title: `remnote-cli update <rem-id> --title "New Title" --text`
   - Titles support `[[id:<remId>]]` for exact inline Rem references.
+- Add or remove real aliases without replacing the alias set:
+  - `remnote-cli update <rem-id> --add-aliases "New Alias" --remove-aliases "Old Alias" --text`
+  - Alias comparison is whitespace-normalized and case-sensitive; additions and removals are idempotent.
 - Set document status on an existing Rem (dry-run first):
   - `remnote-cli set-document-status <rem-id> --document --text`
   - Apply after preview:

@@ -69,6 +69,7 @@ remnote-cli create [title] [options]
 | `--parent-id <id>`      | none    | Parent Rem ID                                        |
 | `--tag-ids <id...>`     | none    | Exact tag Rem IDs to add                             |
 | `--as-document`         | false   | Mark the created title/root Rem as a document        |
+| `--aliases <text...>`   | none    | Real aliases to add to the explicit title/root Rem   |
 
 Behavior rules:
 
@@ -82,6 +83,8 @@ Behavior rules:
 - If `parent-id` is not provided, the note will be created under the default root rem in the setting.
 - Tag Rem IDs are applied only to the top-level Rems created. Tag names are not accepted.
 - `--as-document` requires a title/root Rem and preserves any flashcard/concept status created by markdown syntax.
+- `--aliases` requires a title. Values are whitespace-normalized and deduplicated; matches to the primary title are
+  ignored while Unicode and case are preserved.
 
 Examples:
 
@@ -101,6 +104,9 @@ remnote-cli create --title "Compound" --content "Component [[id:<component-rem-i
 
 # Create a title/root Rem as a document
 remnote-cli create --title "Project Plan" --content "Phase 1" --as-document
+
+# Create real aliases on the title/root Rem
+remnote-cli create --title "The Shop on Main Street" --aliases "Obchod na korze"
 
 # Create a new note with markdown content directly under parent rem id
 # Note: if the content is in markdown format, --content/--content-file must be used to avoid misinterpretation of the content as command options
@@ -280,9 +286,14 @@ Update note metadata.
 remnote-cli update <rem-id> [options]
 ```
 
-| Option           | Default | Description                                      |
-| ---------------- | ------- | ------------------------------------------------ |
-| `--title <text>` | none    | Replace title/headline; supports `[[id:<remId>]]` |
+| Option                       | Default | Description                                                  |
+| ---------------------------- | ------- | ------------------------------------------------------------ |
+| `--title <text>`             | none    | Replace title/headline; supports `[[id:<remId>]]`             |
+| `--add-aliases <text...>`    | none    | Add real aliases if not already present                       |
+| `--remove-aliases <text...>` | none    | Remove aliases by exact whitespace-normalized, case-sensitive match |
+
+At least one update option is required. Alias additions/removals are idempotent, and the same normalized alias cannot
+be requested in both operations.
 
 Use the dedicated commands below for child content and tag writes.
 
@@ -291,6 +302,7 @@ Examples:
 ```bash
 remnote-cli update abc123def --title "Updated Title"
 remnote-cli update abc123def --title "See also [[id:<target-rem-id>]]"
+remnote-cli update abc123def --add-aliases "Original Title" --remove-aliases "Old Title"
 ```
 
 ## set-document-status

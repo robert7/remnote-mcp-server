@@ -3,7 +3,7 @@ export const FALLBACK_TOOLS = [
   {
     name: 'remnote_create_note',
     description:
-      'Create a new note in RemNote with optional content, parent, and exact tag Rem IDs. Supports hierarchical markdown, flashcard syntax (e.g. "- Term :: Definition"), and exact inline Rem references as [[id:<remId>]]. At least one of title or content must be provided. Recommended preflight once per session: remnote_status.',
+      'Create a new note in RemNote with optional content, parent, exact tag Rem IDs, and real aliases on an explicit title/root Rem. Supports hierarchical markdown, flashcard syntax (e.g. "- Term :: Definition"), and exact inline Rem references as [[id:<remId>]]. At least one of title or content must be provided. Recommended preflight once per session: remnote_status.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -32,6 +32,14 @@ export const FALLBACK_TOOLS = [
           type: 'boolean',
           description:
             'Mark the created title/root Rem as a document while preserving any concept/card status',
+        },
+        aliases: {
+          type: 'array',
+          items: {
+            type: 'string',
+          },
+          description:
+            'Alternate names for the explicit title/root Rem; normalized, deduplicated, and ignored when equal to the primary title',
         },
       },
       required: [],
@@ -207,7 +215,7 @@ export const FALLBACK_TOOLS = [
   {
     name: 'remnote_get_media',
     description:
-      'Retrieve a RemNote-managed local image as MCP-native image content. First call remnote_read_note with includeMediaMetadata=true, then pass the returned remId, field, and mediaId. Requires bridge capability media.images.v1. External URL retrieval is not supported.',
+      'Retrieve a RemNote-managed local image as MCP-native image content. First call remnote_read_note with includeMediaMetadata=true, then pass the returned remId, field, and mediaId. External URL retrieval is not supported.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -268,7 +276,7 @@ export const FALLBACK_TOOLS = [
   {
     name: 'remnote_update_note',
     description:
-      'Update note metadata in RemNote. Use this tool for title changes only. The title supports exact Rem references as [[id:<remId>]].',
+      'Update note metadata in RemNote with an optional title change and exact additive/removal alias operations. The title supports exact Rem references as [[id:<remId>]].',
     inputSchema: {
       type: 'object',
       properties: {
@@ -280,8 +288,22 @@ export const FALLBACK_TOOLS = [
           type: 'string',
           description: 'New title. Use [[id:<remId>]] for exact Rem references.',
         },
+        addAliases: {
+          type: 'array',
+          items: {
+            type: 'string',
+          },
+          description: 'Aliases to add if their normalized text is not already present',
+        },
+        removeAliases: {
+          type: 'array',
+          items: {
+            type: 'string',
+          },
+          description: 'Aliases to remove by exact whitespace-normalized, case-sensitive match',
+        },
       },
-      required: ['remId', 'title'],
+      required: ['remId'],
       additionalProperties: false,
     },
   },
@@ -551,7 +573,7 @@ export const FALLBACK_TOOLS = [
   {
     name: 'remnote_status',
     description:
-      'Check bridge connection health, compatibility warnings, and write-policy capabilities. Recommended once per session before write operations.',
+      'Check bridge connection health, compatibility warnings, and write-policy settings. Recommended once per session before write operations.',
     inputSchema: {
       type: 'object',
       properties: {},

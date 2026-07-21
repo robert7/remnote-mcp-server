@@ -429,6 +429,80 @@ export async function readUpdateWorkflow(
     const start = Date.now();
     try {
       if (acceptWriteOperations) {
+        const originalAlias = `Pôvodný názov ${ctx.runId}`;
+        const unicodeAlias = `한국어 ${ctx.runId}`;
+        const addedAlias = `العنوان ${ctx.runId}`;
+        const result = (await ctx.cli.runExpectSuccess([
+          'update',
+          state.noteAId as string,
+          '--add-aliases',
+          unicodeAlias,
+          addedAlias,
+          addedAlias,
+          '--remove-aliases',
+          ` Pôvodný   názov ${ctx.runId} `,
+          'Missing Alias',
+        ])) as Record<string, unknown>;
+        assertHasField(result, 'remIds', 'update note aliases');
+
+        const reread = (await ctx.cli.runExpectSuccess([
+          'read',
+          state.noteAId as string,
+          '--content-mode',
+          'none',
+          '--view',
+          'full',
+        ])) as Record<string, unknown>;
+        assertTruthy(Array.isArray(reread.aliases), 'updated aliases should be an array');
+        assertEqual(
+          JSON.stringify(reread.aliases),
+          JSON.stringify([unicodeAlias, addedAlias]),
+          'CLI alias add/remove should be exact, normalized, idempotent, and Unicode-safe'
+        );
+        assertTruthy(
+          !(reread.aliases as string[]).includes(originalAlias),
+          'removed alias should be absent'
+        );
+        steps.push({
+          label: 'Update note aliases',
+          passed: true,
+          durationMs: Date.now() - start,
+        });
+      } else {
+        const result = await ctx.cli.runExpectError([
+          'update',
+          state.noteAId as string,
+          '--add-aliases',
+          'Should be blocked',
+        ]);
+        assertContains(
+          result.stderr,
+          'Write operations are disabled',
+          'update aliases should be blocked when write operations are disabled'
+        );
+        steps.push({
+          label: 'Update note aliases blocked by write gate',
+          passed: true,
+          durationMs: Date.now() - start,
+        });
+      }
+    } catch (e) {
+      steps.push({
+        label: acceptWriteOperations
+          ? 'Update note aliases'
+          : 'Update note aliases blocked by write gate',
+        passed: false,
+        durationMs: Date.now() - start,
+        error: (e as Error).message,
+      });
+    }
+  }
+
+  // Step 3: Update note A — insert content (or validate write gate rejection)
+  {
+    const start = Date.now();
+    try {
+      if (acceptWriteOperations) {
         assertTruthy(typeof state.noteBId === 'string', 'insert content reference target remId');
         const result = (await withTempContentFile(
           `Appended by CLI integration test [[id:${state.noteBId}]]`,

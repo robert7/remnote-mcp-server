@@ -260,13 +260,34 @@ export async function createSearchWorkflow(
   {
     const start = Date.now();
     try {
+      const title = `[MCP-TEST] Simple Note ${simpleSearchToken}`;
+      const originalAlias = `Pôvodný názov ${ctx.runId}`;
+      const unicodeAlias = `日本語 ${ctx.runId}`;
       const result = (await ctx.client.callTool('remnote_create_note', {
-        title: `[MCP-TEST] Simple Note ${simpleSearchToken}`,
+        title,
         parentId: state.integrationParentRemId,
+        aliases: [
+          ` ${title.replaceAll(' ', '   ')} `,
+          ` Pôvodný   názov ${ctx.runId} `,
+          originalAlias,
+          unicodeAlias,
+        ],
       })) as { remIds: string[] };
       assertHasField(result, 'remIds', 'create simple note');
       assertIsArray(result.remIds, 'remIds should be an array');
       state.noteAId = result.remIds[0];
+
+      const reread = (await ctx.client.callTool('remnote_read_note', {
+        remId: state.noteAId,
+        contentMode: 'none',
+        view: 'full',
+      })) as Record<string, unknown>;
+      assertIsArray(reread.aliases, 'created aliases');
+      assertEqual(
+        JSON.stringify(reread.aliases),
+        JSON.stringify([originalAlias, unicodeAlias]),
+        'create aliases should normalize, deduplicate, suppress the title, and preserve Unicode'
+      );
       steps.push({ label: 'Create simple note', passed: true, durationMs: Date.now() - start });
     } catch (e) {
       steps.push({

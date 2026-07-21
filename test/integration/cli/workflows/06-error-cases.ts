@@ -182,7 +182,40 @@ export async function errorCasesWorkflow(
     }
   }
 
-  // Step 8: Journal detects argument shifting in options
+  // Step 8: Update rejects contradictory normalized alias operations
+  {
+    const start = Date.now();
+    try {
+      const result = await ctx.cli.runExpectError([
+        'update',
+        'validation-only-rem-id',
+        '--add-aliases',
+        'Same   Alias',
+        '--remove-aliases',
+        ' Same Alias ',
+      ]);
+      assertTruthy(result.exitCode !== 0, 'should have non-zero exit code');
+      assertContains(
+        result.stderr,
+        'Alias cannot be both added and removed',
+        'stderr should explain contradictory alias operations'
+      );
+      steps.push({
+        label: 'Update rejects contradictory alias operations',
+        passed: true,
+        durationMs: Date.now() - start,
+      });
+    } catch (e) {
+      steps.push({
+        label: 'Update rejects contradictory alias operations',
+        passed: false,
+        durationMs: Date.now() - start,
+        error: (e as Error).message,
+      });
+    }
+  }
+
+  // Step 9: Journal detects argument shifting in options
   {
     const start = Date.now();
     try {

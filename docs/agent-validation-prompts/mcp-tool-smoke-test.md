@@ -62,7 +62,7 @@ Resolve all three by exact title and derive all Rem, property, field, and media 
    - Confirm the playbook mentions dry-run-first `remnote_set_document_status`.
    - Confirm the playbook mentions setting tag/table property values with `remnote_set_property`.
    - Confirm the playbook mentions exact inline Rem references with `[[id:<remId>]]`.
-   - Confirm the playbook describes the `media.images.v1` image retrieval workflow.
+   - Confirm the playbook describes managed-image retrieval and real alias writes.
 
 3. Resolve the shared temporary integration-test root.
    - Search for the exact title `RemNote Automation Bridge [temporary integration test data]`.
@@ -77,6 +77,7 @@ Resolve all three by exact title and derive all Rem, property, field, and media 
 4. Create a test run note under the root note.
    - Title: `[MCP-AGENT-TEST] Tool smoke test <current ISO timestamp>`
    - Content: short text stating the agent/client name if known and the timestamp
+   - Aliases: one whitespace-padded Latin alias and one Unicode alias
    - Keep the created run note Rem ID.
 
 5. Search for the exact run-note title with `remnote_search`, scoped with `parentRemId` set to the root note Rem ID,
@@ -86,6 +87,7 @@ Resolve all three by exact title and derive all Rem, property, field, and media 
    - Use `contentMode="structured"` when available.
    - Use `ancestorDepth=5` on at least one read or search and confirm `ancestors` is parent-first when present.
    - Confirm the title and parent context are consistent with the root note.
+   - Confirm `aliases` contains normalized values and preserves the Unicode alias.
    - If `inlineRefs` appears on the note or structured children, confirm each item includes `text`, `targetRemId`, and
      `kind: "rem"`.
    - Dry-run `remnote_set_document_status` on the run note with `isDocument: true` and `expectedOldRemType` set to the
@@ -96,6 +98,8 @@ Resolve all three by exact title and derive all Rem, property, field, and media 
    - Read it again with `contentMode="structured"` and `view="full"`.
    - Confirm the updated title.
    - Confirm `inlineRefs` includes an item with `targetRemId` equal to the root note Rem ID and `kind: "rem"`.
+   - Add a new alias and remove the original Latin alias without changing the Unicode alias.
+   - Repeat the addition, read again, and confirm it remains idempotent with no duplicate alias.
 
 8. Insert children under the run note with `remnote_insert_children`.
    - Insert at least two children, for example:

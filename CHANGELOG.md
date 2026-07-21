@@ -7,6 +7,21 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- Add real RemNote alias writes through `remnote_create_note`, `remnote_update_note`, `remnote-cli create`, and
+  `remnote-cli update`, with normalization, idempotency, exact removal, Unicode preservation, and MCP/MCPB/CLI parity.
+
+### Changed
+
+- Define synchronized minor releases as the compatibility boundary for new bridge/server protocol features while
+  preserving patch-level wire compatibility.
+
+### Removed
+
+- Remove the redundant bridge capability list and `media.images.v1` negotiation; matching bridge/server minor versions
+  now provide the complete protocol contract.
+
 ## [0.17.0] - 2026-07-17
 
 ### Added

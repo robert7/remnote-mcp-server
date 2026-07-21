@@ -143,7 +143,43 @@ export async function errorCasesWorkflow(
     }
   }
 
-  // Step 5: Search with empty query handled gracefully
+  // Step 5: Contradictory alias operations fail schema validation
+  {
+    const start = Date.now();
+    try {
+      const errorText = await ctx.client.callToolExpectError('remnote_update_note', {
+        remId: 'validation-only-rem-id',
+        addAliases: ['Same   Alias'],
+        removeAliases: [' Same Alias '],
+      });
+      assertTruthy(
+        errorText.includes('Alias cannot be both added and removed'),
+        'should reject contradictory normalized alias operations'
+      );
+      steps.push({
+        label: 'Contradictory alias operations return validation error',
+        passed: true,
+        durationMs: Date.now() - start,
+      });
+    } catch (e) {
+      if (e instanceof ToolError) {
+        steps.push({
+          label: 'Contradictory alias operations return validation error',
+          passed: true,
+          durationMs: Date.now() - start,
+        });
+      } else {
+        steps.push({
+          label: 'Contradictory alias operations return validation error',
+          passed: false,
+          durationMs: Date.now() - start,
+          error: (e as Error).message,
+        });
+      }
+    }
+  }
+
+  // Step 6: Search with empty query handled gracefully
   {
     const start = Date.now();
     try {
