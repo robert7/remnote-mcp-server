@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "remnote-local",
   "display_name": "RemNote Local",
-  "version": "0.17.0",
+  "version": "0.18.0",
   "description": "Use a locally running RemNote MCP Server from Claude Desktop or Cowork without a public HTTPS tunnel.",
   "long_description": "RemNote Local is a Claude Desktop extension that exposes RemNote MCP tools over stdio and forwards calls to a local remnote-mcp-server Streamable HTTP endpoint. It can also be used by Claude Cowork in Claude Desktop when desktop extensions are enabled. Start remnote-mcp-server and keep the RemNote Automation Bridge plugin connected before using the tools.",
   "author": { "name": "Robert Spiegel", "email": "nightingale7@gmail.com" },

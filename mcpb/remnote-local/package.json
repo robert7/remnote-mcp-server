@@ -1,6 +1,6 @@
 {
   "name": "remnote-local-mcpb",
-  "version": "0.17.0",
+  "version": "0.18.0",
   "description": "Claude Desktop MCPB stdio proxy for a local RemNote MCP Server",
   "type": "module",
   "private": true,
