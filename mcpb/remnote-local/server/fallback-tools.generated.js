@@ -411,7 +411,7 @@ export const FALLBACK_TOOLS = [
   {
     name: 'remnote_replace_children',
     description:
-      'Replace all direct children under a parent Rem. This is destructive because existing child Rem IDs are removed and may be blocked by bridge policy.',
+      'Replace all direct content children under a parent Rem while preserving parent metadata. This is destructive because existing content-child Rem IDs are removed and may be blocked by bridge policy.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -422,7 +422,7 @@ export const FALLBACK_TOOLS = [
         content: {
           type: 'string',
           description:
-            'Markdown content to use as replacement children; empty string clears all direct children. Use [[id:<remId>]] for exact Rem references.',
+            'Markdown content to use as replacement children; empty string clears all direct content children. Use [[id:<remId>]] for exact Rem references.',
         },
       },
       required: ['parentRemId', 'content'],

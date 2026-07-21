@@ -199,6 +199,8 @@ content and matching structured metadata.
     - If destructive validation is explicitly approved, call `remnote_replace_children` on the run note with content
       containing `[[id:<root note Rem ID>]]`, then read the replacement child with `contentMode="structured"` and
       `view="full"` and confirm `inlineRefs.targetRemId` equals the root note Rem ID.
+    - Read the run note with `view="full"` immediately before and after replacement and confirm its Rem ID, title,
+      aliases, Rem type, tags, and parent are unchanged.
     - Do not call `remnote_replace_children` unless destructive validation is explicitly approved.
 
 19. Final response:

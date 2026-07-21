@@ -184,7 +184,7 @@ If any precondition is missing, stop and fix setup first.
   - For inline references inside text values, use `[[id:<remId>]]`.
 - Replace direct children (destructive, only with explicit user intent):
   - `remnote-cli replace-children <parent-rem-id> --content-file /tmp/replacement.md --text`
-  - Use an empty content file to clear all direct children.
+  - Use an empty content file to clear all direct content children; parent metadata is preserved.
 - Journal: `remnote-cli journal "Finished task" --text`
 - Journal (from file): `remnote-cli journal --content-file /tmp/entry.md --text`
 - Journal without timestamp:
@@ -195,7 +195,8 @@ If any precondition is missing, stop and fix setup first.
 - Safety:
   - Use `insert-children` for additive child writes and `replace-children` only for explicit replacement.
   - Run replace only when `acceptWriteOperations=true` and `acceptReplaceOperation=true` from `status`.
-  - Treat replace as destructive and require the user to clearly request replace semantics.
+  - Treat replace as destructive for content-child Rem IDs and require the user to clearly request replace semantics;
+    parent identity, title, aliases, document status, tags, and properties are preserved.
   - Quote text values with spaces or special characters, and use explicit empty-value syntax like `--title=""` to avoid
     argument shifting.
   - Use `set-document-status` dry-run first and include `--expected-old-rem-type` when applying from a prior read.

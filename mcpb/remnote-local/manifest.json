@@ -62,7 +62,7 @@
     },
     {
       "name": "remnote_replace_children",
-      "description": "Replace all direct children under a parent Rem. This is destructive because existing child Rem IDs are removed and may be blocked by bridge policy."
+      "description": "Replace all direct content children under a parent Rem while preserving parent metadata. This is destructive because existing content-child Rem IDs are removed and may be blocked by bridge policy."
     },
     {
       "name": "remnote_update_tags",

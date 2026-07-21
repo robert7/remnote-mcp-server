@@ -16,6 +16,8 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Define synchronized minor releases as the compatibility boundary for new bridge/server protocol features while
   preserving patch-level wire compatibility.
+- Clarify and validate across MCP, MCPB, and CLI that `remnote_replace_children` removes only direct content children
+  while preserving parent identity, title, aliases, document status, tags, and properties.
 
 ### Removed
 

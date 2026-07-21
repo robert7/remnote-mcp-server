@@ -989,7 +989,7 @@ export const INSERT_CHILDREN_TOOL = {
 export const REPLACE_CHILDREN_TOOL = {
   name: 'remnote_replace_children',
   description:
-    'Replace all direct children under a parent Rem. This is destructive because existing child Rem IDs are removed and may be blocked by bridge policy.',
+    'Replace all direct content children under a parent Rem while preserving parent metadata. This is destructive because existing content-child Rem IDs are removed and may be blocked by bridge policy.',
   inputSchema: {
     type: 'object' as const,
     properties: {
@@ -1000,7 +1000,7 @@ export const REPLACE_CHILDREN_TOOL = {
       content: {
         type: 'string',
         description:
-          'Markdown content to use as replacement children; empty string clears all direct children. Use [[id:<remId>]] for exact Rem references.',
+          'Markdown content to use as replacement children; empty string clears all direct content children. Use [[id:<remId>]] for exact Rem references.',
       },
     },
     required: ['parentRemId', 'content'],
@@ -1560,7 +1560,7 @@ export function registerAllTools(
               'Need to append to today journal? Use remnote_append_journal; pass tagRemIds when the journal entry should be tagged and [[id:<remId>]] for exact inline Rem references.',
               'Need to insert children? Use remnote_insert_children with an explicit position; use [[id:<remId>]] for exact inline Rem references.',
               'Need to move a note? Use remnote_move_note dryRun first, include expectedOldParentRemId for stale-context protection, then rerun with dryRun=false after approval.',
-              'Need to replace children? Check remnote_status first; remnote_replace_children requires acceptReplaceOperation=true and supports [[id:<remId>]] for exact inline Rem references.',
+              'Need to replace children? Check remnote_status first; remnote_replace_children requires acceptReplaceOperation=true, preserves parent metadata, and supports [[id:<remId>]] for exact inline Rem references.',
               'Need to update tags on an existing note? Use remnote_update_tags with exact tag Rem IDs.',
               'Need to set a tag/table property value? Use remnote_set_property with exact remId, tagRemId, propertyRemId, and a text/rem_reference/clear value payload. For select properties, pass the option Rem ID as rem_reference.remId; for inline references in text values, use [[id:<remId>]].',
             ],
@@ -1588,8 +1588,8 @@ export function registerAllTools(
                 'Create/update/insert/replace/tag/journal writes require acceptWriteOperations=true.',
                 'remnote_update_note is metadata-only for title and alias changes; use insert_children, replace_children, and update_tags for structural or tag writes.',
                 'remnote_set_document_status changes only document status; it preserves concept/card status and defaults to dryRun=true.',
-                'remnote_replace_children requires acceptReplaceOperation=true.',
-                'remnote_insert_children preserves existing child Rem IDs; remnote_replace_children removes them.',
+                'remnote_replace_children requires acceptReplaceOperation=true and preserves parent identity, title, aliases, document status, tags, and properties.',
+                'remnote_insert_children preserves existing child Rem IDs; remnote_replace_children removes existing direct content-child Rem IDs.',
                 'remnote_move_note preserves the moved Rem ID and subtree; dryRun defaults to true.',
                 'All production tag writes use exact tag Rem IDs: create_note.tagRemIds, append_journal.tagRemIds, and update_tags add/remove arrays.',
                 'Markdown-capable write fields support [[id:<remId>]] to create real inline references to existing Rems without name lookup.',

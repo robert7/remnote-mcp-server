@@ -31,6 +31,34 @@ function summarizeReadResult(result: Record<string, unknown>): Record<string, un
   };
 }
 
+function normalizedTags(value: unknown): string {
+  if (!Array.isArray(value)) return '[]';
+  return JSON.stringify(
+    value
+      .map((tag) => {
+        const record = tag as Record<string, unknown>;
+        return { tagRemId: record.tagRemId, name: record.name };
+      })
+      .sort((left, right) => String(left.tagRemId).localeCompare(String(right.tagRemId)))
+  );
+}
+
+function assertParentMetadataUnchanged(
+  before: Record<string, unknown>,
+  after: Record<string, unknown>,
+  label: string
+): void {
+  for (const field of ['remId', 'title', 'remType', 'parentRemId', 'cardDirection'] as const) {
+    assertEqual(after[field], before[field], `${label}: ${field}`);
+  }
+  assertStringArrayEqualUnordered(
+    after.aliases ?? [],
+    (before.aliases ?? []) as string[],
+    `${label}: aliases`
+  );
+  assertEqual(normalizedTags(after.tags), normalizedTags(before.tags), `${label}: tags`);
+}
+
 async function resolveExpectedSearchByTagTarget(
   ctx: WorkflowContext,
   taggedRemId: string
@@ -743,6 +771,14 @@ export async function readUpdateWorkflow(
     try {
       if (acceptReplaceOperation) {
         assertTruthy(typeof state.noteBId === 'string', 'replace content reference target remId');
+        const parentBefore = (await ctx.cli.runExpectSuccess([
+          'read',
+          state.noteAId as string,
+          '--content-mode',
+          'none',
+          '--view',
+          'full',
+        ])) as Record<string, unknown>;
         const replaceBody = `[CLI-TEST] Replaced via integration test ${ctx.runId} [[id:${state.noteBId}]]`;
         const result = (await withTempContentFile(
           replaceBody,
@@ -761,12 +797,19 @@ export async function readUpdateWorkflow(
           state.noteAId as string,
           '--content-mode',
           'markdown',
+          '--view',
+          'full',
         ])) as Record<string, unknown>;
         assertTruthy(typeof reread.content === 'string', 're-read content should be a string');
         assertContains(
           reread.content as string,
           `[CLI-TEST] Replaced via integration test ${ctx.runId}`,
           're-read content should include replaced body'
+        );
+        assertParentMetadataUnchanged(
+          parentBefore,
+          reread,
+          'CLI replace-children should preserve parent metadata'
         );
 
         const replacedRemId = (result.remIds as string[])[0];
@@ -842,6 +885,14 @@ export async function readUpdateWorkflow(
   if (acceptReplaceOperation) {
     const start = Date.now();
     try {
+      const parentBefore = (await ctx.cli.runExpectSuccess([
+        'read',
+        state.noteAId as string,
+        '--content-mode',
+        'none',
+        '--view',
+        'full',
+      ])) as Record<string, unknown>;
       const result = (await ctx.cli.runExpectSuccess([
         'replace-children',
         state.noteAId as string,
@@ -855,11 +906,18 @@ export async function readUpdateWorkflow(
         state.noteAId as string,
         '--content-mode',
         'markdown',
+        '--view',
+        'full',
       ])) as Record<string, unknown>;
       assertEqual(
         (reread.content as string | undefined) ?? '',
         '',
         'empty replace should clear markdown content'
+      );
+      assertParentMetadataUnchanged(
+        parentBefore,
+        reread,
+        'CLI empty replace-children should preserve parent metadata'
       );
       steps.push({
         label: 'Update note A (empty replace clears children)',

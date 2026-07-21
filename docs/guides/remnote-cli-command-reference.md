@@ -383,7 +383,8 @@ remnote-cli move-note <rem-id> --new-parent-rem-id <parent-rem-id> --expected-ol
 
 ## replace-children
 
-Replace all direct child Rems under a parent. This is destructive and can be blocked by bridge policy.
+Replace all direct content child Rems under a parent while preserving parent identity, title, aliases, document status,
+tags, and properties. This is destructive for existing content-child Rem IDs and can be blocked by bridge policy.
 
 ```bash
 remnote-cli replace-children <parent-rem-id> --content-file <path>
@@ -392,7 +393,7 @@ remnote-cli replace-children <parent-rem-id> --content-file <path>
 | Option                  | Default | Description                                                                      |
 | ----------------------- | ------- | -------------------------------------------------------------------------------- |
 | `--content <text>`      | none    | Replacement content                                                              |
-| `--content-file <path>` | none    | Read replacement content from UTF-8 file (`-` stdin; empty file clears children) |
+| `--content-file <path>` | none    | Read replacement content from UTF-8 file (`-` stdin; empty file clears content children) |
 
 Replacement content supports `[[id:<remId>]]` for exact inline references to existing Rems.
 

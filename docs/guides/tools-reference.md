@@ -512,12 +512,13 @@ Use `[[id:<remId>]]` inside inserted markdown to create exact inline references 
 
 ## remnote_replace_children
 
-Replace all direct children under a parent Rem. This is destructive because existing child Rem IDs are removed.
+Replace all direct content children under a parent Rem. Existing content-child Rem IDs are removed, while parent
+identity, title, aliases, document status, tags, and properties remain unchanged.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `parentRemId` | string | Yes | Parent Rem ID whose direct children will be replaced |
-| `content` | string | Yes | Markdown replacement content; empty string clears direct children; supports `[[id:<remId>]]` |
+| `content` | string | Yes | Markdown replacement content; empty string clears direct content children; supports `[[id:<remId>]]` |
 
 Bridge policy can reject this tool when `acceptReplaceOperation=false`.
 

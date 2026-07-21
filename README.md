@@ -202,7 +202,7 @@ After installing the LaunchAgent, `remnote-mcp-server daemon status|start|stop|r
 | `remnote_update_note`     | Update title and add/remove real aliases |
 | `remnote_set_document_status` | Preview or set document status while preserving concept/card status |
 | `remnote_insert_children` | Insert child Rems at deterministic positions |
-| `remnote_replace_children` | Replace direct children when destructive replacement is enabled |
+| `remnote_replace_children` | Replace direct content children while preserving parent metadata |
 | `remnote_update_tags`     | Add or remove tags by exact tag Rem ID |
 | `remnote_append_journal`  | Append hierarchical content to today's daily document with optional tag Rem IDs |
 | `remnote_read_table`      | Read Advanced Table columns, rows, and typed property metadata |

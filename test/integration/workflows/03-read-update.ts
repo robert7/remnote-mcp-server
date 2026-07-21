@@ -29,6 +29,34 @@ function summarizeReadResult(result: Record<string, unknown>): Record<string, un
   };
 }
 
+function normalizedTags(value: unknown): string {
+  if (!Array.isArray(value)) return '[]';
+  return JSON.stringify(
+    value
+      .map((tag) => {
+        const record = tag as Record<string, unknown>;
+        return { tagRemId: record.tagRemId, name: record.name };
+      })
+      .sort((left, right) => String(left.tagRemId).localeCompare(String(right.tagRemId)))
+  );
+}
+
+function assertParentMetadataUnchanged(
+  before: Record<string, unknown>,
+  after: Record<string, unknown>,
+  label: string
+): void {
+  for (const field of ['remId', 'title', 'remType', 'parentRemId', 'cardDirection'] as const) {
+    assertEqual(after[field], before[field], `${label}: ${field}`);
+  }
+  assertStringArrayEqualUnordered(
+    after.aliases ?? [],
+    (before.aliases ?? []) as string[],
+    `${label}: aliases`
+  );
+  assertEqual(normalizedTags(after.tags), normalizedTags(before.tags), `${label}: tags`);
+}
+
 async function listChildrenUntilFound(
   ctx: WorkflowContext,
   parentRemId: string,
@@ -534,6 +562,11 @@ export async function readUpdateWorkflow(
     try {
       if (acceptReplaceOperation) {
         assertTruthy(typeof state.noteBId === 'string', 'replace content reference target remId');
+        const parentBefore = (await ctx.client.callTool('remnote_read_note', {
+          remId: state.noteAId,
+          contentMode: 'none',
+          view: 'full',
+        })) as Record<string, unknown>;
         const replaceBody = `[MCP-TEST] Replaced via integration test ${ctx.runId} [[id:${state.noteBId}]]`;
         const result = (await ctx.client.callTool('remnote_replace_children', {
           parentRemId: state.noteAId,
@@ -542,16 +575,22 @@ export async function readUpdateWorkflow(
         assertHasField(result, 'remIds', 'replace content should succeed when enabled');
         assertIsArray(result.remIds, 'replace content remIds');
 
-        const reread = await ctx.client.callTool('remnote_read_note', {
+        const reread = (await ctx.client.callTool('remnote_read_note', {
           remId: state.noteAId,
           depth: 2,
           contentMode: 'markdown',
-        });
+          view: 'full',
+        })) as Record<string, unknown>;
         assertTruthy(typeof reread.content === 'string', 're-read content should be string');
         assertContains(
           reread.content as string,
           `[MCP-TEST] Replaced via integration test ${ctx.runId}`,
           're-read content should include replaced body'
+        );
+        assertParentMetadataUnchanged(
+          parentBefore,
+          reread,
+          'replace_children should preserve parent metadata'
         );
 
         const replacedRemId = result.remIds[0];
@@ -597,6 +636,11 @@ export async function readUpdateWorkflow(
   if (acceptReplaceOperation) {
     const start = Date.now();
     try {
+      const parentBefore = (await ctx.client.callTool('remnote_read_note', {
+        remId: state.noteAId,
+        contentMode: 'none',
+        view: 'full',
+      })) as Record<string, unknown>;
       const result = (await ctx.client.callTool('remnote_replace_children', {
         parentRemId: state.noteAId,
         content: '',
@@ -604,15 +648,21 @@ export async function readUpdateWorkflow(
       assertHasField(result, 'remIds', 'empty replace should succeed');
       assertIsArray(result.remIds, 'empty replace remIds');
 
-      const reread = await ctx.client.callTool('remnote_read_note', {
+      const reread = (await ctx.client.callTool('remnote_read_note', {
         remId: state.noteAId,
         depth: 2,
         contentMode: 'markdown',
-      });
+        view: 'full',
+      })) as Record<string, unknown>;
       assertEqual(
         reread.content as string,
         '',
         'empty replace should clear direct child markdown content'
+      );
+      assertParentMetadataUnchanged(
+        parentBefore,
+        reread,
+        'empty replace_children should preserve parent metadata'
       );
       steps.push({
         label: 'Empty replace clears direct children',
