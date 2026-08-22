@@ -51,19 +51,23 @@ if [[ -f "${statusCountPath}" ]]; then
 fi
 count=$((count + 1))
 echo "$count" > "${statusCountPath}"
+status_mode="connected"
 ${statusSequence
-  .map((mode, index) =>
-    mode === 'fail'
-      ? `if (( count == ${index + 1} )); then
-  echo "status unavailable" >&2
-  exit 1
-fi`
-      : `if (( count == ${index + 1} )); then
-echo '{"connected": true}'
-  exit 0
+  .map(
+    (mode, index) =>
+      `if (( count == ${index + 1} )); then
+  status_mode="${mode}"
 fi`
   )
   .join('\n')}
+if [[ "$status_mode" == "fail" ]]; then
+  echo "status unavailable" >&2
+  exit 1
+fi
+if [[ ! -s "${serverPidPath}" ]]; then
+  echo "server startup pending" >&2
+  exit 1
+fi
 echo '{"connected": true}'
 `
   );
