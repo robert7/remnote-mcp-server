@@ -161,8 +161,8 @@ wrapper.
 
 ## Documentation and Changelog Rules
 
-- Before docs edits, read `.agents/dev-documentation.md`.
-- Any functional or documentation change must be recorded in `CHANGELOG.md`.
+- Update documentation when behavior, contracts, configuration, or non-obvious rationale changes.
+- Record notable functional and documentation changes in `CHANGELOG.md`.
 - Keep AGENTS/docs map-level: contracts, rationale, and navigation.
 - When changing bridge action contracts, MCP tool input/output schemas, tool behavior, or response semantics:
   - Keep `remnote-cli` functionally aligned for every behavior reachable through the CLI: update the command parser,
@@ -191,4 +191,4 @@ wrapper.
 
 ## Git Policy
 
-Do not create commits unless explicitly requested. Use `.agents/dev-workflow.md` as canonical policy.
+Do not create commits unless explicitly requested.
